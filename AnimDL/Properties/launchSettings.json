@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "MalSyncCli": {
+      "commandName": "Project",
+      "commandLineArgs": "grab \"hyouka\""
+    }
+  }
+}
