@@ -1,8 +1,7 @@
 {
   "profiles": {
-    "MalSyncCli": {
-      "commandName": "Project",
-      "commandLineArgs": "grab \"hyouka\""
+    "AnimDL": {
+      "commandName": "Project"
     }
   }
 }

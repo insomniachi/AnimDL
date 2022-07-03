@@ -11,10 +11,11 @@ public class AppArguments
 public static class AppOptions
 {
     public static readonly Option<ProviderType> ProviderType = new(new[] { "-p", "--provider" }, "provider name");
+    public static readonly Option<int> Episode = new(new[] { "-ep", "--episode" }, "episode number (starts from 1)");
 
     static AppOptions()
     {
+        Episode.SetDefaultValue(1);
         ProviderType.AddCompletions(Enum.GetNames<ProviderType>());
-        ProviderType.SetDefaultValue(AnimDL.Api.ProviderType.AnimixPlay);
     }
 }    

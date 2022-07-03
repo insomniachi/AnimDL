@@ -20,6 +20,7 @@ public static class ServiceCollectionExtensions
         //catalog
         services.AddTransient<AnimixPlayCatalog>();
         services.AddTransient<AnimePaheCatalog>();
+        services.AddTransient<TenshiMoeCatalog>();
 
         //providers
         services.AddTransient<IProvider, AnimixPlayProvider>();
@@ -30,7 +31,7 @@ public static class ServiceCollectionExtensions
 
     public static IServiceCollection RegisterCommands(this IServiceCollection services)
     {
-        services.AddTransient<GrabCommand>();
+        services.AddTransient<StreamCommand>();
         return services;
     }
 }
