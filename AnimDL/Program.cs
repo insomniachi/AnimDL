@@ -31,6 +31,7 @@ var configureCommand = new Command("configure", "configure options for applicati
 configureCommand.SetHandler(Configure);
 rootCommand.AddCommand(configureCommand);
 rootCommand.AddCommand(host.Services.GetRequiredService<StreamCommand>());
+rootCommand.AddCommand(host.Services.GetRequiredService<GrabCommand>());
 
 return await rootCommand.InvokeAsync(args);
 

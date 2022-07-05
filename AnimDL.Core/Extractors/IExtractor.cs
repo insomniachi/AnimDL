@@ -1,4 +1,4 @@
-﻿namespace AnimDL.Extractors
+﻿namespace AnimDL.Core.Extractors
 {
     public interface IProvider
     {

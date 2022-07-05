@@ -1,5 +1,4 @@
-﻿using HtmlAgilityPack;
-using System.Text.RegularExpressions;
+﻿using System.Text.RegularExpressions;
 
 namespace AnimDL.Core.Helpers;
 

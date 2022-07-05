@@ -64,50 +64,6 @@ public class AnimixPlayStreamProvider : BaseStreamProvider
             }
         }
     }
-
-    //public async Task<HlsStreams> FetchEpisode(string url, int ep)
-    //{
-    //    var doc = await Load(url);
-    //    var eps = doc.GetElementbyId("epslistplace")?.InnerText;
-
-    //    if (string.IsNullOrEmpty(eps))
-    //    {
-    //        yield break;
-    //    }
-
-    //    JsonObject json = JsonNode.Parse(eps)!.AsObject();
-
-    //    yield return json.ContainsKey((ep - 1).ToString())
-    //        ? GetStreamUrl(json[ep]!.ToString())
-    //        : string.Empty;
-    //}
-
-    //public async IAsyncEnumerable<KeyValuePair<string, string>> FetchEpisodes(string url, int start, int end)
-    //{
-    //    var doc = await Load(url);
-    //    var eps = doc.GetElementbyId("epslistplace")?.InnerText;
-
-    //    if (string.IsNullOrEmpty(eps))
-    //    {
-    //        yield break;
-    //    }
-
-    //    JsonObject json = JsonNode.Parse(eps)!.AsObject();
-    //    foreach (var ep in Enumerable.Range(start - 1, end - start - 1).Select(x => x.ToString()))
-    //    {
-    //        if (!json.ContainsKey(ep))
-    //        {
-    //            continue;
-    //        }
-
-    //        var epUrl = GetStreamUrl(json[ep]!.ToString());
-    //        if (!string.IsNullOrEmpty(epUrl))
-    //        {
-    //            yield return new(ep, epUrl);
-    //        }
-    //    }
-    //}
-
     private string GetStreamUrl(string url)
     {
         var uri = new Uri(url);

@@ -3,5 +3,6 @@
 public enum ProviderType
 {
     AnimixPlay,
-    AnimePahe
+    AnimePahe,
+    Tenshi
 }

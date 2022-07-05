@@ -15,3 +15,9 @@ public class AnimePaheProvider : BaseProvider
     public AnimePaheProvider(AnimePaheStreamProvider provider, AnimePaheCatalog catalog) : base(provider, catalog) { }
     public override ProviderType ProviderType => ProviderType.AnimePahe;
 }
+
+public class TenshiMoeProvider : BaseProvider
+{
+    public TenshiMoeProvider(TenshiMoeStreamProvider provider, TenshiMoeCatalog catalog) : base(provider, catalog) { }
+    public override ProviderType ProviderType => ProviderType.Tenshi;
+}

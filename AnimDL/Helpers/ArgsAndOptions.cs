@@ -18,4 +18,4 @@ public static class AppOptions
         Episode.SetDefaultValue(1);
         ProviderType.AddCompletions(Enum.GetNames<ProviderType>());
     }
-}    
+}

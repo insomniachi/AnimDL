@@ -18,7 +18,7 @@ public class AnimePaheStreamProvider : BaseStreamProvider
 
     public AnimePaheStreamProvider()
     {
-        _playerRegex = EncodingHelper.SiteBasedRegex(BASE_URL, extraRegex: "/play/([^?&/]+)");
+        _playerRegex = RegexHelper.SiteBasedRegex(BASE_URL, extraRegex: "/play/([^?&/]+)");
     }
 
     public override async IAsyncEnumerable<HlsStreams> GetStreams(string url)

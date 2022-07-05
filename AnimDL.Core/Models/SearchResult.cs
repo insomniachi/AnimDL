@@ -1,6 +1,4 @@
-﻿using System.Collections;
-
-namespace AnimDL.Core.Models;
+﻿namespace AnimDL.Core.Models;
 
 public class SearchResult
 {

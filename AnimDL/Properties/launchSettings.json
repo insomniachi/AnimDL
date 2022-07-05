@@ -1,7 +1,8 @@
 {
   "profiles": {
     "AnimDL": {
-      "commandName": "Project"
+      "commandName": "Project",
+      "commandLineArgs": "stream \"hyouka\" -p Tenshi"
     }
   }
 }

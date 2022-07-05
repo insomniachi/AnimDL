@@ -6,34 +6,24 @@ using System.CommandLine;
 
 namespace AnimDL.Commands
 {
-    public class StreamCommand : Command
+    public class GrabCommand : Command
     {
         private readonly IProviderFactory _providerFactory;
         private readonly ILogger _logger;
-        private readonly IMediaPlayer _mediaPlayer;
 
-        public StreamCommand(IProviderFactory providerFactory,
-            ILogger<StreamCommand> logger,
-            IMediaPlayer mediaPlayer) : base("stream", "stream anime")
+        public GrabCommand(IProviderFactory providerFactory,
+            ILogger<StreamCommand> logger) : base("grab", "grab stream links")
         {
             _providerFactory = providerFactory;
             _logger = logger;
-            _mediaPlayer = mediaPlayer;
             AddArgument(AppArguments.Title);
             AddOption(AppOptions.ProviderType);
-            AddOption(AppOptions.Episode);
 
-            this.SetHandler(Execute, AppArguments.Title, AppOptions.ProviderType, AppOptions.Episode);
+            this.SetHandler(Execute, AppArguments.Title, AppOptions.ProviderType);
         }
 
-        public async Task Execute(string query, ProviderType providerType, int episode)
+        public async Task Execute(string query, ProviderType providerType)
         {
-            if (_mediaPlayer.IsAvailable == false)
-            {
-                _logger.LogWarning("Media player not conifgured, use \"animdl configure\" to configure");
-                return;
-            }
-
             var provider = _providerFactory.GetProvider(providerType);
 
             _logger.LogInformation("Searching in {Type}", providerType);
@@ -48,8 +38,10 @@ namespace AnimDL.Commands
             var selection = Prompt.GetUserInput("Select : ");
             var selectedResult = results[selection];
 
-            var episodeStream = await provider.StreamProvider.GetStreams(selectedResult.Url).ElementAtAsync(episode);
-            _mediaPlayer.Play(episodeStream.streams[0].stream_url);
+            await foreach(var stream in provider.StreamProvider.GetStreams(selectedResult.Url))
+            {
+                Console.WriteLine(StreamOutputFormater.Format(stream, providerType));
+            }
         }
     }
 }
