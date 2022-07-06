@@ -4,5 +4,6 @@ public enum ProviderType
 {
     AnimixPlay,
     AnimePahe,
-    Tenshi
+    Tenshi,
+    AnimeOut
 }

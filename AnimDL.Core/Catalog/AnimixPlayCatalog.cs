@@ -2,6 +2,7 @@
 using AnimDL.Core.Helpers;
 using AnimDL.Core.Models;
 using HtmlAgilityPack;
+using HtmlAgilityPack.CssSelectors.NetCore;
 using System.Text.Json.Nodes;
 
 namespace AnimDL.Core.Catalog;
@@ -29,11 +30,11 @@ public class AnimixPlayCatalog : ICatalog
         var doc = new HtmlDocument();
         doc.LoadHtml(html);
 
-        foreach (var item in doc.DocumentNode.SelectNodes("li"))
+        foreach (var item in doc.DocumentNode.SelectNodes("a"))
         {
-            var url = item.SelectSingleNode("div/a").Attributes["href"].Value;
-            var title = item.SelectSingleNode("div/a").Attributes["title"].Value;
-            var image = item.SelectSingleNode("div/a/img").Attributes["src"].Value;
+            var url = item.Attributes["href"].Value;
+            var title = item.Attributes["title"].Value;
+            var image = item.SelectSingleNode("li/div/img").Attributes["src"].Value;
 
             yield return new AnimixPlaySearchResult()
             {

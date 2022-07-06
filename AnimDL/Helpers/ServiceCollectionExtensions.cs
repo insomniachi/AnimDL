@@ -17,16 +17,19 @@ public static class ServiceCollectionExtensions
         services.AddTransient<AnimixPlayStreamProvider>();
         services.AddTransient<AnimePaheStreamProvider>();
         services.AddTransient<TenshiMoeStreamProvider>();
+        services.AddTransient<AnimeOutStreamProvider>();
 
         //catalog
         services.AddTransient<AnimixPlayCatalog>();
         services.AddTransient<AnimePaheCatalog>();
         services.AddTransient<TenshiMoeCatalog>();
+        services.AddTransient<AnimeOutCatalog>();
 
         //providers
         services.AddTransient<IProvider, AnimixPlayProvider>();
         services.AddTransient<IProvider, AnimePaheProvider>();
         services.AddTransient<IProvider, TenshiMoeProvider>();
+        services.AddTransient<IProvider, AnimeOutProvider>();
 
         return services;
     }
@@ -35,6 +38,7 @@ public static class ServiceCollectionExtensions
     {
         services.AddTransient<StreamCommand>();
         services.AddTransient<GrabCommand>();
+        services.AddTransient<SearchCommand>();
         return services;
     }
 }

@@ -1,5 +1,4 @@
-﻿using AnimDL.Core.Helpers;
-using AnimDL.Core.Models;
+﻿using AnimDL.Core.Models;
 using AnimDL.Core.Models.Internal;
 using HtmlAgilityPack;
 using Microsoft.AspNetCore.WebUtilities;
@@ -10,26 +9,12 @@ namespace AnimDL.Core.StreamProviders;
 
 public class AnimePaheStreamProvider : BaseStreamProvider
 {
-    private readonly Regex _playerRegex;
     private readonly Regex _idRegex = new("let id = \"(.+?)\"", RegexOptions.Compiled);
-    private readonly Regex _kquiRegex = new("Plyr\\|(.+?)'", RegexOptions.Compiled);
-    const string BASE_URL = "https://animepahe.com/";
+    private readonly Regex _kwikRegex = new("Plyr\\|(.+?)'", RegexOptions.Compiled);
     const string API = "https://animepahe.com/api";
-
-    public AnimePaheStreamProvider()
-    {
-        _playerRegex = RegexHelper.SiteBasedRegex(BASE_URL, extraRegex: "/play/([^?&/]+)");
-    }
 
     public override async IAsyncEnumerable<HlsStreams> GetStreams(string url)
     {
-        var match = _playerRegex.Match(url);
-
-        if (match.Success)
-        {
-            url = $"https://www.animepahe.com/anime/{match.Groups[1].Value}";
-        }
-
         var doc = await Load(url);
         var releaseId = _idRegex.Match(doc.Text).Groups[1].Value;
 
@@ -43,7 +28,8 @@ public class AnimePaheStreamProvider : BaseStreamProvider
                     episode = item.episode
                 };
 
-                var stringUrls = GetStreamUrl(releaseId, item.session).Result;
+                var stringUrls = await GetStreamUrl(releaseId, item.session);
+                
                 foreach (var kv in stringUrls)
                 {
                     streams.streams.Add(new HlsStreamInfo
@@ -74,8 +60,7 @@ public class AnimePaheStreamProvider : BaseStreamProvider
         });
 
         using var client = new HttpClient();
-        var response = await client.GetAsync(query).ConfigureAwait(false);
-        var content = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+        var content = await client.GetStringAsync(query);
         return JsonSerializer.Deserialize<AnimePaheEpisodePage>(content) ?? new();
     }
 
@@ -90,8 +75,7 @@ public class AnimePaheStreamProvider : BaseStreamProvider
         });
 
         using var client = new HttpClient();
-        var response = await client.GetAsync(query).ConfigureAwait(false);
-        var content = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+        var content = await client.GetStringAsync(query);
         var result = JsonSerializer.Deserialize<AnimePaheQualityModel>(content) ?? new();
         return result.GetQualities();
     }
@@ -106,7 +90,7 @@ public class AnimePaheStreamProvider : BaseStreamProvider
         };
 
         var doc = web.Load(kwik);
-        var match = _kquiRegex.Match(doc.Text);
+        var match = _kwikRegex.Match(doc.Text);
 
         if (!match.Success)
         {

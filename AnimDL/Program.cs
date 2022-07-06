@@ -32,6 +32,7 @@ configureCommand.SetHandler(Configure);
 rootCommand.AddCommand(configureCommand);
 rootCommand.AddCommand(host.Services.GetRequiredService<StreamCommand>());
 rootCommand.AddCommand(host.Services.GetRequiredService<GrabCommand>());
+rootCommand.AddCommand(host.Services.GetRequiredService<SearchCommand>());
 
 return await rootCommand.InvokeAsync(args);
 

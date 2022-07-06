@@ -15,8 +15,7 @@ namespace AnimDL.Core.StreamProviders
         public override async IAsyncEnumerable<HlsStreams> GetStreams(string url)
         {
             var client = await BypassHelper.BypassDDoS(BASE_URL);
-            var result = await client.GetAsync(url);
-            var html = await result.Content.ReadAsStringAsync();
+            var html = await client.GetStringAsync(url);
 
             var doc = new HtmlDocument();
             doc.LoadHtml(html);
@@ -35,8 +34,7 @@ namespace AnimDL.Core.StreamProviders
 
         private async Task<HlsStreams?> ExtractUrls(HttpClient client, string url)
         {
-            var result = await client.GetAsync(url);
-            var html = await result.Content.ReadAsStringAsync();
+            var html = await client.GetStringAsync(url);
 
             var doc = new HtmlDocument();
             doc.LoadHtml(html);
@@ -47,12 +45,9 @@ namespace AnimDL.Core.StreamProviders
                 return null;
             }
 
-            result = await client.GetAsync(embedStream);
-            html = await result.Content.ReadAsStringAsync();
+            html = await client.GetStringAsync(embedStream);
 
             var streams = new HlsStreams() { streams = new() };
-            var jsonString = _streamRegex.Matches(html);
-
             foreach (Match match in _streamRegex.Matches(html))
             {
                 streams.streams.Add(new HlsStreamInfo { quality = match.Groups[2].Value, stream_url = match.Groups[1].Value });

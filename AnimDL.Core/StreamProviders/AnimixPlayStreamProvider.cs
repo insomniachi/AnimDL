@@ -37,7 +37,6 @@ public class AnimixPlayStreamProvider : BaseStreamProvider
     public override async IAsyncEnumerable<HlsStreams> GetStreams(string url)
     {
         var doc = await Load(url);
-
         var eps = doc.GetElementbyId("epslistplace")?.InnerText;
 
         if (string.IsNullOrEmpty(eps))

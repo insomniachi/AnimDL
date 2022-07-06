@@ -12,10 +12,11 @@ namespace AnimDL.Commands
         private readonly ILogger _logger;
 
         public GrabCommand(IProviderFactory providerFactory,
-            ILogger<StreamCommand> logger) : base("grab", "grab stream links")
+            ILogger<GrabCommand> logger) : base("grab", "grab stream links")
         {
             _providerFactory = providerFactory;
             _logger = logger;
+
             AddArgument(AppArguments.Title);
             AddOption(AppOptions.ProviderType);
 
