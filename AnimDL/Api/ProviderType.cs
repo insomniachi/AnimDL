@@ -5,5 +5,6 @@ public enum ProviderType
     AnimixPlay,
     AnimePahe,
     Tenshi,
-    AnimeOut
+    AnimeOut,
+    GogoAnime
 }

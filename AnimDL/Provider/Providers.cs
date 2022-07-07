@@ -24,6 +24,12 @@ public class TenshiMoeProvider : BaseProvider
 
 public class AnimeOutProvider : BaseProvider
 {
-    public AnimeOutProvider(AnimeOutStreamProvider provider, AnimeOutCatalog catalot) : base(provider, catalot) { }
+    public AnimeOutProvider(AnimeOutStreamProvider provider, AnimeOutCatalog catalog) : base(provider, catalog) { }
     public override ProviderType ProviderType => ProviderType.AnimeOut;
+}
+
+public class GogoAnimeProvider : BaseProvider
+{
+    public GogoAnimeProvider(GogoAnimeStreamProvider provider, GogoAnimeCatalog catalog) : base(provider, catalog) { }
+    public override ProviderType ProviderType => ProviderType.GogoAnime;
 }

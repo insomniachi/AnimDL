@@ -2,7 +2,7 @@
   "profiles": {
     "AnimDL": {
       "commandName": "Project",
-      "commandLineArgs": "stream \"hyouka\" -p Tenshi"
+      "commandLineArgs": "grab \"sword art online\" -p GogoAnime"
     }
   }
 }
