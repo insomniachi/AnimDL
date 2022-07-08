@@ -62,6 +62,12 @@ internal class GogoAnimeProvider : BaseProvider
     public override ProviderType ProviderType => ProviderType.GogoAnime;
 }
 
+internal class ZoroProvider : BaseProvider
+{
+    public ZoroProvider(ZoroStreamProvider provider, ZoroCatalog catalog) : base(provider, catalog) { }
+    public override ProviderType ProviderType => ProviderType.Zoro;
+}
+
 public static class ServiceCollectionExtensions
 {
     public static IServiceCollection RegisterProviders(this IServiceCollection services)
@@ -74,6 +80,7 @@ public static class ServiceCollectionExtensions
         services.AddTransient<TenshiMoeStreamProvider>();
         services.AddTransient<AnimeOutStreamProvider>();
         services.AddTransient<GogoAnimeStreamProvider>();
+        services.AddTransient<ZoroStreamProvider>();
 
         //catalog
         services.AddTransient<AnimixPlayCatalog>();
@@ -81,6 +88,7 @@ public static class ServiceCollectionExtensions
         services.AddTransient<TenshiMoeCatalog>();
         services.AddTransient<AnimeOutCatalog>();
         services.AddTransient<GogoAnimeCatalog>();
+        services.AddTransient<ZoroCatalog>();
 
         //extractors
         services.AddTransient<GogoPlayExtractor>();
@@ -91,6 +99,7 @@ public static class ServiceCollectionExtensions
         services.AddTransient<IProvider, TenshiMoeProvider>();
         services.AddTransient<IProvider, AnimeOutProvider>();
         services.AddTransient<IProvider, GogoAnimeProvider>();
+        services.AddTransient<IProvider, ZoroProvider>();
 
         return services;
     }

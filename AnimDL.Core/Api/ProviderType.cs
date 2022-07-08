@@ -6,5 +6,6 @@ public enum ProviderType
     AnimePahe,
     Tenshi,
     AnimeOut,
-    GogoAnime
+    GogoAnime,
+    Zoro
 }
