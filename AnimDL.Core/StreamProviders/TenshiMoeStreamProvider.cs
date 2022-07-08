@@ -2,58 +2,70 @@
 using AnimDL.Core.Models;
 using HtmlAgilityPack;
 using HtmlAgilityPack.CssSelectors.NetCore;
+using Microsoft.Extensions.Logging;
 using System.Text.RegularExpressions;
 
-namespace AnimDL.Core.StreamProviders
+namespace AnimDL.Core.StreamProviders;
+
+internal class TenshiMoeStreamProvider : BaseStreamProvider
 {
-    public class TenshiMoeStreamProvider : BaseStreamProvider
+    readonly string BASE_URL = Constants.Tenshi;
+    private readonly Regex _streamRegex = new("src: '(.*)',[\x00-\x7F]*?size: (\\d+)", RegexOptions.Compiled);
+    private readonly ILogger<TenshiMoeStreamProvider> _logger;
+
+    public TenshiMoeStreamProvider(ILogger<TenshiMoeStreamProvider> logger)
     {
-        const string BASE_URL = "https://tenshi.moe/";
+        _logger = logger;
+    }
 
-        private readonly Regex _streamRegex = new("src: '(.*)',[\x00-\x7F]*?size: (\\d+)", RegexOptions.Compiled);
+    public override async IAsyncEnumerable<VideoStreamsForEpisode> GetStreams(string url)
+    {
+        var client = await BypassHelper.BypassDDoS(BASE_URL);
+        var html = await client.GetStringAsync(url);
 
-        public override async IAsyncEnumerable<HlsStreams> GetStreams(string url)
+        var doc = new HtmlDocument();
+        doc.LoadHtml(html);
+
+        var count = int.Parse(doc.QuerySelector("span.badge").InnerText);
+
+        foreach (var ep in Enumerable.Range(1, count - 1))
         {
-            var client = await BypassHelper.BypassDDoS(BASE_URL);
-            var html = await client.GetStringAsync(url);
-
-            var doc = new HtmlDocument();
-            doc.LoadHtml(html);
-
-            var count = int.Parse(doc.QuerySelector("span.badge").InnerText);
-
-            foreach (var ep in Enumerable.Range(1, count - 1))
+            if (await ExtractUrls(client, $"{url}/{ep}") is VideoStreamsForEpisode streamForEp)
             {
-                if (await ExtractUrls(client, $"{url}/{ep}") is HlsStreams streams)
-                {
-                    streams.episode = ep;
-                    yield return streams;
-                }
+                streamForEp.Episode = ep;
+                yield return streamForEp;
             }
         }
+    }
 
-        private async Task<HlsStreams?> ExtractUrls(HttpClient client, string url)
+    private async Task<VideoStreamsForEpisode?> ExtractUrls(HttpClient client, string url)
+    {
+        var html = await client.GetStringAsync(url);
+
+        var doc = new HtmlDocument();
+        doc.LoadHtml(html);
+        var embedStream = doc.QuerySelector("iframe")?.Attributes["src"].Value;
+
+        if (string.IsNullOrEmpty(embedStream))
         {
-            var html = await client.GetStringAsync(url);
-
-            var doc = new HtmlDocument();
-            doc.LoadHtml(html);
-            var embedStream = doc.QuerySelector("iframe")?.Attributes["src"].Value;
-
-            if (string.IsNullOrEmpty(embedStream))
-            {
-                return null;
-            }
-
-            html = await client.GetStringAsync(embedStream);
-
-            var streams = new HlsStreams() { streams = new() };
-            foreach (Match match in _streamRegex.Matches(html))
-            {
-                streams.streams.Add(new HlsStreamInfo { quality = match.Groups[2].Value, stream_url = match.Groups[1].Value });
-            }
-
-            return streams;
+            _logger.LogError("unable to find embed stream");
+            return null;
         }
+
+        html = await client.GetStringAsync(embedStream);
+
+        var streamsForEp = new VideoStreamsForEpisode();
+        foreach (Match match in _streamRegex.Matches(html))
+        {
+            var quality = match.Groups[2].Value;
+
+            streamsForEp.Qualities.Add(quality, new VideoStream
+            {
+                Quality = quality,
+                Url = match.Groups[1].Value
+            });
+        }
+
+        return streamsForEp;
     }
 }

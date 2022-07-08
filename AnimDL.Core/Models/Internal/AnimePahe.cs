@@ -2,7 +2,36 @@
 
 namespace AnimDL.Core.Models.Internal;
 
-public class AnimePaheQualityModel
+internal class AnimePaheEpisodePage
+{
+    public int total { get; set; }
+    public int per_page { get; set; }
+    public int current_page { get; set; }
+    public int last_page { get; set; }
+    public string next_page_url { get; set; } = string.Empty;
+    public string prev_page_url { get; set; } = string.Empty;
+    public int from { get; set; }
+    public int to { get; set; }
+    public List<AnimePaheEpisodeInfo> data { get; set; } = new();
+}
+
+internal class AnimePaheEpisodeInfo
+{
+    public int id { get; set; }
+    public int anime_id { get; set; }
+    public int episode { get; set; }
+    public int episode2 { get; set; }
+    public string edition { get; set; } = string.Empty;
+    public string title { get; set; } = string.Empty;
+    public string snapshot { get; set; } = string.Empty;
+    public string disc { get; set; } = string.Empty;
+    public string duration { get; set; } = string.Empty;
+    public string session { get; set; } = string.Empty;
+    public int filler { get; set; }
+    public string created_at { get; set; } = string.Empty;
+}
+
+internal class AnimePaheQualityModel
 {
     public List<Qualities> data { get; set; } = new();
 
@@ -12,7 +41,7 @@ public class AnimePaheQualityModel
     }
 }
 
-public class Qualities
+internal class Qualities
 {
     [JsonPropertyName("360")]
     public Quality? QHD { get; set; }
@@ -32,7 +61,7 @@ public class Qualities
     }
 }
 
-public class Quality
+internal class Quality
 {
     public int id { get; set; }
     public int filesize { get; set; }

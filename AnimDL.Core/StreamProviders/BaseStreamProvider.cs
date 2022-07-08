@@ -6,7 +6,7 @@ using System.Net;
 
 namespace AnimDL.Core.StreamProviders;
 
-public abstract class BaseStreamProvider : IStreamProvider
+internal abstract class BaseStreamProvider : IStreamProvider
 {
     protected readonly HtmlWeb _session = new();
     protected HttpStatusCode _statusCode = HttpStatusCode.OK;
@@ -32,5 +32,5 @@ public abstract class BaseStreamProvider : IStreamProvider
         });
     }
 
-    public abstract IAsyncEnumerable<HlsStreams> GetStreams(string url);
+    public abstract IAsyncEnumerable<VideoStreamsForEpisode> GetStreams(string url);
 }

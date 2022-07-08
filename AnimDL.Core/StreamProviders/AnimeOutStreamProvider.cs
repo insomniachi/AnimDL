@@ -2,9 +2,9 @@
 
 namespace AnimDL.Core.StreamProviders;
 
-public class AnimeOutStreamProvider : BaseStreamProvider
+internal class AnimeOutStreamProvider : BaseStreamProvider
 {
-    public override IAsyncEnumerable<HlsStreams> GetStreams(string url)
+    public override IAsyncEnumerable<VideoStreamsForEpisode> GetStreams(string url)
     {
         throw new NotImplementedException();
     }

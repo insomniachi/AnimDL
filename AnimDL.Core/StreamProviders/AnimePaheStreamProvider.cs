@@ -2,18 +2,25 @@
 using AnimDL.Core.Models.Internal;
 using HtmlAgilityPack;
 using Microsoft.AspNetCore.WebUtilities;
+using Microsoft.Extensions.Logging;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 
 namespace AnimDL.Core.StreamProviders;
 
-public class AnimePaheStreamProvider : BaseStreamProvider
+internal class AnimePaheStreamProvider : BaseStreamProvider
 {
     private readonly Regex _idRegex = new("let id = \"(.+?)\"", RegexOptions.Compiled);
     private readonly Regex _kwikRegex = new("Plyr\\|(.+?)'", RegexOptions.Compiled);
-    const string API = "https://animepahe.com/api";
+    readonly string API = Constants.AnimePahe + "api";
+    private readonly ILogger<AnimePaheStreamProvider> _logger;
 
-    public override async IAsyncEnumerable<HlsStreams> GetStreams(string url)
+    public AnimePaheStreamProvider(ILogger<AnimePaheStreamProvider> logger)
+    {
+        _logger = logger;
+    }
+
+    public override async IAsyncEnumerable<VideoStreamsForEpisode> GetStreams(string url)
     {
         var doc = await Load(url);
         var releaseId = _idRegex.Match(doc.Text).Groups[1].Value;
@@ -23,20 +30,20 @@ public class AnimePaheStreamProvider : BaseStreamProvider
         {
             foreach (var item in fpd.data)
             {
-                var streams = new HlsStreams
+                var streams = new VideoStreamsForEpisode
                 {
-                    episode = item.episode
+                    Episode = item.episode
                 };
 
                 var stringUrls = await GetStreamUrl(releaseId, item.session);
                 
                 foreach (var kv in stringUrls)
                 {
-                    streams.streams.Add(new HlsStreamInfo
+                    streams.Qualities.Add(kv.Key, new VideoStream
                     {
-                        headers = new RequestHeaders { referer = kv.Value.kwik },
-                        quality = kv.Key,
-                        stream_url = GetStreamFromEmbedUrl(kv.Value.kwik)
+                        Quality = kv.Key,
+                        Headers = new Dictionary<string, string> { ["referer"] = kv.Value.kwik },
+                        Url = GetStreamFromEmbedUrl(kv.Value.kwik)
                     });
                 }
 
@@ -97,18 +104,8 @@ public class AnimePaheStreamProvider : BaseStreamProvider
             return string.Empty;
         }
 
-        var values = match.Groups[1].Value.Split("|").Reverse().ToList();
-        return string.Format("{0}://{1}-{2}.{3}.{4}.{5}/{6}/{7}/{8}/{9}.{10}",
-            values[0],
-            values[1],
-            values[2],
-            values[3],
-            values[4],
-            values[5],
-            values[6],
-            values[7],
-            values[8],
-            values[9],
-            values[10]);
+        var p = match.Groups[1].Value.Split("|").Reverse().ToList();
+
+        return $"{p[0]}://{p[1]}-{p[2]}.{p[3]}.{p[4]}.{p[5]}/{p[6]}/{p[7]}/{p[8]}/{p[9]}.{p[10]}";
     }
 }

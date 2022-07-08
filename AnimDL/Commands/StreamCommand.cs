@@ -49,7 +49,26 @@ namespace AnimDL.Commands
             var selectedResult = results[selection];
 
             var episodeStream = await provider.StreamProvider.GetStreams(selectedResult.Url).ElementAtAsync(episode);
-            _mediaPlayer.Play(episodeStream.streams[0].stream_url);
+
+            if(!episodeStream.Qualities.Any())
+            {
+                _logger.LogError("Didn't find any stream for {Query}", query);
+            }
+
+            selection = 0;
+            if(episodeStream.Qualities.Count > 1)
+            {
+                var count = 0;
+                foreach (var quality in episodeStream.Qualities.Keys)
+                {
+                    _logger.LogInformation("[{Index}] => {Quality}", count++, quality);
+                }
+
+                selection = Prompt.GetUserInput("Select : "); 
+            }
+
+            var url = episodeStream.Qualities.ElementAt(selection).Value.Url;
+            _mediaPlayer.Play(url);
         }
     }
 }

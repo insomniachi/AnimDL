@@ -6,18 +6,18 @@ namespace AnimDL.Helpers
 {
     public static class StreamOutputFormater
     {
-        public static string Format(this HlsStreams streams, ProviderType type)
+        public static string Format(this VideoStreamsForEpisode streamsForEp, ProviderType type)
         {
             return type switch
             {
-                ProviderType.AnimixPlay => FormatAnimixPlay(streams),
-                _ => JsonSerializer.Serialize(streams)
+                ProviderType.AnimixPlay => AnimixPlayFormat(streamsForEp),
+                _ => JsonSerializer.Serialize(streamsForEp)
             };
         }
 
-        private static string FormatAnimixPlay(HlsStreams streams)
+        private static string AnimixPlayFormat(VideoStreamsForEpisode streamsForEp)
         {
-            return $"[Ep - {streams.episode}] => {streams.streams[0].stream_url}";
+            return $"[Ep - {streamsForEp.Episode}] => {streamsForEp.Qualities.FirstOrDefault().Value.Url}";
         }
     }
 }

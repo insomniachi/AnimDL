@@ -4,5 +4,5 @@ namespace AnimDL.Core.Api;
 
 public interface IStreamProvider
 {
-    public IAsyncEnumerable<HlsStreams> GetStreams(string url);
+    public IAsyncEnumerable<VideoStreamsForEpisode> GetStreams(string url);
 }

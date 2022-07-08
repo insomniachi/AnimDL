@@ -1,6 +1,7 @@
 ﻿
 using AnimDL.Api;
 using AnimDL.Commands;
+using AnimDL.Core;
 using AnimDL.Helpers;
 using AnimDL.MediaPlayer;
 using Microsoft.Extensions.Configuration;
@@ -14,13 +15,11 @@ var host = Host.CreateDefaultBuilder()
     .ConfigureLogging(builder => builder.AddConsole())
     .ConfigureServices((ctx, services) =>
     {
-        services.RegisterCommands()
-                .RegisterProviders();
-
+        services.RegisterCommands();
+        services.RegisterProviders();
         services.AddSingleton<IMediaPlayer, MediaPlayer>();
     })
     .Build();
-
 
 var config = host.Services.GetRequiredService<IConfiguration>();
 var defaultProviderType = config.GetValue<ProviderType>("DefaultProvider");
@@ -30,13 +29,14 @@ var rootCommand = new RootCommand();
 var configureCommand = new Command("configure", "configure options for application");
 configureCommand.SetHandler(Configure);
 rootCommand.AddCommand(configureCommand);
-rootCommand.AddCommand(host.Services.GetRequiredService<StreamCommand>());
-rootCommand.AddCommand(host.Services.GetRequiredService<GrabCommand>());
-rootCommand.AddCommand(host.Services.GetRequiredService<SearchCommand>());
+rootCommand.AddCommand(Resolve<StreamCommand>());
+rootCommand.AddCommand(Resolve<GrabCommand>());
+rootCommand.AddCommand(Resolve<SearchCommand>());
 
 return await rootCommand.InvokeAsync(args);
 
 
+T Resolve<T>() where T : notnull => host.Services.GetRequiredService<T>();
 
 void Configure()
 {
