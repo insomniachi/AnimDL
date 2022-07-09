@@ -1,4 +1,5 @@
 ﻿
+using AnimDL;
 using AnimDL.Api;
 using AnimDL.Commands;
 using AnimDL.Core;
@@ -10,6 +11,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using System.CommandLine;
 using System.Diagnostics;
+using CliCommand = System.CommandLine.Command;
 
 var host = Host.CreateDefaultBuilder()
     .ConfigureLogging(builder => builder.AddConsole())
@@ -26,14 +28,29 @@ var defaultProviderType = config.GetValue<ProviderType>("DefaultProvider");
 AppOptions.ProviderType.SetDefaultValue(defaultProviderType);
 
 var rootCommand = new RootCommand();
-var configureCommand = new Command("configure", "configure options for application");
+rootCommand.AddOption(AppOptions.ForceCli);
+var configureCommand = new CliCommand("configure", "configure options for application");
 configureCommand.SetHandler(Configure);
 rootCommand.AddCommand(configureCommand);
 rootCommand.AddCommand(Resolve<StreamCommand>());
 rootCommand.AddCommand(Resolve<GrabCommand>());
 rootCommand.AddCommand(Resolve<SearchCommand>());
 
-return await rootCommand.InvokeAsync(args);
+if(args.Length > 0)
+{
+    return await rootCommand.InvokeAsync(args);
+}
+else
+{
+   return GuiRunner.Run();
+}
+
+
+
+
+
+
+
 
 
 T Resolve<T>() where T : notnull => host.Services.GetRequiredService<T>();
