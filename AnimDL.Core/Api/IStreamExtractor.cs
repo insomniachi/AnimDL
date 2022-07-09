@@ -4,6 +4,6 @@ namespace AnimDL.Core.Api
 {
     public interface IStreamExtractor
     {
-        Task<VideoStreamsForEpisode> Extract(string url);
+        Task<VideoStreamsForEpisode?> Extract(string url);
     }
 }

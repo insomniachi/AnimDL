@@ -14,7 +14,7 @@ public class GogoPlayExtractor : IStreamExtractor
     private readonly Regex _encryptionRegex = new("data-value=\"(.+?)\"", RegexOptions.Compiled);
     private readonly Regex _keysRegex = new("(?:container|videocontent)-(\\d+)", RegexOptions.Compiled);
 
-    public async Task<VideoStreamsForEpisode> Extract(string url)
+    public async Task<VideoStreamsForEpisode?> Extract(string url)
     {
         var client = new HttpClient();
         var uri = new Uri(url);

@@ -1,4 +1,5 @@
-﻿using AnimDL.Core.Models;
+﻿using AnimDL.Core.Extractors;
+using AnimDL.Core.Models;
 using HtmlAgilityPack;
 using HtmlAgilityPack.CssSelectors.NetCore;
 using Microsoft.AspNetCore.WebUtilities;
@@ -11,6 +12,13 @@ namespace AnimDL.Core.StreamProviders;
 internal class ZoroStreamProvider : BaseStreamProvider
 {
     private readonly ILogger<ZoroStreamProvider> _logger;
+    private readonly Dictionary<int, string> _serverIds = new()
+    {
+        [1] = "rapidvideo",
+        [3] = "streamtape",
+        [4] = "rapidvideo",
+        [5] = "streamsb"
+    };
 
     public ZoroStreamProvider(ILogger<ZoroStreamProvider> logger)
     {
@@ -92,9 +100,9 @@ internal class ZoroStreamProvider : BaseStreamProvider
 
         foreach (var item in doc.QuerySelectorAll("div.server-item"))
         {
-            var sourceUrl = QueryHelpers.AddQueryString(Constants.Zoro + "ajax/v2/episode/sources", new Dictionary<string, string> 
+            var sourceUrl = QueryHelpers.AddQueryString(Constants.Zoro + "ajax/v2/episode/sources", new Dictionary<string, string>
             {
-                ["id"] = item.Attributes["data-id"].Value 
+                ["id"] = item.Attributes["data-id"].Value
             });
 
             jsonString = await client.GetStringAsync(sourceUrl);
@@ -107,11 +115,30 @@ internal class ZoroStreamProvider : BaseStreamProvider
 
             var type = sourceNode["type"]!.ToString();
 
-            if(type != "iframe")
+            var link = $"{sourceNode["link"]}";
+            var epTitle = $"{sourceNode["data-type"]} - {title}";
+
+            if (type != "iframe")
             {
-                var link = $"{sourceNode["link"]}";
-                var epTitle = $"{sourceNode["data-type"]} - {title}";
+                return;
             }
+
+            if (sourceNode["server"] is not { } serverNode)
+            {
+                _logger.LogWarning("server not found");
+                continue;
+            }
+
+            var serverId = int.Parse(serverNode.ToString());
+            var server = _serverIds[serverId];
+            if (new[] { "streamsb", "streamtape" }.Contains(server))
+            {
+                _logger.LogWarning("server not supported {Server}", server);
+                continue;
+            }
+
+            var extractor = new RapidVideoExtractor();
+            var result = await extractor.Extract(link);
         }
 
     }
