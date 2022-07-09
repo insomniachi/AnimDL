@@ -1,7 +1,8 @@
 ﻿using AnimDL.Core.Api;
+using AnimDL.Core.Helpers;
 using AnimDL.Core.Models;
 using HtmlAgilityPack;
-using Microsoft.AspNetCore.WebUtilities;
+using Microsoft.Extensions.Logging;
 
 namespace AnimDL.Core.Catalog;
 
@@ -9,13 +10,16 @@ public class GogoAnimeCatalog : ICatalog
 {
     const string SEARCH_URL = "https://gogoanime.lu/search.html";
     const string BASE_URL = "https://gogoanime.lu/";
+    private readonly HttpClient _client;
+
+    public GogoAnimeCatalog(HttpClient client)
+    {
+        _client = client;
+    }
 
     public async IAsyncEnumerable<SearchResult> Search(string query)
     {
-        var url = QueryHelpers.AddQueryString(SEARCH_URL, new Dictionary<string, string> { ["keyword"] = query });
-
-        var client = new HttpClient();
-        var html = await client.GetStringAsync(url);
+        var html = await _client.GetStringAsync(SEARCH_URL, parameters: new() { ["keyword"] = query });
 
         var doc = new HtmlDocument();
         doc.LoadHtml(html);

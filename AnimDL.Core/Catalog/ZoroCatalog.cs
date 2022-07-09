@@ -3,13 +3,13 @@ using AnimDL.Core.Models;
 using HtmlAgilityPack;
 using HtmlAgilityPack.CssSelectors.NetCore;
 using Microsoft.AspNetCore.WebUtilities;
-using System;
 
 namespace AnimDL.Core.Catalog;
 
 internal class ZoroCatalog : ICatalog
 {
     readonly string SEARCH_URL = Constants.Zoro + "search";
+
     public async IAsyncEnumerable<SearchResult> Search(string query)
     {
         var url = QueryHelpers.AddQueryString(SEARCH_URL, new Dictionary<string, string> { ["keyword"] = query });

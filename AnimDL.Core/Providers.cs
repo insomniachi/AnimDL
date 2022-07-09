@@ -46,7 +46,7 @@ internal class AnimePaheProvider : BaseProvider
 
 internal class TenshiMoeProvider : BaseProvider
 {
-    public TenshiMoeProvider(TenshiMoeStreamProvider provider, TenshiMoeCatalog catalog) : base(provider, catalog) { }
+    public TenshiMoeProvider(TenshiMoeStreamProvider provider, TenshiCatalog catalog) : base(provider, catalog) { }
     public override ProviderType ProviderType => ProviderType.Tenshi;
 }
 
@@ -86,7 +86,7 @@ public static class ServiceCollectionExtensions
         //catalog
         services.AddTransient<AnimixPlayCatalog>();
         services.AddTransient<AnimePaheCatalog>();
-        services.AddTransient<TenshiMoeCatalog>();
+        services.AddTransient<TenshiCatalog>();
         services.AddTransient<AnimeOutCatalog>();
         services.AddTransient<GogoAnimeCatalog>();
         services.AddTransient<ZoroCatalog>();

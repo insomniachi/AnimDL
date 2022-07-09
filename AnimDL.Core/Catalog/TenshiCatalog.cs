@@ -3,20 +3,22 @@ using AnimDL.Core.Helpers;
 using AnimDL.Core.Models;
 using HtmlAgilityPack;
 using HtmlAgilityPack.CssSelectors.NetCore;
-using Microsoft.AspNetCore.WebUtilities;
 
 namespace AnimDL.Core.Catalog;
 
-public class TenshiMoeCatalog : ICatalog
+public class TenshiCatalog : ICatalog
 {
-    const string BASE_URL = "https://tenshi.moe/";
+    private readonly HttpClient _client;
+
+    public TenshiCatalog(HttpClient client)
+    {
+        _client = client;
+    }
+
     public async IAsyncEnumerable<SearchResult> Search(string query)
     {
-        using var client = new HttpClient();
-        await client.BypassDDoS(BASE_URL);
-        var uri = QueryHelpers.AddQueryString(BASE_URL + "anime", new Dictionary<string, string> { ["q"] = query });
-        var result = await client.GetAsync(uri);
-        var html = await result.Content.ReadAsStringAsync();
+        await _client.BypassDDoS(Constants.Tenshi);
+        var html = await _client.GetStringAsync(Constants.Tenshi + "anime", parameters: new() { ["q"] = query });
 
         var doc = new HtmlDocument();
         doc.LoadHtml(html);
