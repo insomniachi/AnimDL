@@ -3,20 +3,18 @@ using System.Text.RegularExpressions;
 
 namespace AnimDL.Core.Helpers;
 
-public static class BypassHelper
+public static class Bypass
 {
     const string RECAPTCHA_API_JS = "https://www.google.com/recaptcha/api.js";
 
-    public static async Task<HttpClient> BypassDDoS(string uri)
+    public static async Task BypassDDoS(this HttpClient client, string uri)
     {
-        var client = new HttpClient();
-        var text = client.GetStringAsync("https://check.ddos-guard.net/check.js").Result;
+        var text = await client.GetStringAsync("https://check.ddos-guard.net/check.js");
         var match = Regex.Match(text, "'(.*?)'");
         await client.GetAsync(uri + match.Groups[1].Value);
-        return client;
     }
 
-    public static async Task<(string Token, string Number)?> BypassRecaptcha(HttpClient client, string url, Dictionary<string, string>? headers = null)
+    public static async Task<(string Token, string Number)?> BypassRecaptcha(this HttpClient client, string url, Dictionary<string, string>? headers = null)
     {
         var uri = new Uri(url);
         var referer = $"{uri.Scheme}://{uri.Host}:443";
@@ -43,21 +41,23 @@ public static class BypassHelper
 
     private static async Task<string> GetTokenRecaptcha(HttpClient client, string domain, string key, string referer)
     {
-        var recaptchaUrl = QueryHelpers.AddQueryString(RECAPTCHA_API_JS, new Dictionary<string, string> { ["render"] = "key" });
-        client.DefaultRequestHeaders.Referrer = new Uri(referer);
+        //var recaptchaUrl = QueryHelpers.AddQueryString(RECAPTCHA_API_JS, new Dictionary<string, string> { ["render"] = "key" });
+        //client.DefaultRequestHeaders.Referrer = new Uri(referer);
 
-        var recaptchaOut = await client.GetStringAsync(recaptchaUrl);
+        var recaptchaOut = await client.GetStringAsync(RECAPTCHA_API_JS,
+            parameters: new() { ["render"] = "key" },
+            headers: new() { ["referer"] = referer });
 
         var match = Regex.Match(recaptchaOut, "releases/([^/&?#]+)");
 
-        if(!match.Success)
+        if (!match.Success)
         {
             return "";
         }
 
         var token = match.Groups[1].Value;
 
-        var anchorOutUrl = QueryHelpers.AddQueryString("https://www.google.com/recaptcha/api2/anchor", new Dictionary<string, string>
+        var anchorOut = await client.GetStringAsync("https://www.google.com/recaptcha/api2/anchor", parameters: new()
         {
             ["ar"] = "1",
             ["k"] = key,
@@ -67,8 +67,6 @@ public static class BypassHelper
             ["size"] = "invisible",
             ["cb"] = "kr42069kr"
         });
-
-        var anchorOut = await client.GetStringAsync(anchorOutUrl);
 
         match = Regex.Match(anchorOut, "recaptcha-token.+?=\"(.+?)\"");
 
@@ -82,7 +80,7 @@ public static class BypassHelper
         var reloadUrl = QueryHelpers.AddQueryString("https://www.google.com/recaptcha/api2/reload", new Dictionary<string, string> { ["k"] = key });
         client.DefaultRequestHeaders.Referrer = new Uri("https://www.google.com/recaptcha/api2");
 
-        var tokenOut = await HttpHelper.PostFormUrlEncoded(client, reloadUrl, new Dictionary<string, string>
+        var tokenOut = await client.PostFormUrlEncoded(reloadUrl, new Dictionary<string, string>
         {
             ["v"] = token,
             ["reason"] = "q",

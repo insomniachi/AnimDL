@@ -11,8 +11,9 @@ internal abstract class BaseStreamProvider : IStreamProvider
     protected readonly HtmlWeb _session = new();
     protected HttpStatusCode _statusCode = HttpStatusCode.OK;
     private readonly IMemoryCache _cache = new MemoryCache(new MemoryCacheOptions());
+    protected readonly HttpClient _client;
 
-    public BaseStreamProvider()
+    public BaseStreamProvider(HttpClient client)
     {
         _session.PostResponse = (request, response) =>
         {
@@ -21,6 +22,7 @@ internal abstract class BaseStreamProvider : IStreamProvider
                 _statusCode = response.StatusCode;
             }
         };
+        _client = client;
     }
 
     protected async Task<HtmlDocument> Load(string url)

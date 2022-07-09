@@ -23,7 +23,7 @@ internal class AnimixPlayStreamProvider : BaseStreamProvider
         ["ssload.info"] = "gogocdn.club",
     };
 
-    public AnimixPlayStreamProvider(ILogger<AnimixPlayStreamProvider> logger)
+    public AnimixPlayStreamProvider(ILogger<AnimixPlayStreamProvider> logger, HttpClient client) : base(client)
     {
         _logger = logger;
     }

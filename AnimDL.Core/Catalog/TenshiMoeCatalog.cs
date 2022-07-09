@@ -12,7 +12,8 @@ public class TenshiMoeCatalog : ICatalog
     const string BASE_URL = "https://tenshi.moe/";
     public async IAsyncEnumerable<SearchResult> Search(string query)
     {
-        using var client = await BypassHelper.BypassDDoS(BASE_URL);
+        using var client = new HttpClient();
+        await client.BypassDDoS(BASE_URL);
         var uri = QueryHelpers.AddQueryString(BASE_URL + "anime", new Dictionary<string, string> { ["q"] = query });
         var result = await client.GetAsync(uri);
         var html = await result.Content.ReadAsStringAsync();

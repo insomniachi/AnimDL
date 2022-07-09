@@ -16,7 +16,7 @@ var host = Host.CreateDefaultBuilder()
     .ConfigureServices((ctx, services) =>
     {
         services.RegisterCommands();
-        services.RegisterProviders();
+        services.AddAnimeDl();
         services.AddSingleton<IMediaPlayer, MediaPlayer>();
     })
     .Build();

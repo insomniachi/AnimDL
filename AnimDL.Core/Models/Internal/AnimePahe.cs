@@ -35,9 +35,11 @@ internal class AnimePaheQualityModel
 {
     public List<Qualities> data { get; set; } = new();
 
-    public Dictionary<string, Quality> GetQualities()
+    public Dictionary<string, Quality> GetQualities(string audio = "jpn")
     {
-        return data.Select(x => x.GetActive()).ToDictionary(x => x.Item1, x => x.Item2);
+        return data.Where(x => x.GetActive().Item2.audio == audio)
+            .Select(x => x.GetActive())
+            .ToDictionary(x => x.Item1, x => x.Item2);
     }
 }
 

@@ -20,7 +20,7 @@ internal class ZoroStreamProvider : BaseStreamProvider
         [5] = "streamsb"
     };
 
-    public ZoroStreamProvider(ILogger<ZoroStreamProvider> logger)
+    public ZoroStreamProvider(ILogger<ZoroStreamProvider> logger, HttpClient client) : base(client)
     {
         _logger = logger;
     }

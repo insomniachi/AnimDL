@@ -44,7 +44,7 @@ namespace AnimDL.Core.Extractors
 
             var contentId = match.Groups[1].Value;
 
-            var recaptchaResonse = await BypassHelper.BypassRecaptcha(client, url);
+            var recaptchaResonse = await client.BypassRecaptcha(url);
 
             if(recaptchaResonse is null)
             {
@@ -65,8 +65,10 @@ namespace AnimDL.Core.Extractors
             var streamForEp = new VideoStreamsForEpisode();
             foreach (var item in json!["sources"]!.AsArray())
             {
-                var stream = new VideoStream();
-                stream.Url = $"{item!["file"]}";
+                var stream = new VideoStream
+                {
+                    Url = $"{item!["file"]}"
+                };
                 stream.Headers.Add("SID", _sid);
                 stream.Quality = "default";
 

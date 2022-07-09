@@ -14,7 +14,8 @@ public class AnimixPlayCatalog : ICatalog
 
     public async IAsyncEnumerable<SearchResult> Search(string query)
     {
-        var result = await HttpHelper.PostFormUrlEncoded("https://cachecow.eu/api/search", new Dictionary<string, string> { ["qfast"] = query });
+        using var client = new HttpClient();
+        var result = await HttpHelper.PostFormUrlEncoded(client,"https://cachecow.eu/api/search", new(){ ["qfast"] = query });
         var resultData = JsonNode.Parse(result);
 
         if (resultData is null)

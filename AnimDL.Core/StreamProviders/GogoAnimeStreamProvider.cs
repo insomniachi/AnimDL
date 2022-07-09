@@ -1,8 +1,8 @@
 ﻿using AnimDL.Core.Extractors;
+using AnimDL.Core.Helpers;
 using AnimDL.Core.Models;
 using HtmlAgilityPack;
 using HtmlAgilityPack.CssSelectors.NetCore;
-using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Logging;
 using System.Text.RegularExpressions;
 
@@ -16,7 +16,7 @@ internal class GogoAnimeStreamProvider : BaseStreamProvider
     private readonly GogoPlayExtractor _extractor;
     private readonly ILogger<GogoAnimeStreamProvider> _logger;
 
-    public GogoAnimeStreamProvider(GogoPlayExtractor extractor, ILogger<GogoAnimeStreamProvider> logger)
+    public GogoAnimeStreamProvider(GogoPlayExtractor extractor, ILogger<GogoAnimeStreamProvider> logger, HttpClient client) : base(client)
     {
         _extractor = extractor;
         _logger = logger;
@@ -24,8 +24,7 @@ internal class GogoAnimeStreamProvider : BaseStreamProvider
 
     public override async IAsyncEnumerable<VideoStreamsForEpisode> GetStreams(string url)
     {
-        var client = new HttpClient();
-        var html = await client.GetStringAsync(url);
+        var html = await _client.GetStringAsync(url);
 
         var match = _animeIdRegex.Match(html);
 
@@ -37,10 +36,17 @@ internal class GogoAnimeStreamProvider : BaseStreamProvider
 
         var contentId = match.Groups[1].Value;
 
-        await foreach (var (ep, embedUrl) in GetEpisodeList(client, contentId))
+        await foreach (var (ep, embedUrl) in GetEpisodeList(_client, contentId))
         {
-            var embedPageUrl = await GetEmbedPage(client,embedUrl);
+            var embedPageUrl = await GetEmbedPage(_client,embedUrl);
             var stream = await _extractor.Extract(embedPageUrl);
+
+            if(stream is null)
+            {
+                _logger.LogWarning("unable to find stream {Url}", embedUrl);
+                continue;
+            }
+
             stream.Episode = ep;
             yield return stream;
         }
@@ -48,14 +54,13 @@ internal class GogoAnimeStreamProvider : BaseStreamProvider
 
     private async IAsyncEnumerable<(int ep, string embedUrl)> GetEpisodeList(HttpClient client, string contentId)
     {
-        var url = QueryHelpers.AddQueryString(EPISODE_LOAD_AJAX, new Dictionary<string, string>
+        var html = await client.GetStringAsync(EPISODE_LOAD_AJAX, parameters: new()
         {
             ["ep_start"] = "0",
             ["ep_end"] = "100000",
             ["id"] = contentId
         });
 
-        var html = await client.GetStringAsync(url);
         var doc = new HtmlDocument();
         doc.LoadHtml(html);
  

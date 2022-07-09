@@ -1,7 +1,7 @@
-﻿using AnimDL.Core.Models;
+﻿using AnimDL.Core.Helpers;
+using AnimDL.Core.Models;
 using AnimDL.Core.Models.Internal;
 using HtmlAgilityPack;
-using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Logging;
 using System.Text.Json;
 using System.Text.RegularExpressions;
@@ -15,7 +15,7 @@ internal class AnimePaheStreamProvider : BaseStreamProvider
     readonly string API = Constants.AnimePahe + "api";
     private readonly ILogger<AnimePaheStreamProvider> _logger;
 
-    public AnimePaheStreamProvider(ILogger<AnimePaheStreamProvider> logger)
+    public AnimePaheStreamProvider(ILogger<AnimePaheStreamProvider> logger, HttpClient client) : base(client)
     {
         _logger = logger;
     }
@@ -58,7 +58,7 @@ internal class AnimePaheStreamProvider : BaseStreamProvider
 
     private async Task<AnimePaheEpisodePage> GetSessionPage(string page, string releaseId)
     {
-        var query = QueryHelpers.AddQueryString(API, new Dictionary<string, string>
+        var content = await _client.GetStringAsync(API, parameters: new() 
         {
             ["m"] = "release",
             ["id"] = releaseId,
@@ -66,14 +66,12 @@ internal class AnimePaheStreamProvider : BaseStreamProvider
             ["page"] = page
         });
 
-        using var client = new HttpClient();
-        var content = await client.GetStringAsync(query);
         return JsonSerializer.Deserialize<AnimePaheEpisodePage>(content) ?? new();
     }
 
     private async Task<Dictionary<string, Quality>> GetStreamUrl(string releaseId, string streamSession)
     {
-        var query = QueryHelpers.AddQueryString(API, new Dictionary<string, string>
+        var content = await _client.GetStringAsync(API, parameters: new()
         {
             ["m"] = "links",
             ["id"] = releaseId,
@@ -81,8 +79,6 @@ internal class AnimePaheStreamProvider : BaseStreamProvider
             ["p"] = "kwik"
         });
 
-        using var client = new HttpClient();
-        var content = await client.GetStringAsync(query);
         var result = JsonSerializer.Deserialize<AnimePaheQualityModel>(content) ?? new();
         return result.GetQualities();
     }
