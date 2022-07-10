@@ -28,9 +28,9 @@ internal class AnimixPlayStreamProvider : BaseStreamProvider
         _logger = logger;
     }
 
-    public int GetEpisodeCount(string url)
+    public override async Task<int> GetNumberOfStreams(string url)
     {
-        var doc = _session.Load(url);
+        var doc = await Load(url);
         var eps = doc.GetElementbyId("epslistplace")?.InnerText;
 
         if (string.IsNullOrEmpty(eps))

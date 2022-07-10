@@ -6,33 +6,33 @@ using System.CommandLine;
 
 namespace AnimDL.Commands
 {
-    public class GrabCommand : Command
+    public class GrabCommand
     {
-        private readonly IProviderFactory _providerFactory;
-        private readonly ILogger _logger;
-
-        public GrabCommand(IProviderFactory providerFactory,
-            ILogger<GrabCommand> logger) : base("grab", "grab stream links")
+        public static Command Create()
         {
-            _providerFactory = providerFactory;
-            _logger = logger;
+            var command = new Command("grab", "grabs stream links");
+            command.AddArgument(AppArguments.Title);
+            command.AddOption(AppOptions.ProviderType);
 
-            AddArgument(AppArguments.Title);
-            AddOption(AppOptions.ProviderType);
+            command.SetHandler(Execute, 
+                               AppArguments.Title,
+                               AppOptions.ProviderType,
+                               new ResolveBinder<IProviderFactory>(),
+                               new ResolveBinder<ILogger<GrabCommand>>());
 
-            this.SetHandler(Execute, AppArguments.Title, AppOptions.ProviderType);
+            return command;
         }
 
-        public async Task Execute(string query, ProviderType providerType)
+        public static async Task Execute(string query, ProviderType providerType, IProviderFactory providerFactory, ILogger<GrabCommand> logger)
         {
-            var provider = _providerFactory.GetProvider(providerType);
+            var provider = providerFactory.GetProvider(providerType);
 
-            _logger.LogInformation("Searching in {Type}", providerType);
+            logger.LogInformation("Searching in {Type}", providerType);
 
             var results = new List<SearchResult>();
             await foreach (var item in provider.Catalog.Search(query))
             {
-                _logger.LogInformation("[{Index}] => {Title} ({Url})", results.Count, item.Title, item.Url);
+                logger.LogInformation("[{Index}] => {Title} ({Url})", results.Count, item.Title, item.Url);
                 results.Add(item);
             }
 

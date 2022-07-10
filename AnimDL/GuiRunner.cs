@@ -33,7 +33,7 @@ public static class GuiRunner
         {
             new MenuBarItem ("_File", new MenuItem [] 
             {
-                new MenuItem ("_Find", "Search for anime", () => ShowDialog()),
+                new MenuItem ("_Find", "Search for anime", async () => await Program.ShowDialogAsync<SearchDialog, SearchViewModel>(), null, null, Key.F | Key.CtrlMask),
                 new MenuItem ("_Close", "Quit Applicaiton", () => Application.RequestStop(), null, null, Key.Q | Key.CtrlMask),
             }),
         });
@@ -44,23 +44,5 @@ public static class GuiRunner
         Application.Shutdown();
 
         return 0;
-    }
-
-    private static void ShowDialog()
-    {
-        var view = new SearchDialog(new SearchViewModel());
-        view.ShowDialog();
-    }
-
-    public static void Navigate<TView,TViewModel>()
-        where TView : BaseView<TViewModel>, new()
-        where TViewModel : ReactiveObject, new()
-    {
-        var view = new TView
-        {
-            ViewModel = new TViewModel()
-        };
-
-        view.Setup();
     }
 }

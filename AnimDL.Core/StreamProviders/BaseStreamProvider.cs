@@ -35,4 +35,5 @@ internal abstract class BaseStreamProvider : IStreamProvider
     }
 
     public abstract IAsyncEnumerable<VideoStreamsForEpisode> GetStreams(string url);
+    public virtual Task<int> GetNumberOfStreams(string url) => Task.FromResult(1);
 }

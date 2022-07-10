@@ -1,37 +1,45 @@
 ﻿using AnimDL.Api;
+using AnimDL.Core.Models;
 using AnimDL.Helpers;
 using Microsoft.Extensions.Logging;
 using System.CommandLine;
 
 namespace AnimDL.Commands;
 
-public class SearchCommand : Command
+public class SearchCommand
 {
-    private readonly IProviderFactory _providerFactory;
-    private readonly ILogger _logger;
-
-    public SearchCommand(IProviderFactory providerFactory,
-                         ILogger<SearchCommand> logger) : base("search", "search anime on provider")
+    public static Command Create()
     {
-        _providerFactory = providerFactory;
-        _logger = logger;
+        var command = new Command("search", "search anime on provider");
+        command.AddArgument(AppArguments.Title);
+        command.AddOption(AppOptions.ProviderType);
 
-        AddArgument(AppArguments.Title);
-        AddOption(AppOptions.ProviderType);
+        command.SetHandler(Execute, 
+                           AppArguments.Title, 
+                           AppOptions.ProviderType, 
+                           new ResolveBinder<IProviderFactory>(),
+                           new ResolveBinder<ILogger<SearchCommand>>());
 
-        this.SetHandler(Execute, AppArguments.Title, AppOptions.ProviderType);
+        return command;
     }
 
-    private async Task Execute(string query, ProviderType providerType)
-    {
-        var provider = _providerFactory.GetProvider(providerType);
 
-        _logger.LogInformation("Searching in {Type}", providerType);
+    public static async Task Execute(string query, ProviderType providerType, IProviderFactory providerFactory, ILogger<SearchCommand> logger)
+    {
+        var provider = providerFactory.GetProvider(providerType);
+
+        logger.LogInformation("Searching in {Type}", providerType);
 
         var count = 1;
         await foreach (var item in provider.Catalog.Search(query))
         {
-            _logger.LogInformation("[{Index}] => {Title} ({Url})", count++, item.Title, item.Url);
+            logger.LogInformation("[{Index}] => {Title} ({Url})", count++, item.Title, item.Url);
         }
+    }
+
+    public static IAsyncEnumerable<SearchResult> UiExecute(string query, ProviderType providerType, IProviderFactory providerFactory)
+    {
+        var provider = providerFactory.GetProvider(providerType);
+        return provider.Catalog.Search(query);
     }
 }

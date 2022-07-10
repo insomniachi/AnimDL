@@ -6,42 +6,41 @@ using System.CommandLine;
 
 namespace AnimDL.Commands
 {
-    public class StreamCommand : Command
+    public class StreamCommand
     {
-        private readonly IProviderFactory _providerFactory;
-        private readonly ILogger _logger;
-        private readonly IMediaPlayer _mediaPlayer;
-
-        public StreamCommand(IProviderFactory providerFactory,
-            ILogger<StreamCommand> logger,
-            IMediaPlayer mediaPlayer) : base("stream", "stream anime")
+        public static Command Create()
         {
-            _providerFactory = providerFactory;
-            _logger = logger;
-            _mediaPlayer = mediaPlayer;
-            AddArgument(AppArguments.Title);
-            AddOption(AppOptions.ProviderType);
-            AddOption(AppOptions.Episode);
-
-            this.SetHandler(Execute, AppArguments.Title, AppOptions.ProviderType, AppOptions.Episode);
+            var command = new Command("stream", "stream anime");
+            command.AddArgument(AppArguments.Title);
+            command.AddOption(AppOptions.ProviderType);
+            command.AddOption(AppOptions.Episode);
+            command.SetHandler(Execute, 
+                               AppArguments.Title,
+                               AppOptions.ProviderType,
+                               AppOptions.Episode,
+                               new ResolveBinder<IProviderFactory>(),
+                               new ResolveBinder<ILogger<StreamCommand>>(),
+                               new ResolveBinder<IMediaPlayer>());
+            return command;
         }
 
-        public async Task Execute(string query, ProviderType providerType, int episode)
+        public static async Task Execute(string query, ProviderType providerType, int episode,
+                                         IProviderFactory providerFactory, ILogger<StreamCommand> logger, IMediaPlayer mediaPlayer)
         {
-            if (_mediaPlayer.IsAvailable == false)
+            if (mediaPlayer.IsAvailable == false)
             {
-                _logger.LogWarning("Media player not conifgured, use \"animdl configure\" to configure");
+                logger.LogWarning("Media player not conifgured, use \"animdl configure\" to configure");
                 return;
             }
 
-            var provider = _providerFactory.GetProvider(providerType);
+            var provider = providerFactory.GetProvider(providerType);
 
-            _logger.LogInformation("Searching in {Type}", providerType);
+            logger.LogInformation("Searching in {Type}", providerType);
 
             var results = new List<SearchResult>();
             await foreach (var item in provider.Catalog.Search(query))
             {
-                _logger.LogInformation("[{Index}] => {Title} ({Url})", results.Count, item.Title, item.Url);
+                logger.LogInformation("[{Index}] => {Title} ({Url})", results.Count, item.Title, item.Url);
                 results.Add(item);
             }
 
@@ -52,7 +51,7 @@ namespace AnimDL.Commands
 
             if(!episodeStream.Qualities.Any())
             {
-                _logger.LogError("Didn't find any stream for {Query}", query);
+                logger.LogError("Didn't find any stream for {Query}", query);
             }
 
             selection = 0;
@@ -61,14 +60,14 @@ namespace AnimDL.Commands
                 var count = 0;
                 foreach (var quality in episodeStream.Qualities.Keys)
                 {
-                    _logger.LogInformation("[{Index}] => {Quality}", count++, quality);
+                    logger.LogInformation("[{Index}] => {Quality}", count++, quality);
                 }
 
                 selection = Prompt.GetUserInput("Select : "); 
             }
 
             var url = episodeStream.Qualities.ElementAt(selection).Value.Url;
-            _mediaPlayer.Play(url);
+            mediaPlayer.Play(url);
         }
     }
 }

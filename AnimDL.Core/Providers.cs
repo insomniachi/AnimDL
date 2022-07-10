@@ -70,7 +70,7 @@ internal class ZoroProvider : BaseProvider
 
 public static class ServiceCollectionExtensions
 {
-    public static IServiceCollection AddAnimeDl(this IServiceCollection services)
+    public static IServiceCollection AddAnimeDL(this IServiceCollection services)
     {
         services.AddSingleton<HttpClient>();
         services.AddTransient<IProviderFactory, ProviderFactory>();

@@ -22,16 +22,7 @@ public class SearchDialog : BaseDialog<SearchViewModel>
 		searchButton.Events()
 					.Clicked
 					.InvokeCommand(ViewModel, x => x.SearchCommand);
-		grabButton.Events()
-				  .Clicked
-				  .InvokeCommand(ViewModel, x => x.GrabCommand);
-		streamButton.Events()
-					.Clicked
-					.InvokeCommand(ViewModel, x => x.StreamCommand);
-
 		AddButton(searchButton);
-		AddButton(grabButton);
-		AddButton(streamButton);
     }
 
     public override void Setup()
@@ -71,6 +62,8 @@ public class SearchDialog : BaseDialog<SearchViewModel>
 				   .Select(x => x.Item)
 				   .DistinctUntilChanged()
 				   .BindTo(ViewModel, x => x.SelectedProviderIndex);
+		ViewModel.WhenAnyValue(x => x.SelectedProviderIndex)
+				 .BindTo(cbProviders, x => x.SelectedItem);
 
 		tfQuery.Events()
 			   .TextChanged

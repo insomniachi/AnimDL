@@ -1,8 +1,7 @@
 {
   "profiles": {
     "AnimDL": {
-      "commandName": "Project",
-      "commandLineArgs": "grab \"sword art online\" -p AnimePahe"
+      "commandName": "Project"
     }
   }
 }
