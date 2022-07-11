@@ -12,7 +12,6 @@ namespace AnimDL.ViewModels
     {
         private readonly IProviderFactory _providerFactory;
         private readonly ILoggerFactory _loggerFactory;
-        private readonly IMediaPlayer _mediaPlayer;
 
         public List<string> Sources { get; } = Enum.GetNames<ProviderType>().ToList();
        
@@ -23,14 +22,11 @@ namespace AnimDL.ViewModels
         public int SelectedProviderIndex { get; set; }
 
         public ICommand SearchCommand { get; }
-        public ICommand GrabCommand { get; }
-        public ICommand StreamCommand { get; }
 
-        public SearchViewModel(IProviderFactory providerFactory, ILoggerFactory loggerFactory, IMediaPlayer mediaPlayer)
+        public SearchViewModel(IProviderFactory providerFactory, ILoggerFactory loggerFactory)
         {
             _providerFactory = providerFactory;
             _loggerFactory = loggerFactory;
-            _mediaPlayer = mediaPlayer;
 
             SearchCommand = ReactiveCommand.Create(() => Search());
         }

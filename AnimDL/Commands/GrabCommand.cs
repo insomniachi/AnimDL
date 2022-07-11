@@ -2,6 +2,7 @@
 using AnimDL.Core.Models;
 using AnimDL.Helpers;
 using Microsoft.Extensions.Logging;
+using Sharprompt;
 using System.CommandLine;
 
 namespace AnimDL.Commands
@@ -36,7 +37,7 @@ namespace AnimDL.Commands
                 results.Add(item);
             }
 
-            var selection = Prompt.GetUserInput("Select : ");
+            var selection = Prompt.Input<int>("Select");
             var selectedResult = results[selection];
 
             await foreach(var stream in provider.StreamProvider.GetStreams(selectedResult.Url))

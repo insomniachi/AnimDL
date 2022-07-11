@@ -1,7 +1,7 @@
 ﻿using AnimDL.Api;
-using AnimDL.Core.Models;
 using AnimDL.Helpers;
 using Microsoft.Extensions.Logging;
+using Sharprompt;
 using System.CommandLine;
 
 namespace AnimDL.Commands
@@ -37,16 +37,8 @@ namespace AnimDL.Commands
 
             logger.LogInformation("Searching in {Type}", providerType);
 
-            var results = new List<SearchResult>();
-            await foreach (var item in provider.Catalog.Search(query))
-            {
-                logger.LogInformation("[{Index}] => {Title} ({Url})", results.Count, item.Title, item.Url);
-                results.Add(item);
-            }
-
-            var selection = Prompt.GetUserInput("Select : ");
-            var selectedResult = results[selection];
-
+            var results = await provider.Catalog.Search(query).ToListAsync();
+            var selectedResult = Prompt.Select("Select", results, textSelector: x => x.Title);
             var episodeStream = await provider.StreamProvider.GetStreams(selectedResult.Url).ElementAtAsync(episode);
 
             if(!episodeStream.Qualities.Any())
@@ -54,19 +46,13 @@ namespace AnimDL.Commands
                 logger.LogError("Didn't find any stream for {Query}", query);
             }
 
-            selection = 0;
+            var selectedQuality = episodeStream.Qualities.Keys.First();
             if(episodeStream.Qualities.Count > 1)
             {
-                var count = 0;
-                foreach (var quality in episodeStream.Qualities.Keys)
-                {
-                    logger.LogInformation("[{Index}] => {Quality}", count++, quality);
-                }
-
-                selection = Prompt.GetUserInput("Select : "); 
+                selectedQuality = Prompt.Select("Select", episodeStream.Qualities.Keys); 
             }
 
-            var url = episodeStream.Qualities.ElementAt(selection).Value.Url;
+            var url = episodeStream.Qualities[selectedQuality].Url;
             mediaPlayer.Play(url);
         }
     }
