@@ -16,16 +16,15 @@ namespace AnimDL.Commands
             command.AddOption(AppOptions.Episode);
             command.SetHandler(Execute, 
                                AppArguments.Title,
-                               AppOptions.ProviderType,
+                               new ProviderBinder(AppOptions.ProviderType),
                                AppOptions.Episode,
-                               new ResolveBinder<IProviderFactory>(),
                                new ResolveBinder<ILogger<StreamCommand>>(),
                                new ResolveBinder<IMediaPlayer>());
             return command;
         }
 
-        public static async Task Execute(string query, ProviderType providerType, int episode,
-                                         IProviderFactory providerFactory, ILogger<StreamCommand> logger, IMediaPlayer mediaPlayer)
+        public static async Task Execute(string query, IProvider provider,
+            int episode, ILogger<StreamCommand> logger, IMediaPlayer mediaPlayer)
         {
             if (mediaPlayer.IsAvailable == false)
             {
@@ -33,9 +32,7 @@ namespace AnimDL.Commands
                 return;
             }
 
-            var provider = providerFactory.GetProvider(providerType);
-
-            logger.LogInformation("Searching in {Type}", providerType);
+            logger.LogInformation("Searching in {Type}", provider.ProviderType);
 
             var results = await provider.Catalog.Search(query).ToListAsync();
             var selectedResult = Prompt.Select("Select", results, textSelector: x => x.Title);
@@ -53,7 +50,7 @@ namespace AnimDL.Commands
             }
 
             var url = episodeStream.Qualities[selectedQuality].Url;
-            mediaPlayer.Play(url);
+            await mediaPlayer.Play(url, $"{selectedResult.Title} - Episode {episode}");
         }
     }
 }

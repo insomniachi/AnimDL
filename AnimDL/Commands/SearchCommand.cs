@@ -16,19 +16,16 @@ public class SearchCommand
 
         command.SetHandler(Execute, 
                            AppArguments.Title, 
-                           AppOptions.ProviderType, 
-                           new ResolveBinder<IProviderFactory>(),
+                           new ProviderBinder(AppOptions.ProviderType), 
                            new ResolveBinder<ILogger<SearchCommand>>());
 
         return command;
     }
 
 
-    public static async Task Execute(string query, ProviderType providerType, IProviderFactory providerFactory, ILogger<SearchCommand> logger)
+    public static async Task Execute(string query, IProvider provider, ILogger<SearchCommand> logger)
     {
-        var provider = providerFactory.GetProvider(providerType);
-
-        logger.LogInformation("Searching in {Type}", providerType);
+        logger.LogInformation("Searching in {Type}", provider.ProviderType);
 
         var count = 1;
         await foreach (var item in provider.Catalog.Search(query))
@@ -37,9 +34,8 @@ public class SearchCommand
         }
     }
 
-    public static IAsyncEnumerable<SearchResult> UiExecute(string query, ProviderType providerType, IProviderFactory providerFactory)
+    public static IAsyncEnumerable<SearchResult> UiExecute(string query, IProvider provider)
     {
-        var provider = providerFactory.GetProvider(providerType);
         return provider.Catalog.Search(query);
     }
 }

@@ -35,9 +35,7 @@ namespace AnimDL.ViewModels
         {
             var providerType = Enum.GetValues<ProviderType>().Cast<ProviderType>().ElementAt(SelectedProviderIndex);
             var logger = _loggerFactory.CreateLogger<SearchCommand>();
-
-            var results = Commands.SearchCommand.UiExecute(Query, providerType, _providerFactory);
-
+            var results = Commands.SearchCommand.UiExecute(Query, _providerFactory.GetProvider(providerType));
             await Program.ShowDialogAsync<SearchResultDialog, SearchResultViewModel>(async x => 
             {
                 x.Provider = _providerFactory.GetProvider(providerType);

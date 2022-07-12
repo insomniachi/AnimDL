@@ -15,8 +15,10 @@ public class MediaPlayer : IMediaPlayer
         IsAvailable = File.Exists(Executable);
     }
 
-    public void Play(string streamUri)
+    public Task Play(string streamUri, string title)
     {
-        Process.Start(Executable, streamUri);
+        Process.Start(Executable, $"{streamUri} --meta-title {title}");
+
+        return Task.CompletedTask;
     }
 }

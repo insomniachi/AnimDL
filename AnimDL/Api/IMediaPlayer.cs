@@ -2,6 +2,6 @@
 
 public interface IMediaPlayer
 {
-    void Play(string streamUri);
+    Task Play(string streamUri, string title);
     bool IsAvailable { get; }
 }
