@@ -1,4 +1,5 @@
 ﻿using AnimDL.Api;
+using AnimDL.Core.Models;
 using AnimDL.Helpers;
 using Microsoft.Extensions.Logging;
 using Sharprompt;
@@ -35,10 +36,18 @@ namespace AnimDL.Commands
             logger.LogInformation("Searching in {Type}", provider.ProviderType);
 
             var results = await provider.Catalog.Search(query).ToListAsync();
-            var selectedResult = results.Count == 1 
-                ? results[0] 
-                : Prompt.Select("Select", results, textSelector: x => x.Title);
             
+            SearchResult selectedResult;
+            if(results.Count > 0)
+            {
+                selectedResult = Prompt.Select("Select", results, textSelector: x => x.Title);
+            }
+            else
+            {
+                selectedResult = results.First();
+                logger.LogInformation("only 1 anime found, auto selecting.. {Title}", selectedResult.Title);
+            }
+
             var episodeStream = await provider.StreamProvider.GetStreams(selectedResult.Url).ElementAtAsync(episode);
 
             if(!episodeStream.Qualities.Any())
@@ -46,10 +55,15 @@ namespace AnimDL.Commands
                 logger.LogError("Didn't find any stream for {Query}", query);
             }
 
-            var selectedQuality = episodeStream.Qualities.Keys.First();
+            string selectedQuality;
             if(episodeStream.Qualities.Count > 1)
             {
                 selectedQuality = Prompt.Select("Select", episodeStream.Qualities.Keys); 
+            }
+            else
+            {
+                selectedQuality = episodeStream.Qualities.Keys.First();
+                logger.LogInformation("only 1 quality found, selecting quality {Quality}", selectedQuality);
             }
 
             var url = episodeStream.Qualities[selectedQuality].Url;
