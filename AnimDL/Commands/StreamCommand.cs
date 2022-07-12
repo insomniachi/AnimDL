@@ -35,7 +35,10 @@ namespace AnimDL.Commands
             logger.LogInformation("Searching in {Type}", provider.ProviderType);
 
             var results = await provider.Catalog.Search(query).ToListAsync();
-            var selectedResult = Prompt.Select("Select", results, textSelector: x => x.Title);
+            var selectedResult = results.Count == 1 
+                ? results[0] 
+                : Prompt.Select("Select", results, textSelector: x => x.Title);
+            
             var episodeStream = await provider.StreamProvider.GetStreams(selectedResult.Url).ElementAtAsync(episode);
 
             if(!episodeStream.Qualities.Any())

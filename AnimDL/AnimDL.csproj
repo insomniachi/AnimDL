@@ -5,10 +5,6 @@
 		<TargetFramework>net6.0</TargetFramework>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
-		<RuntimeIdentifier Condition="'$(Configuration)' == 'Release'">win-x64</RuntimeIdentifier>
-		<PublishSingleFile Condition="'$(Configuration)' == 'Release'">true</PublishSingleFile>
-		<SelfContained Condition="'$(Configuration)' == 'Release'">true</SelfContained>
-		<PublishReadyToRun Condition="'$(Configuration)' == 'Release'">true</PublishReadyToRun>
 		<PackAsTool>true</PackAsTool>
 		<ToolCommandName>animdl</ToolCommandName>
 		<PackageOutputPath>./nupkg</PackageOutputPath>

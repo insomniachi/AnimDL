@@ -28,7 +28,9 @@ namespace AnimDL.Commands
 
             var results = await provider.Catalog.Search(query).ToListAsync();
 
-            var selectedResult = Prompt.Select("Select", results, textSelector: x => x.Title);
+            var selectedResult = results.Count == 1 
+                ? results[0] 
+                : Prompt.Select("Select", results, textSelector: x => x.Title);
 
             await foreach(var stream in provider.StreamProvider.GetStreams(selectedResult.Url))
             {
