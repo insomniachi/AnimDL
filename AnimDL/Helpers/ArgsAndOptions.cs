@@ -1,5 +1,6 @@
 ﻿using AnimDL.Api;
 using System.CommandLine;
+using System.Text.RegularExpressions;
 
 namespace AnimDL.Helpers;
 
@@ -11,12 +12,39 @@ public class AppArguments
 public static class AppOptions
 {
     public static readonly Option<ProviderType> ProviderType = new(new[] { "-p", "--provider" }, "provider name");
-    public static readonly Option<int> Episode = new(new[] { "-ep", "--episode" }, "episode number (starts from 1)");
     public static readonly Option<bool> ForceCli = new("--cli", "run application in cli mode");
+    public static readonly Option<Range> Range = new(aliases: new[] { "-r", "--range" }, description: "range of episodes", parseArgument: x =>
+    {
+        var str = x.Tokens[0].Value;
+        var match = Regex.Match(str, "(?'start'\\d+)(?'startFromEnd'\\^)?(?'isRange'..)?(?'end'\\d+)?(?'endFromEnd'\\^)?");
+
+        if (!match.Success)
+        {
+            x.ErrorMessage = "invalid format, use format \\d+(?''\\^?)(..)?(\\d+)?(\\^?)";
+            return new Range();
+        }
+
+        var start = int.Parse(match.Groups["start"].Value);
+        var startIndex = match.Groups["startFromEnd"].Success ? new Index(start, true) : new Index(start);
+
+        if (!match.Groups["isRange"].Success)
+        {
+            return new Range(startIndex, start);
+        }
+
+        var endIndex = Index.FromEnd(0);
+        if (match.Groups["end"].Success)
+        {
+            var end = int.Parse(match.Groups["end"].Value);
+            endIndex = match.Groups["endFromEnd"].Success ? new Index(end, true) : new Index(end);
+        }
+
+        return new Range(startIndex, endIndex);
+    });
 
     static AppOptions()
     {
-        Episode.SetDefaultValue(1);
+        Range.Arity = ArgumentArity.ZeroOrOne;
         ProviderType.AddCompletions(Enum.GetNames<ProviderType>());
     }
 }

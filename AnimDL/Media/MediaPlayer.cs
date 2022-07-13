@@ -17,7 +17,7 @@ public class MediaPlayer : IMediaPlayer
 
     public Task Play(string streamUri, string title)
     {
-        Process.Start(Executable, $"{streamUri} --meta-title \"{title}\"");
+        Process.Start(Executable, $"{streamUri} --meta-title \"{title}\" --play-and-exit");
 
         return Task.CompletedTask;
     }

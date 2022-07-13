@@ -14,18 +14,18 @@ namespace AnimDL.Commands
             var command = new Command("stream", "stream anime");
             command.AddArgument(AppArguments.Title);
             command.AddOption(AppOptions.ProviderType);
-            command.AddOption(AppOptions.Episode);
+            command.AddOption(AppOptions.Range);
             command.SetHandler(Execute, 
                                AppArguments.Title,
                                new ProviderBinder(AppOptions.ProviderType),
-                               AppOptions.Episode,
+                               AppOptions.Range,
                                new ResolveBinder<ILogger<StreamCommand>>(),
                                new ResolveBinder<IMediaPlayer>());
             return command;
         }
 
         public static async Task Execute(string query, IProvider provider,
-            int episode, ILogger<StreamCommand> logger, IMediaPlayer mediaPlayer)
+            Range eps, ILogger<StreamCommand> logger, IMediaPlayer mediaPlayer)
         {
             if (mediaPlayer.IsAvailable == false)
             {
@@ -48,26 +48,29 @@ namespace AnimDL.Commands
                 logger.LogInformation("only 1 anime found, auto selecting.. {Title}", selectedResult.Title);
             }
 
-            var episodeStream = await provider.StreamProvider.GetStreams(selectedResult.Url).ElementAtAsync(episode);
-
-            if(!episodeStream.Qualities.Any())
+            await foreach(var episodeStream in provider.StreamProvider.GetStreams(selectedResult.Url).Slice(eps))
             {
-                logger.LogError("Didn't find any stream for {Query}", query);
-            }
+                if (!episodeStream.Qualities.Any())
+                {
+                    logger.LogError("Didn't find any stream for {Query}", query);
+                }
 
-            string selectedQuality;
-            if(episodeStream.Qualities.Count > 1)
-            {
-                selectedQuality = Prompt.Select("Select", episodeStream.Qualities.Keys); 
-            }
-            else
-            {
-                selectedQuality = episodeStream.Qualities.Keys.First();
-                logger.LogInformation("only 1 quality found, selecting quality {Quality}", selectedQuality);
-            }
+                string selectedQuality;
+                if (episodeStream.Qualities.Count > 1)
+                {
+                    selectedQuality = Prompt.Select("Select", episodeStream.Qualities.Keys);
+                }
+                else
+                {
+                    selectedQuality = episodeStream.Qualities.Keys.First();
+                    logger.LogInformation("only 1 quality found, selecting quality {Quality}", selectedQuality);
+                }
 
-            var url = episodeStream.Qualities[selectedQuality].Url;
-            await mediaPlayer.Play(url, $"{selectedResult.Title} - Episode {episode}");
+                var url = episodeStream.Qualities[selectedQuality].Url;
+                await mediaPlayer.Play(url, $"{selectedResult.Title} - Episode {episodeStream.Episode}");
+
+                Console.Clear();
+            }
         }
     }
 }
