@@ -50,7 +50,7 @@ public class GogoPlayExtractor : IStreamExtractor
             streamForEp.Qualities.Add(quality, new VideoStream
             {
                 Quality = quality,
-                Headers = new Dictionary<string, string> { ["referer"] = nextHost },
+                Headers = new Dictionary<string, string> { [Headers.Referer] = nextHost },
                 Url = item!["file"]!.ToString()
             });
         }

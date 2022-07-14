@@ -42,7 +42,7 @@ internal class AnimePaheStreamProvider : BaseStreamProvider
                     streams.Qualities.Add(kv.Key, new VideoStream
                     {
                         Quality = kv.Key,
-                        Headers = new Dictionary<string, string> { ["referer"] = kv.Value.kwik },
+                        Headers = new Dictionary<string, string> { [Headers.Referer] = kv.Value.kwik },
                         Url = GetStreamFromEmbedUrl(kv.Value.kwik)
                     });
                 }

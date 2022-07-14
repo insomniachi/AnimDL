@@ -23,7 +23,7 @@ public class Program
     {
         services.AddAnimeDL();
         services.AddViews();
-        services.AddSingleton<IMediaPlayer, MediaPlayer>();
+        services.AddMediaPlayers();
     })
 #if DEBUG
         .UseEnvironment("development")
@@ -38,7 +38,6 @@ public class Program
         AppOptions.ProviderType.SetDefaultValue(defaultProviderType);
 
         var rootCommand = new RootCommand();
-        rootCommand.AddOption(AppOptions.ForceCli);
         var configureCommand = new CliCommand("configure", "configure options for application");
         configureCommand.SetHandler(Configure);
         rootCommand.AddCommand(configureCommand);

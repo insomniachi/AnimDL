@@ -29,3 +29,18 @@ public class ProviderBinder : BinderBase<IProvider>
         return Program.Resolve<IProviderFactory>().GetProvider(bindingContext.ParseResult.GetValueForOption(_providerType));
     }
 }
+
+public class MediaPlayerBinder : BinderBase<IMediaPlayer>
+{
+    private readonly Option<MediaPlayerType> _mediaPlayerType;
+
+    public MediaPlayerBinder(Option<MediaPlayerType> mediaPlayerType)
+    {
+        _mediaPlayerType = mediaPlayerType;
+    }
+
+    protected override IMediaPlayer GetBoundValue(BindingContext bindingContext)
+    {
+        return Program.Resolve<IMediaPlayerFactory>().GetMediaPlayer(bindingContext.ParseResult.GetValueForOption(_mediaPlayerType));
+    }
+}

@@ -1,4 +1,6 @@
-﻿using AnimDL.ViewModels;
+﻿using AnimDL.Api;
+using AnimDL.Media;
+using AnimDL.ViewModels;
 using AnimDL.Views;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -18,6 +20,14 @@ public static class ServiceCollectionExtensions
         services.AddTransient<SearchViewModel>();
         services.AddTransient<SearchResultViewModel>();
         services.AddTransient<StreamsViewModel>();
+
+        return services;
+    }
+
+    public static IServiceCollection AddMediaPlayers(this IServiceCollection services)
+    {
+        services.AddSingleton<IMediaPlayerFactory, MediaPlayerFactory>();
+        services.AddTransient<IMediaPlayer, VlcMediaPlayer>();
 
         return services;
     }

@@ -15,12 +15,13 @@ namespace AnimDL.Commands
             command.AddArgument(AppArguments.Title);
             command.AddOption(AppOptions.ProviderType);
             command.AddOption(AppOptions.Range);
+            command.AddOption(AppOptions.MediaPlayer);
             command.SetHandler(Execute, 
                                AppArguments.Title,
                                new ProviderBinder(AppOptions.ProviderType),
                                AppOptions.Range,
                                new ResolveBinder<ILogger<StreamCommand>>(),
-                               new ResolveBinder<IMediaPlayer>());
+                               new MediaPlayerBinder(AppOptions.MediaPlayer));
             return command;
         }
 
@@ -66,8 +67,8 @@ namespace AnimDL.Commands
                     logger.LogInformation("only 1 quality found, selecting quality {Quality}", selectedQuality);
                 }
 
-                var url = episodeStream.Qualities[selectedQuality].Url;
-                await mediaPlayer.Play(url, $"{selectedResult.Title} - Episode {episodeStream.Episode}");
+                var stream = episodeStream.Qualities[selectedQuality];
+                await mediaPlayer.Play(stream, $"{selectedResult.Title} - Episode {episodeStream.Episode + 1}");
 
                 Console.Clear();
             }

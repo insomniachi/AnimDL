@@ -12,7 +12,7 @@ public class AppArguments
 public static class AppOptions
 {
     public static readonly Option<ProviderType> ProviderType = new(new[] { "-p", "--provider" }, "provider name");
-    public static readonly Option<bool> ForceCli = new("--cli", "run application in cli mode");
+    public static readonly Option<MediaPlayerType> MediaPlayer = new(new[] { "--player" }, () => MediaPlayerType.Vlc, "media player to stream.");
     public static readonly Option<Range> Range = new(aliases: new[] { "-r", "--range" }, description: "range of episodes", parseArgument: x =>
     {
         var str = x.Tokens[0].Value;
