@@ -67,8 +67,16 @@ namespace AnimDL.Commands
                     logger.LogInformation("only 1 quality found, selecting quality {Quality}", selectedQuality);
                 }
 
+
+
                 var stream = episodeStream.Qualities[selectedQuality];
-                await mediaPlayer.Play(stream, $"{selectedResult.Title} - Episode {episodeStream.Episode + 1}");
+                var title = $"{selectedResult.Title} - Episode {episodeStream.Episode + 1}";
+
+                DiscordRpc.SetPresense(new DiscordRPC.RichPresence()
+                .WithState("Watching")
+                .WithDetails(title));
+
+                await mediaPlayer.Play(stream, title);
 
                 Console.Clear();
             }

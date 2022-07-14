@@ -24,6 +24,7 @@ public class Program
         services.AddAnimeDL();
         services.AddViews();
         services.AddMediaPlayers();
+        DiscordRpc.Initialize();
     })
 #if DEBUG
         .UseEnvironment("development")
