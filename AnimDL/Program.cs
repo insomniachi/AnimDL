@@ -25,6 +25,9 @@ public class Program
         services.AddViews();
         services.AddSingleton<IMediaPlayer, MediaPlayer>();
     })
+#if DEBUG
+        .UseEnvironment("development")
+#endif
     .Build();
 
     static async Task<int> Main(string[] args)
