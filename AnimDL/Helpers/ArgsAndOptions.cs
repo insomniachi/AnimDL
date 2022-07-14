@@ -44,6 +44,7 @@ public static class AppOptions
 
     static AppOptions()
     {
+        Range.SetDefaultValue(new Range(Index.FromStart(0), Index.FromEnd(0)));
         Range.Arity = ArgumentArity.ZeroOrOne;
         ProviderType.AddCompletions(Enum.GetNames<ProviderType>());
     }
