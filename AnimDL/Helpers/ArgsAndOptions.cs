@@ -16,11 +16,11 @@ public static class AppOptions
     public static readonly Option<Range> Range = new(aliases: new[] { "-r", "--range" }, description: "range of episodes", parseArgument: x =>
     {
         var str = x.Tokens[0].Value;
-        var match = Regex.Match(str, "(?'start'\\d+)(?'startFromEnd'\\^)?(?'isRange'..)?(?'end'\\d+)?(?'endFromEnd'\\^)?");
+        var match = Regex.Match(str, @"(?'startFromEnd'\^)?(?'start'\d+)(?'isRange'..)?(?'endFromEnd'\^)?(?'end'\d+)?");
 
         if (!match.Success)
         {
-            x.ErrorMessage = "invalid format, use format \\d+(?''\\^?)(..)?(\\d+)?(\\^?)";
+            x.ErrorMessage = "invalid format, use format (\\^?)\\d+(..)?(\\^?)(\\d+)?";
             return new Range();
         }
 

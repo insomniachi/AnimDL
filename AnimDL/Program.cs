@@ -26,6 +26,11 @@ public class Program
         services.AddViews();
         services.AddMediaPlayers();
     })
+    .ConfigureAppConfiguration(config => 
+    {
+        config.SetBasePath(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location));
+        config.AddJsonFile("appsettings.json");
+    })
 #if DEBUG
     .UseEnvironment("development")
 #endif

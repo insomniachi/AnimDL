@@ -1,4 +1,5 @@
-﻿using AnimDL.Core.Models;
+﻿using AnimDL.Core.Helpers;
+using AnimDL.Core.Models;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Logging;
 using System.Net;
@@ -42,7 +43,7 @@ internal class AnimixPlayStreamProvider : BaseStreamProvider
         return json["eptotal"]!.GetValue<int>();
     }
 
-    public override async IAsyncEnumerable<VideoStreamsForEpisode> GetStreams(string url)
+    public override async IAsyncEnumerable<VideoStreamsForEpisode> GetStreams(string url, Range range)
     {
         var doc = await Load(url);
         var eps = doc.GetElementbyId("epslistplace")?.InnerText;
@@ -67,8 +68,9 @@ internal class AnimixPlayStreamProvider : BaseStreamProvider
         }
 
         var epTotal = epTotalNode.GetValue<int>();
+        (int start, int end) = range.Extract(epTotal);
 
-        foreach (var ep in Enumerable.Range(0, epTotal).Select(x => x.ToString()))
+        foreach (var ep in Enumerable.Range(start - 1, end - start + 1).Select(x => x.ToString()))
         {
             if (jobject[ep] is not JsonNode epNode)
             {

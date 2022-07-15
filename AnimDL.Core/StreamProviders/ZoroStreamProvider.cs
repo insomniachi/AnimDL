@@ -25,7 +25,8 @@ internal class ZoroStreamProvider : BaseStreamProvider
         _logger = logger;
     }
 
-    public override async IAsyncEnumerable<VideoStreamsForEpisode> GetStreams(string url)
+
+    public override async IAsyncEnumerable<VideoStreamsForEpisode> GetStreams(string url, Range range)
     {
         var match = Regex.Match(url, "(/watch)?/[\\w-]+-(\\d+)");
 

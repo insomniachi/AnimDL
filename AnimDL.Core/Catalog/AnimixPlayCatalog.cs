@@ -23,15 +23,15 @@ public class AnimixPlayCatalog : ICatalog
 
     public async IAsyncEnumerable<SearchResult> Search(string query)
     {
-        //var result = await _client.PostFormUrlEncoded("https://cachecow.eu/api/search", new(){ ["qfast"] = query });
-        
-        var result = await _client.PostFormUrlEncoded(WORKER, new()
-        {
-            ["q2"] = query,
-            ["origin"] = "1",
-            ["root"] = "animixplay.to",
-            ["d"] = "gogoanime.gg"
-        });
+        var result = await _client.PostFormUrlEncoded("https://cachecow.eu/api/search", new() { ["qfast"] = query });
+
+        //result = await _client.PostFormUrlEncoded(WORKER, new()
+        //{
+        //    ["q2"] = query,
+        //    ["origin"] = "1",
+        //    ["root"] = "animixplay.to",
+        //    ["d"] = "gogoanime.gg"
+        //});
         
         var resultData = JsonNode.Parse(result);
 

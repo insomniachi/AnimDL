@@ -11,9 +11,4 @@ internal class AnimeOutStreamProvider : BaseStreamProvider
     {
         this.logger = logger;
     }
-
-    public override IAsyncEnumerable<VideoStreamsForEpisode> GetStreams(string url)
-    {
-        throw new NotImplementedException();
-    }
 }

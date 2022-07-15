@@ -22,7 +22,38 @@ internal class GogoAnimeStreamProvider : BaseStreamProvider
         _logger = logger;
     }
 
-    public override async IAsyncEnumerable<VideoStreamsForEpisode> GetStreams(string url)
+    public override async Task<int> GetNumberOfStreams(string url)
+    {
+        var html = await _client.GetStringAsync(url);
+
+        var match = _animeIdRegex.Match(html);
+
+        if (!match.Success)
+        {
+            _logger.LogError("unable to match id regex");
+            return 0;
+        }
+
+        var contentId = match.Groups[1].Value;
+
+        html = await _client.GetStringAsync(EPISODE_LOAD_AJAX, parameters: new()
+        {
+            ["ep_start"] = "0",
+            ["ep_end"] = "100000",
+            ["id"] = contentId
+        });
+
+        var epMatch = Regex.Match(html, "EP.*?(\\d+)");
+
+        if(!epMatch.Success)
+        {
+            return 0;
+        }
+
+        return int.Parse(epMatch.Groups[1].Value);
+    }
+
+    public override async IAsyncEnumerable<VideoStreamsForEpisode> GetStreams(string url, Range range)
     {
         var html = await _client.GetStringAsync(url);
 
@@ -36,7 +67,28 @@ internal class GogoAnimeStreamProvider : BaseStreamProvider
 
         var contentId = match.Groups[1].Value;
 
-        await foreach (var (ep, embedUrl) in GetEpisodeList(_client, contentId))
+        html = await _client.GetStringAsync(EPISODE_LOAD_AJAX, parameters: new()
+        {
+            ["ep_start"] = "0",
+            ["ep_end"] = "100000",
+            ["id"] = contentId
+        });
+
+        var epMatch = Regex.Match(html, "EP.*?(\\d+)");
+
+        int start = 0;
+        int end = 100000;
+        if(!epMatch.Success)
+        {
+            _logger.LogWarning("did not find any episode number");
+        }
+        else
+        {
+            var count = int.Parse(epMatch.Groups[1].Value);
+            (start, end) = range.Extract(count);
+        }
+
+        await foreach (var (ep, embedUrl) in GetEpisodeList(_client, contentId, start, end))
         {
             var embedPageUrl = await GetEmbedPage(_client,embedUrl);
             var stream = await _extractor.Extract(embedPageUrl);
@@ -52,18 +104,18 @@ internal class GogoAnimeStreamProvider : BaseStreamProvider
         }
     }
 
-    private async IAsyncEnumerable<(int ep, string embedUrl)> GetEpisodeList(HttpClient client, string contentId)
+    private async IAsyncEnumerable<(int ep, string embedUrl)> GetEpisodeList(HttpClient client, string contentId, int start, int end)
     {
         var html = await client.GetStringAsync(EPISODE_LOAD_AJAX, parameters: new()
         {
-            ["ep_start"] = "0",
-            ["ep_end"] = "100000",
+            ["ep_start"] = $"{start}",
+            ["ep_end"] = $"{end}",
             ["id"] = contentId
         });
 
         var doc = new HtmlDocument();
         doc.LoadHtml(html);
- 
+
         foreach (var item in doc.QuerySelectorAll("a[class=\"\"] , a[class=\"\"]").Reverse())
         {
             var embedUrl = BASE_URL_STRIPPED + item.Attributes["href"].Value.Trim();

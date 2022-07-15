@@ -49,7 +49,7 @@ namespace AnimDL.Commands
                 logger.LogInformation("only 1 anime found, auto selecting.. {Title}", selectedResult.Title);
             }
 
-            await foreach(var episodeStream in provider.StreamProvider.GetStreams(selectedResult.Url).Slice(eps))
+            await foreach(var episodeStream in provider.StreamProvider.GetStreams(selectedResult.Url, eps))
             {
                 if (!episodeStream.Qualities.Any())
                 {
@@ -66,8 +66,6 @@ namespace AnimDL.Commands
                     selectedQuality = episodeStream.Qualities.Keys.First();
                     logger.LogInformation("only 1 quality found, selecting quality {Quality}", selectedQuality);
                 }
-
-
 
                 var stream = episodeStream.Qualities[selectedQuality];
                 var title = $"{selectedResult.Title} - Episode {episodeStream.Episode}";

@@ -13,16 +13,18 @@ namespace AnimDL.Commands
             var command = new Command("grab", "grabs stream links");
             command.AddArgument(AppArguments.Title);
             command.AddOption(AppOptions.ProviderType);
+            command.AddOption(AppOptions.Range);
 
             command.SetHandler(Execute, 
                                AppArguments.Title,
+                               AppOptions.Range,
                                new ProviderBinder(AppOptions.ProviderType),
                                new ResolveBinder<ILogger<GrabCommand>>());
 
             return command;
         }
 
-        public static async Task Execute(string query, IProvider provider, ILogger<GrabCommand> logger)
+        public static async Task Execute(string query, Range range, IProvider provider, ILogger<GrabCommand> logger)
         {
             logger.LogInformation("Searching in {Type}", provider.ProviderType);
 
@@ -38,7 +40,7 @@ namespace AnimDL.Commands
                 ? results[0] 
                 : Prompt.Select("Select", results, textSelector: x => x.Title, pageSize: 10);
 
-            await foreach(var stream in provider.StreamProvider.GetStreams(selectedResult.Url))
+            await foreach(var stream in provider.StreamProvider.GetStreams(selectedResult.Url, range))
             {
                 logger.LogInformation(StreamOutputFormater.Format(stream, provider.ProviderType));
             }

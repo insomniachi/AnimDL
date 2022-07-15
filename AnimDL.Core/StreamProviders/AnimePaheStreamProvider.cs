@@ -20,7 +20,7 @@ internal class AnimePaheStreamProvider : BaseStreamProvider
         _logger = logger;
     }
 
-    public override async IAsyncEnumerable<VideoStreamsForEpisode> GetStreams(string url)
+    public override async IAsyncEnumerable<VideoStreamsForEpisode> GetStreams(string url, Range range)
     {
         var doc = await Load(url);
         var releaseId = _idRegex.Match(doc.Text).Groups[1].Value;

@@ -2,6 +2,8 @@
 using AnimDL.Core.Models;
 using HtmlAgilityPack;
 using Microsoft.Extensions.Caching.Memory;
+using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 
 namespace AnimDL.Core.StreamProviders;
@@ -34,6 +36,6 @@ internal abstract class BaseStreamProvider : IStreamProvider
         });
     }
 
-    public abstract IAsyncEnumerable<VideoStreamsForEpisode> GetStreams(string url);
+    public virtual IAsyncEnumerable<VideoStreamsForEpisode> GetStreams(string url, Range stream) => AsyncEnumerable.Empty<VideoStreamsForEpisode>();
     public virtual Task<int> GetNumberOfStreams(string url) => Task.FromResult(1);
 }

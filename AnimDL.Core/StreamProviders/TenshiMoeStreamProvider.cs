@@ -18,7 +18,18 @@ internal class TenshiMoeStreamProvider : BaseStreamProvider
         _logger = logger;
     }
 
-    public override async IAsyncEnumerable<VideoStreamsForEpisode> GetStreams(string url)
+    public override async Task<int> GetNumberOfStreams(string url)
+    {
+        await _client.BypassDDoS(BASE_URL);
+        var html = await _client.GetStringAsync(url);
+
+        var doc = new HtmlDocument();
+        doc.LoadHtml(html);
+
+        return int.Parse(doc.QuerySelector("span.badge").InnerText);
+    }
+
+    public override async IAsyncEnumerable<VideoStreamsForEpisode> GetStreams(string url, Range range)
     {
         await _client.BypassDDoS(BASE_URL);
         var html = await _client.GetStringAsync(url);
@@ -27,8 +38,9 @@ internal class TenshiMoeStreamProvider : BaseStreamProvider
         doc.LoadHtml(html);
 
         var count = int.Parse(doc.QuerySelector("span.badge").InnerText);
+        (int start, int end) = range.Extract(count);
 
-        foreach (var ep in Enumerable.Range(1, count - 1))
+        foreach (var ep in Enumerable.Range(start, end - start + 1))
         {
             if (await ExtractUrls(_client, $"{url}/{ep}") is VideoStreamsForEpisode streamForEp)
             {
