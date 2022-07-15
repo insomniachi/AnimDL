@@ -36,7 +36,7 @@ namespace AnimDL.Commands
 
             var selectedResult = results.Count == 1 
                 ? results[0] 
-                : Prompt.Select("Select", results, textSelector: x => x.Title);
+                : Prompt.Select("Select", results, textSelector: x => x.Title, pageSize: 10);
 
             await foreach(var stream in provider.StreamProvider.GetStreams(selectedResult.Url))
             {

@@ -41,7 +41,7 @@ namespace AnimDL.Commands
             SearchResult selectedResult;
             if(results.Count > 1)
             {
-                selectedResult = Prompt.Select("Select", results, textSelector: x => x.Title);
+                selectedResult = Prompt.Select("Select", results, textSelector: x => x.Title, pageSize: 10);
             }
             else
             {
@@ -73,8 +73,8 @@ namespace AnimDL.Commands
                 var title = $"{selectedResult.Title} - Episode {episodeStream.Episode}";
 
                 DiscordRpc.SetPresense(new DiscordRPC.RichPresence()
-                .WithState("Watching")
-                .WithDetails(title));
+                          .WithState("Watching")
+                          .WithDetails(title));
 
                 await mediaPlayer.Play(stream, title);
 
