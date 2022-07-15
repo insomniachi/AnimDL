@@ -28,13 +28,19 @@ namespace AnimDL.Commands
 
             var results = await provider.Catalog.Search(query).ToListAsync();
 
+            if(results.Count == 0)
+            {
+                logger.LogError("unable to find any titles, try other providers");
+                return;
+            }
+
             var selectedResult = results.Count == 1 
                 ? results[0] 
                 : Prompt.Select("Select", results, textSelector: x => x.Title);
 
             await foreach(var stream in provider.StreamProvider.GetStreams(selectedResult.Url))
             {
-                Console.WriteLine(StreamOutputFormater.Format(stream, provider.ProviderType));
+                logger.LogInformation(StreamOutputFormater.Format(stream, provider.ProviderType));
             }
         }
     }

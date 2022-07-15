@@ -12,7 +12,7 @@ public static class RangeExtensions
         var result = enumerable;
         var count = Math.Abs(range.End.Value - range.Start.Value) + 1;
 
-        result = range.Start.IsFromEnd ? result.TakeLast(range.Start.Value) : result.Skip(range.Start.Value);
+        result = range.Start.IsFromEnd ? result.TakeLast(range.Start.Value) : result.Skip(range.Start.Value - 1);
 
         return result.Take(count);
     }

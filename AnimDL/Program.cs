@@ -26,13 +26,8 @@ public class Program
         services.AddViews();
         services.AddMediaPlayers();
     })
-    .ConfigureAppConfiguration(confg =>
-    {
-        string assemblyFolder = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)!;
-        confg.SetBasePath(assemblyFolder);
-    })
 #if DEBUG
-        .UseEnvironment("development")
+    .UseEnvironment("development")
 #endif
     .Build();
 
@@ -49,9 +44,7 @@ public class Program
         }
 
         var rootCommand = new RootCommand();
-        var configureCommand = new CliCommand("configure", "configure options for application");
-        configureCommand.SetHandler(Configure);
-        rootCommand.AddCommand(configureCommand);
+        rootCommand.AddCommand(ConfigureCommand.Create());
         rootCommand.AddCommand(GrabCommand.Create());
         rootCommand.AddCommand(SearchCommand.Create());
         rootCommand.AddCommand(StreamCommand.Create());
@@ -69,13 +62,6 @@ public class Program
 
     public static T Resolve<T>() where T : notnull => _host.Services.GetRequiredService<T>();
 
-    public static void Navigate<TView, TViewModel>()
-        where TView : BaseView<TViewModel>
-    {
-        var view = Resolve<TView>();
-        view.Setup();
-    }
-
     public static async Task ShowDialogAsync<TView,TViewModel>(Func<TViewModel,Task>? setup = null, Func<TViewModel, Task>? onActivated = null)
         where TView : BaseDialog<TViewModel>
     {
@@ -89,17 +75,5 @@ public class Program
             var task = onActivated(view.ViewModel);
         }
         view.ShowDialog();
-    }
-
-    public static void Configure()
-    {
-        var p = new Process
-        {
-            StartInfo = new ProcessStartInfo(Path.Combine(Directory.GetCurrentDirectory(), "appsettings.json"))
-            {
-                UseShellExecute = true
-            }
-        };
-        p.Start();
     }
 }

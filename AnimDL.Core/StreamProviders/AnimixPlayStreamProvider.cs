@@ -87,7 +87,7 @@ internal class AnimixPlayStreamProvider : BaseStreamProvider
             {
                 yield return new()
                 {
-                    Episode = int.Parse(ep),
+                    Episode = int.Parse(ep) + 1, // start at 1
                     Qualities = new()
                     {
                         ["default"] = new VideoStream

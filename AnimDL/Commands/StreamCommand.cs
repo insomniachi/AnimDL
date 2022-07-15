@@ -70,7 +70,7 @@ namespace AnimDL.Commands
 
 
                 var stream = episodeStream.Qualities[selectedQuality];
-                var title = $"{selectedResult.Title} - Episode {episodeStream.Episode + 1}";
+                var title = $"{selectedResult.Title} - Episode {episodeStream.Episode}";
 
                 DiscordRpc.SetPresense(new DiscordRPC.RichPresence()
                 .WithState("Watching")
