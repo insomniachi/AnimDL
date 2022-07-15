@@ -39,7 +39,7 @@ namespace AnimDL.Commands
             var results = await provider.Catalog.Search(query).ToListAsync();
             
             SearchResult selectedResult;
-            if(results.Count > 0)
+            if(results.Count > 1)
             {
                 selectedResult = Prompt.Select("Select", results, textSelector: x => x.Title);
             }

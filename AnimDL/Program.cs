@@ -10,6 +10,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using System.CommandLine;
 using System.Diagnostics;
+using System.Reflection;
 using CliCommand = System.CommandLine.Command;
 
 namespace AnimDL;
@@ -24,7 +25,11 @@ public class Program
         services.AddAnimeDL();
         services.AddViews();
         services.AddMediaPlayers();
-        DiscordRpc.Initialize();
+    })
+    .ConfigureAppConfiguration(confg =>
+    {
+        string assemblyFolder = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)!;
+        confg.SetBasePath(assemblyFolder);
     })
 #if DEBUG
         .UseEnvironment("development")
@@ -37,6 +42,11 @@ public class Program
         var config = _host.Services.GetRequiredService<IConfiguration>();
         var defaultProviderType = config.GetValue<ProviderType>("DefaultProvider");
         AppOptions.ProviderType.SetDefaultValue(defaultProviderType);
+
+        if(config.GetValue<bool>("UseRichPresense"))
+        {
+            DiscordRpc.Initialize();
+        }
 
         var rootCommand = new RootCommand();
         var configureCommand = new CliCommand("configure", "configure options for application");

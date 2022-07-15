@@ -13,6 +13,11 @@ namespace AnimDL.Api
 
         public static void SetPresense(RichPresence presence)
         {
+            if(!client.IsInitialized)
+            {
+                return;
+            }
+
             client.SetPresence(presence);
         }
     }
