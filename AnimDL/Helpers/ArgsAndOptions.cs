@@ -29,7 +29,7 @@ public static class AppOptions
 
         if (!match.Groups["isRange"].Success)
         {
-            return new Range(startIndex, start);
+            return new Range(startIndex, startIndex);
         }
 
         var endIndex = Index.FromEnd(0);

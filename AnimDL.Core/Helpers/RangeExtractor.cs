@@ -6,6 +6,12 @@
         {
 
             int start = range.Start.IsFromEnd ? count - range.Start.Value + 1 : range.Start.Value;
+
+            if(range.Start.Equals(range.End))
+            {
+                return (start, start);
+            }
+
             int end;
 
             if(range.End.IsFromEnd)

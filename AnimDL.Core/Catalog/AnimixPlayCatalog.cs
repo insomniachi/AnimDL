@@ -56,11 +56,15 @@ public class AnimixPlayCatalog : ICatalog
         var doc = new HtmlDocument();
         doc.LoadHtml(html);
 
-        foreach (var item in doc.DocumentNode.SelectNodes("ul/li"))
+        foreach (var item in doc.DocumentNode.SelectNodes("a"))
         {
-            var url = item.SelectSingleNode("div/a").Attributes["href"].Value;
-            var title = item.SelectSingleNode("div/a").Attributes["title"].Value;
-            var image = item.SelectSingleNode("div/a/img").Attributes["src"].Value;
+            var url = item.Attributes["href"].Value;
+            var title = item.Attributes["title"].Value;
+            var image = item.SelectSingleNode("li/div/img").Attributes["src"].Value;
+
+            //var url = item.SelectSingleNode("div/a").Attributes["href"].Value;
+            //var title = item.SelectSingleNode("div/a").Attributes["title"].Value;
+            //var image = item.SelectSingleNode("div/a/img").Attributes["src"].Value;
 
             yield return new AnimixPlaySearchResult()
             {
