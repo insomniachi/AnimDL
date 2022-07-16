@@ -1,4 +1,5 @@
 ﻿using AnimDL.Core.Extractors;
+using AnimDL.Core.Helpers;
 using AnimDL.Core.Models;
 using HtmlAgilityPack;
 using HtmlAgilityPack.CssSelectors.NetCore;
@@ -59,8 +60,11 @@ internal class ZoroStreamProvider : BaseStreamProvider
 
         var doc = new HtmlDocument();
         doc.LoadHtml(htmlNode.ToString());
+        var eps = doc.QuerySelectorAll("a[title][data-number][data-id]").ToList();
+        var count = eps.Count;
+        var (start, end) = range.Extract(count);
 
-        foreach (var item in doc.QuerySelectorAll("a[title][data-number][data-id]"))
+        foreach (var item in eps)
         {
             var ep = -1;
             if (item.Attributes["data-number"] is not { } epAttr)
@@ -70,6 +74,11 @@ internal class ZoroStreamProvider : BaseStreamProvider
             else
             {
                 ep = int.Parse(epAttr.Value);
+            }
+
+            if(ep < start && ep > end)
+            {
+                continue;
             }
 
             var dataId = item.Attributes["data-id"].Value;
