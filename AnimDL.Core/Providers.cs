@@ -93,6 +93,7 @@ public static class ServiceCollectionExtensions
 
         //extractors
         services.AddTransient<GogoPlayExtractor>();
+        services.AddTransient<RapidVideoExtractor>();
 
         //providers
         services.AddTransient<IProvider, AnimixPlayProvider>();

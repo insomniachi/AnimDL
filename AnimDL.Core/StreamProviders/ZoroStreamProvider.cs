@@ -3,7 +3,6 @@ using AnimDL.Core.Helpers;
 using AnimDL.Core.Models;
 using HtmlAgilityPack;
 using HtmlAgilityPack.CssSelectors.NetCore;
-using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Logging;
 using System.Text.Json.Nodes;
 using System.Text.RegularExpressions;
@@ -13,6 +12,7 @@ namespace AnimDL.Core.StreamProviders;
 internal class ZoroStreamProvider : BaseStreamProvider
 {
     private readonly ILogger<ZoroStreamProvider> _logger;
+    private readonly RapidVideoExtractor _extractor;
     private readonly Dictionary<int, string> _serverIds = new()
     {
         [1] = "rapidvideo",
@@ -20,10 +20,18 @@ internal class ZoroStreamProvider : BaseStreamProvider
         [4] = "rapidvideo",
         [5] = "streamsb"
     };
+    private readonly List<string> _unsupported = new()
+    {
+        "streamsb",
+        "streamtape"
+    };
 
-    public ZoroStreamProvider(ILogger<ZoroStreamProvider> logger, HttpClient client) : base(client)
+    public ZoroStreamProvider(ILogger<ZoroStreamProvider> logger,
+                              HttpClient client,
+                              RapidVideoExtractor extractor) : base(client)
     {
         _logger = logger;
+        _extractor = extractor;
     }
 
 
@@ -38,13 +46,12 @@ internal class ZoroStreamProvider : BaseStreamProvider
         }
 
         var slug = match.Groups[2].Value;
-
-        var client = new HttpClient();
-        client.DefaultRequestHeaders.Add("X-Requested-With", "XMLHttpRequest");
-        client.DefaultRequestHeaders.Referrer = new(Constants.Zoro);
-
         var ajax = $"{Constants.Zoro}ajax/v2/episode/list/{slug}";
-        var jsonString = await client.GetStringAsync(ajax);
+        var jsonString = await _client.GetStringAsync(ajax, headers: new()
+        {
+            ["X-Requested-With"] = "XMLHttpRequest",
+            ["Referer"] = Constants.Zoro
+        });
 
         if (JsonNode.Parse(jsonString) is not { } responseNode)
         {
@@ -84,25 +91,34 @@ internal class ZoroStreamProvider : BaseStreamProvider
             var dataId = item.Attributes["data-id"].Value;
             var title = item.Attributes["title"].Value;
 
-            await ExtractEpisodes(client, dataId, title);
+            await foreach (var stream in ExtractEpisodes(dataId, title))
+            {
+                if(stream is null)
+                {
+                    _logger.LogWarning("unable to extract episode {EP}", ep);
+                    continue;
+                }
+
+                stream.Episode = ep;
+                yield return stream;
+            }
         }
     }
 
-    private async Task ExtractEpisodes(HttpClient client, string dataId, string title)
+    private async IAsyncEnumerable<VideoStreamsForEpisode?> ExtractEpisodes(string dataId, string title)
     {
-        var url = QueryHelpers.AddQueryString(Constants.Zoro + "ajax/v2/episode/servers", new Dictionary<string, string> { ["episodeId"] = dataId });
-        var jsonString = await client.GetStringAsync(url);
+        var jsonString = await _client.GetStringAsync(Constants.Zoro + "ajax/v2/episode/servers", parameters: new() { ["episodeId"] = dataId });
 
         if (JsonNode.Parse(jsonString) is not { } responseNode)
         {
             _logger.LogError("ExtractEpisodes:: unable to parse json {Json}", jsonString);
-            return;
+            yield break;
         }
 
         if (responseNode["html"] is not { } htmlNode)
         {
             _logger.LogError("ExtractEpisodes:: reponse doesn't contain html property");
-            return;
+            yield break;
         }
 
         var doc = new HtmlDocument();
@@ -110,17 +126,15 @@ internal class ZoroStreamProvider : BaseStreamProvider
 
         foreach (var item in doc.QuerySelectorAll("div.server-item"))
         {
-            var sourceUrl = QueryHelpers.AddQueryString(Constants.Zoro + "ajax/v2/episode/sources", new Dictionary<string, string>
+            jsonString = await _client.GetStringAsync(Constants.Zoro + "ajax/v2/episode/sources", parameters: new()
             {
                 ["id"] = item.Attributes["data-id"].Value
             });
 
-            jsonString = await client.GetStringAsync(sourceUrl);
-
             if (JsonNode.Parse(jsonString) is not { } sourceNode)
             {
                 _logger.LogError("ExtractEpisodes:: unable to parse json {Json}", jsonString);
-                return;
+                yield break;
             }
 
             var type = sourceNode["type"]!.ToString();
@@ -130,7 +144,7 @@ internal class ZoroStreamProvider : BaseStreamProvider
 
             if (type != "iframe")
             {
-                return;
+                yield break;
             }
 
             if (sourceNode["server"] is not { } serverNode)
@@ -141,14 +155,13 @@ internal class ZoroStreamProvider : BaseStreamProvider
 
             var serverId = int.Parse(serverNode.ToString());
             var server = _serverIds[serverId];
-            if (new[] { "streamsb", "streamtape" }.Contains(server))
+            if (_unsupported.Contains(server))
             {
-                _logger.LogWarning("server not supported {Server}", server);
+                //_logger.LogWarning("server not supported {Server}", server);
                 continue;
             }
 
-            var extractor = new RapidVideoExtractor();
-            var result = await extractor.Extract(link);
+            yield return await _extractor.Extract(link);
         }
 
     }

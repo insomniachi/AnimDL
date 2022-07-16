@@ -2,16 +2,13 @@
 using AnimDL.Commands;
 using AnimDL.Core;
 using AnimDL.Helpers;
-using AnimDL.Media;
 using AnimDL.Views;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using System.CommandLine;
-using System.Diagnostics;
 using System.Reflection;
-using CliCommand = System.CommandLine.Command;
 
 namespace AnimDL;
 

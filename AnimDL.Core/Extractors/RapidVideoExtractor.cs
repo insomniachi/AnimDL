@@ -2,9 +2,9 @@
 using AnimDL.Core.Helpers;
 using AnimDL.Core.Models;
 using Microsoft.AspNetCore.WebUtilities;
+using Microsoft.Extensions.Logging;
 using System.Text.Json.Nodes;
 using System.Text.RegularExpressions;
-using System;
 
 namespace AnimDL.Core.Extractors
 {
@@ -16,19 +16,32 @@ namespace AnimDL.Core.Extractors
             ["EIO"] = "4",
             ["transport"] = "polling"
         };
+        private readonly ILogger<RapidVideoExtractor> _logger;
+        private readonly HttpClient _client;
         private string _sid = "";
+
+        public RapidVideoExtractor(ILogger<RapidVideoExtractor> logger)
+        {
+            _logger = logger;
+            _client = new HttpClient();
+            _client.DefaultRequestHeaders.Add("X-Requested-With", "XMLHttpRequest");
+            _client.DefaultRequestHeaders.Referrer = new(Constants.Zoro);
+        }
 
         public async Task<VideoStreamsForEpisode?> Extract(string url)
         {
-            using var client = new HttpClient();
-            client.DefaultRequestHeaders.Add("X-Requested-With", "XMLHttpRequest");
-            client.DefaultRequestHeaders.Referrer = new(Constants.Zoro);
-
             var cts = new CancellationTokenSource();
-            var thread = new Thread(async () => await StartPolling(client, cts.Token));
+            var thread = new Thread(async () =>
+            {
+                try
+                {
+                    await StartPolling(_client, cts.Token);
+                }
+                catch { }
+            });
             thread.Start();
 
-            while(string.IsNullOrEmpty(_sid))
+            while (string.IsNullOrEmpty(_sid))
             {
                 await Task.Delay(100);
             }
@@ -37,28 +50,27 @@ namespace AnimDL.Core.Extractors
 
             var match = Regex.Match(url, "embed-6/([^?#&/.]+)");
 
-            if(!match.Success)
+            if (!match.Success)
             {
                 return null;
             }
 
             var contentId = match.Groups[1].Value;
 
-            var recaptchaResonse = await client.BypassRecaptcha(url);
+            var recaptchaResonse = await _client.BypassRecaptcha(url);
 
-            if(recaptchaResonse is null)
+            if (recaptchaResonse is null)
             {
                 return null;
             }
 
-            var ajaxUrl = QueryHelpers.AddQueryString($"https://{new Uri(url).Host}/ajax/embed-6/getSources", new Dictionary<string, string>
+
+            var ajaxResponse = await _client.GetStringAsync($"https://{new Uri(url).Host}/ajax/embed-6/getSources", parameters: new()
             {
                 ["id"] = contentId,
                 ["_token"] = recaptchaResonse.Value.Token,
                 ["_number"] = recaptchaResonse.Value.Number
             });
-
-            var ajaxResponse = await client.GetStringAsync(ajaxUrl);
 
             var json = JsonNode.Parse(ajaxResponse);
 
@@ -81,46 +93,47 @@ namespace AnimDL.Core.Extractors
         private async Task StartPolling(HttpClient client, CancellationToken token)
         {
 
-            (_, var result) = await Poll(client);
+            (_, var result) = await Poll();
 
             var jsonObject = JsonNode.Parse(result)!.AsObject();
             var pingInterval = jsonObject["pingInterval"]!.ToString() ?? "1000";
             var pollingSid = $"{jsonObject["sid"]}";
 
-            (_, var clientCheck) = await Poll(client, new Dictionary<string, string> { ["sid"] = pollingSid }, "40");
+            (_, var clientCheck) = await Poll(new Dictionary<string, string> { ["sid"] = pollingSid }, "40");
 
             if (clientCheck != "ok")
             {
                 throw new Exception($"Websocket server has returned a faulty value: {clientCheck}");
             }
 
-            (_, result) = await Poll(client, new Dictionary<string, string> { ["sid"] = pollingSid });
+            (_, result) = await Poll(new Dictionary<string, string> { ["sid"] = pollingSid });
 
             jsonObject = JsonNode.Parse(result)!.AsObject();
             _sid = $"{jsonObject["sid"]}";
 
-            //while (!token.IsCancellationRequested)
-            //{
-            //    (_, result) = await Poll(client, new Dictionary<string, string> { ["sid"] = pollingSid });
+            while (!token.IsCancellationRequested)
+            {
+                (_, result) = await Poll(new Dictionary<string, string> { ["sid"] = pollingSid });
 
-            //    if (result != "2")
-            //    {
-            //        throw new Exception($"Websocket server has returned a faulty value: {result}");
-            //    }
+                if (result != "2")
+                {
+                    _logger.LogWarning("Websocket server has returned a faulty value: {Result}", result);
+                    continue;
+                }
 
-            //    (_, result) = await Poll(client, new Dictionary<string, string> { ["sid"] = pollingSid }, "3");
+                (_, result) = await Poll(new Dictionary<string, string> { ["sid"] = pollingSid }, "3");
 
-            //    if (result != "3")
-            //    {
-            //        throw new Exception($"Websocket server has returned a faulty value: {result}");
-            //    }
-            //}
+                if (result != "3")
+                {
+                    _logger.LogWarning("Websocket server has returned a faulty value: {Result}", result);
+                }
+            }
         }
 
 
-        private async Task<(int id, string json)> Poll(HttpClient client, Dictionary<string,string>? @params = null, string? data = null)
+        private async Task<(int id, string json)> Poll(Dictionary<string, string>? @params = null, string? data = null)
         {
-            if(@params is not null)
+            if (@params is not null)
             {
                 foreach (var item in @params.Where(x => !_pollingParameters.ContainsKey(x.Key)))
                 {
@@ -132,11 +145,11 @@ namespace AnimDL.Core.Extractors
             string response;
             if (data is null)
             {
-                response = await client.GetStringAsync(url);
+                response = await _client.GetStringAsync(url);
             }
             else
             {
-                var postResponse = await client.PostAsync(url, new StringContent(data));
+                var postResponse = await _client.PostAsync(url, new StringContent(data));
                 response = await postResponse.Content.ReadAsStringAsync();
             }
 
@@ -144,11 +157,11 @@ namespace AnimDL.Core.Extractors
 
         }
 
-        private (int id,string json) ParseResponse(string text)
+        private static (int id, string json) ParseResponse(string text)
         {
             var match = Regex.Match(text, "(\\d+)(.+)");
 
-            if(match.Success)
+            if (match.Success)
             {
                 return (int.Parse(match.Groups[1].Value), match.Groups[2].Value);
             }

@@ -29,7 +29,7 @@ public static class Bypass
         }
 
         var token = await GetTokenRecaptcha(client, domain, match.Groups[1].Value, referer);
-        match = Regex.Match(initialPage, "recaptchaNumber = \"(\\d+?)\"");
+        match = Regex.Match(initialPage, "recaptchaNumber = '(\\d+?)'");
 
         if(!match.Success)
         {
@@ -41,9 +41,6 @@ public static class Bypass
 
     private static async Task<string> GetTokenRecaptcha(HttpClient client, string domain, string key, string referer)
     {
-        //var recaptchaUrl = QueryHelpers.AddQueryString(RECAPTCHA_API_JS, new Dictionary<string, string> { ["render"] = "key" });
-        //client.DefaultRequestHeaders.Referrer = new Uri(referer);
-
         var recaptchaOut = await client.GetStringAsync(RECAPTCHA_API_JS,
             parameters: new() { ["render"] = "key" },
             headers: new() { ["referer"] = referer });
