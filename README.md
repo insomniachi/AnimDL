@@ -82,7 +82,7 @@ animdl stream "One Piece"
 ```
 <p align="center">
 <sub>
-Providers can be specified by using provider prefix, <code>stream "One Piece" -p gogoanime</code>, will use the 9Anime provider.
+Providers can be specified by using provider prefix, <code>stream "One Piece" -p gogoanime</code>, will use the GogoAnime provider.
 </sub></p>
 
 ## `-r` / `--range` argument
@@ -97,7 +97,7 @@ uses c# range and indices syntax.
 ```
 if you don't provide a value for this argument, all available episodes will be taken.
 
-# Configuration
+## Configuration
 use **animdl config** edit the configuration file in your default editor for `.json` files
 ```
 {
@@ -111,3 +111,13 @@ use **animdl config** edit the configuration file in your default editor for `.j
   }
 }
 ```
+
+
+## Third party dependencies
+- [CliWrap](https://github.com/Tyrrrz/CliWrap) (for running external command line applications)
+- [DiscordRichPresence](https://github.com/Lachee/discord-rpc-csharp)
+- [Sharprompt](https://github.com/shibayan/Sharprompt) (for user input)
+- [Terminal.Gui](https://github.com/migueldeicaza/gui.cs) (for terminal based gui, not yet fully integrated to animdl)
+- [ReactiveUI](https://github.com/reactiveui/ReactiveUI) (for gui)
+- [HtmlAgilityPack](https://html-agility-pack.net/) (for html parsing)
+- [HtmlAgilityPack.CssSelectors.NetCore](https://github.com/trenoncourt/HtmlAgilityPack.CssSelectors.NetCore)
