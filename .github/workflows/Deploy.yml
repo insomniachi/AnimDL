@@ -27,7 +27,7 @@ jobs:
             run: dotnet restore ${{ env.PROJECT_PATH }}
 
         -   name: 'Build project'
-            run: dotnet build ${{ env.PROJECT_PATH }} --no-restore --c Release
+            run: dotnet build ${{ env.PROJECT_PATH }} --no-restore -c Release
 
         -   name: 'Get version'
             id: version

@@ -69,3 +69,26 @@ Providers can be specified by using provider prefix, <code>stream "One Piece" -p
 ## `-r` / `--range` argument
 This argument is shared by **stream** and **grab**, it can be used to hand over custom ranges for selecting episodes.<br/>
 uses c# range and indices syntax.
+```
+2..5    // episodes from [2-5]
+5..     // episodes from 5 till end.
+5       // 5th episode
+^3      // 3rd episode from end
+^3..    // last 3 episodes
+```
+if you don't provide a value for this argument, all available episodes will be taken.
+
+# Configuration
+use **animdl config** edit the configuration file in your default editor for `.json` files
+```
+{
+  "DefaultProvider": "AnimixPlay",
+  "DefaultMediaPlayer": "VLC",
+  "UseRichPresense": false,
+  "MediaPlayers": {
+    "VLC": {
+      "Executable": "%ProgramFiles%\\VideoLAN\\VLC\\vlc.exe"
+    }
+  }
+}
+```
