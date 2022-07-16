@@ -1,6 +1,6 @@
 ﻿namespace AnimDL.Core.Helpers
 {
-    public static class RangeExtractor
+    public static class RangeExtensions
     {
         public static (int Start, int End) Extract(this Range range, int count)
         {
