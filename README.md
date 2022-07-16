@@ -1,6 +1,25 @@
 # AnimDL
+This project is a C# port of [**justfoolingaround/animdl**](https://github.com/justfoolingaround/animdl)
 
-# Usage
+## Installation
+1.  dotNET CLI (Global)
+    ```
+    dotnet tool install --global AnimDL
+    ```
+2. dotNET CLI (Local)
+    ```
+    dotnet new tool-manifest # if you are setting up this repo
+    dotnet tool install --local AnimDL
+    ```
+3. Cake
+    ```
+    #tool dotnet:?package=AnimDL
+    ```
+4. NUKE
+    ```
+    nuke :add-package AnimDL
+    ```
+## Usage
 ```
 Usage:
   AnimDL [command] [options]
