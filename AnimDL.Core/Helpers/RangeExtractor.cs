@@ -4,6 +4,10 @@
     {
         public static (int Start, int End) Extract(this Range range, int count)
         {
+            if(range.Equals(Range.All))
+            {
+                return (1, count);
+            }
 
             int start = range.Start.IsFromEnd ? count - range.Start.Value + 1 : range.Start.Value;
 
