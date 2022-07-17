@@ -119,3 +119,4 @@ configuration file can be found in installation director or at `%userprofile%/.a
 - [Sharprompt](https://github.com/shibayan/Sharprompt) (for user input)
 - [HtmlAgilityPack](https://html-agility-pack.net/) (for html parsing)
 - [HtmlAgilityPack.CssSelectors.NetCore](https://github.com/trenoncourt/HtmlAgilityPack.CssSelectors.NetCore)
+- [Xabe.FFmpeg](https://github.com/tomaszzmuda/Xabe.FFmpeg)
