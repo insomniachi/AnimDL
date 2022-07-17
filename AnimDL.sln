@@ -7,6 +7,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AnimDL", "AnimDL\AnimDL.csp
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AnimDL.Core", "AnimDL.Core\AnimDL.Core.csproj", "{5792C1CC-1759-4303-8A9B-C84316E111AF}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AnimDL.Gui", "AnimDL.Gui\AnimDL.Gui.csproj", "{BF9122D7-5D6B-4CA7-9717-B513CC6A23A9}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{5792C1CC-1759-4303-8A9B-C84316E111AF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5792C1CC-1759-4303-8A9B-C84316E111AF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5792C1CC-1759-4303-8A9B-C84316E111AF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BF9122D7-5D6B-4CA7-9717-B513CC6A23A9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BF9122D7-5D6B-4CA7-9717-B513CC6A23A9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BF9122D7-5D6B-4CA7-9717-B513CC6A23A9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BF9122D7-5D6B-4CA7-9717-B513CC6A23A9}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
