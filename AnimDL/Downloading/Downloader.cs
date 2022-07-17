@@ -2,8 +2,6 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Sharprompt;
-using Xabe.FFmpeg;
-using Xabe.FFmpeg.Events;
 
 namespace AnimDL.Downloading;
 
@@ -11,8 +9,10 @@ public class Downloader : IDownloader
 {
     private readonly ILogger<Downloader> _logger;
     private readonly IConfiguration _config;
-    private double _currentProgress = -1;
     private ProgressBar? _progressBar;
+    private IDownloadOperation? _currentDownload;
+
+    public bool IsDownloading { get; set; }
 
     public Downloader(ILogger<Downloader> logger, IConfiguration config)
     {
@@ -45,29 +45,28 @@ public class Downloader : IDownloader
             }
         }
 
-        IMediaInfo result = await FFmpeg.GetMediaInfo(url);
-        var conversion = FFmpeg.Conversions.New().AddStream(result.Streams).SetOutput(filePath);
+        // TODO: change this when other downloaders are implemented
+        // TODO: choose downloader based on file extension, ffmpeg only needed for hls streams
+        _currentDownload = await FfmpegDownloadOperation.Create(url, filePath, headers);
+        _currentDownload.OnProgress += Conversion_OnProgress;
 
-        if(headers is not null && headers.Count > 0)
-        {
-            conversion.AddParameter($"-headers {string.Join("\r\n", headers.Select(x => $"{x.Key}:{x.Value}"))}");
-        }
-
-        conversion.OnProgress += Conversion_OnProgress;
-
+        IsDownloading = true;
         _progressBar = new ProgressBar();
-        await conversion.Start();
+        await _currentDownload.Start();
         _progressBar.Dispose();
+        IsDownloading = false;
     }
 
-    private void Conversion_OnProgress(object sender, ConversionProgressEventArgs args)
+    private void Conversion_OnProgress(object? sender, double progress)
     {
-        if (_currentProgress == args.Percent)
-        {
-            return;
-        }
+        _progressBar?.Report(progress / 100);
+    }
 
-        _currentProgress = args.Percent;
-        _progressBar?.Report(_currentProgress / 100);
+    public void Dispose()
+    {
+        if(IsDownloading)
+        {
+            _currentDownload?.Cancel();
+        }
     }
 }

@@ -8,7 +8,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using System.CommandLine;
-using System.Reflection;
 using Xabe.FFmpeg;
 
 namespace AnimDL;
@@ -40,7 +39,6 @@ public class Program
 
     static async Task<int> Main(string[] args)
     {
-
         Initialize(_host.Services.GetRequiredService<IConfiguration>());
 
         var rootCommand = new RootCommand();

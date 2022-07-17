@@ -4,7 +4,7 @@ namespace AnimDL.Downloading;
 
 public sealed class ProgressBar : IDisposable, IProgress<double>
 {
-	private const int _blockCount = 10;
+	private const int _blockCount = 50;
 	private readonly TimeSpan _animationInterval = TimeSpan.FromSeconds(1.0 / 8);
 	private const string _animation = @"|/-\";
 	private readonly Timer _timer;

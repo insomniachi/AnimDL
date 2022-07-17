@@ -75,7 +75,7 @@ internal class DownloadCommand
 
             await downloader.Download(stream.Url,
                                       selectedResult.Title,
-                                      episodeStream.Episode.ToString().PadLeft(3,'0') + ".mp4",
+                                      episodeStream.Episode.ToString().PadLeft(3,'0') + ".mp4", // TODO: file extension
                                       stream.Headers);
 
         }
