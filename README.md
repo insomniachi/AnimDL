@@ -98,7 +98,7 @@ uses c# range and indices syntax.
 if you don't provide a value for this argument, all available episodes will be taken.
 
 ## Configuration
-use **animdl config** edit the configuration file in your default editor for `.json` files
+configuration file can be found in installation director or at `%userprofile%/.animdl/appsettings.json`
 ```
 {
   "DefaultProvider": "AnimixPlay",
@@ -117,7 +117,5 @@ use **animdl config** edit the configuration file in your default editor for `.j
 - [CliWrap](https://github.com/Tyrrrz/CliWrap) (for running external command line applications)
 - [DiscordRichPresence](https://github.com/Lachee/discord-rpc-csharp)
 - [Sharprompt](https://github.com/shibayan/Sharprompt) (for user input)
-- [Terminal.Gui](https://github.com/migueldeicaza/gui.cs) (for terminal based gui, not yet fully integrated to animdl)
-- [ReactiveUI](https://github.com/reactiveui/ReactiveUI) (for gui)
 - [HtmlAgilityPack](https://html-agility-pack.net/) (for html parsing)
 - [HtmlAgilityPack.CssSelectors.NetCore](https://github.com/trenoncourt/HtmlAgilityPack.CssSelectors.NetCore)
