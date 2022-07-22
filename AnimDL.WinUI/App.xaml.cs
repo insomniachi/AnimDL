@@ -7,9 +7,7 @@ using AnimDL.WinUI.Models;
 using AnimDL.WinUI.Services;
 using AnimDL.WinUI.ViewModels;
 using AnimDL.WinUI.Views;
-using JikanDotNet;
 using MalApi;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.UI.Xaml;
@@ -19,11 +17,6 @@ namespace AnimDL.WinUI;
 
 public partial class App : Application
 {
-    // The .NET Generic Host provides dependency injection, configuration, logging, and other services.
-    // https://docs.microsoft.com/dotnet/core/extensions/generic-host
-    // https://docs.microsoft.com/dotnet/core/extensions/dependency-injection
-    // https://docs.microsoft.com/dotnet/core/extensions/configuration
-    // https://docs.microsoft.com/dotnet/core/extensions/logging
     private static readonly IHost _host = Host
         .CreateDefaultBuilder()
         .ConfigureServices((context, services) =>
@@ -48,8 +41,8 @@ public partial class App : Application
             // Views and ViewModels
             services.AddTransient<SettingsViewModel>();
             services.AddTransient<SettingsPage>();
-            services.AddTransient<MainViewModel>();
-            services.AddTransient<MainPage>();
+            services.AddTransient<UserListViewModel>();
+            services.AddTransient<UserListPage>();
             services.AddTransient<ShellPage>();
             services.AddTransient<ShellViewModel>();
 

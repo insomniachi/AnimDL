@@ -19,7 +19,7 @@ public class PageService : IPageService
 
     public PageService()
     {
-        Configure<MainViewModel, MainPage>();
+        Configure<UserListViewModel, UserListPage>();
         Configure<SettingsViewModel, SettingsPage>();
     }
 
