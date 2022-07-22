@@ -25,7 +25,7 @@ public sealed partial class SettingsPage : SettingsPageBase
         {
             WebView.Events().NavigationCompleted
                             .Select(x => x.sender.Source.OriginalString)
-                            .Where(x => x.Contains("github"))
+                            .Where(x => x.Contains("code"))
                             .InvokeCommand(ViewModel.SaveAuthTokenCommand)
                             .DisposeWith(d);
         });

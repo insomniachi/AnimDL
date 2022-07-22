@@ -20,4 +20,9 @@ public class AnimeListService : IAnimeListService
         return result;
     }
 
+    public async Task<List<Anime>> GetUserAnime()
+    {
+        return await _client.GetUserAnimeAsync();
+    }
+
 }

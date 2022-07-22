@@ -44,9 +44,10 @@ public class SettingsViewModel : ReactiveObject
         ClientId = configuration["ClientId"];
 
         SwitchThemeCommand = ReactiveCommand.Create<ElementTheme>(t => themeSelectorService.SetTheme(t));
-        SaveAuthTokenCommand = ReactiveCommand.Create<string>(async code =>
+        SaveAuthTokenCommand = ReactiveCommand.Create<string>(async query =>
         {
             IsPaneOpen = false;
+            var code = HttpUtility.ParseQueryString(query)[0];
             var token = await MalAuthHelper.DoAuth(ClientId, code);
             localSettingsService.SaveSetting("MalToken", token);
         });
