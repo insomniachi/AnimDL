@@ -21,6 +21,7 @@ public class PageService : IPageService
     {
         Configure<UserListViewModel, UserListPage>();
         Configure<SettingsViewModel, SettingsPage>();
+        Configure<WatchViewModel, WatchPage>();
     }
 
     public Type GetPageType(string key)

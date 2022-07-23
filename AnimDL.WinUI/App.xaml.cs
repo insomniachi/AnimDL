@@ -1,4 +1,5 @@
-﻿using AnimDL.WinUI.Activation;
+﻿using AnimDL.Core;
+using AnimDL.WinUI.Activation;
 using AnimDL.WinUI.Contracts.Services;
 using AnimDL.WinUI.Core.Contracts.Services;
 using AnimDL.WinUI.Core.Services;
@@ -37,6 +38,7 @@ public partial class App : Application
 
             // Core Services
             services.AddSingleton<IFileService, FileService>();
+            services.AddAnimDL();
 
             // Views and ViewModels
             services.AddTransient<SettingsViewModel>();
@@ -45,6 +47,8 @@ public partial class App : Application
             services.AddTransient<UserListPage>();
             services.AddTransient<ShellPage>();
             services.AddTransient<ShellViewModel>();
+            services.AddTransient<WatchViewModel>();
+            services.AddTransient<WatchPage>();
 
             services.AddSingleton<IAnimeListService, AnimeListService>(x => 
             {
