@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Threading.Tasks;
-using AnimDL.WinUI.Core.Contracts.Services;
+﻿using AnimDL.WinUI.Core.Contracts.Services;
 using MalApi;
 
 namespace AnimDL.WinUI.Core.Services;

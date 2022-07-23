@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Net.Http;
 using System.Threading.Tasks;
 using MalApi.Models;
 using MalApi.Requests;
@@ -11,14 +12,10 @@ namespace MalApi
         public MalClient(string accessToken)
         {
             HttpRequest.AccessToken = accessToken;
+            Http.Client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", accessToken);
         }
 
-        public async Task<Anime> GetAnimeAsync(int id)
-        {
-            var request = new GetAnimeDetailsRequest(id);
-
-            return await request.GetAsync();
-        }
+        public IMalEndPoint GetAnime() => new GetAnimeRequestBuilder();
 
         public async Task<List<Anime>> SearchAnimeAsync(string name, int limit = 25)
         {
