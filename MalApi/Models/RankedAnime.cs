@@ -11,4 +11,6 @@
             return $"({Ranking.CurrentRank}) {Anime}";
         }
     }
+
+    public class PagedRankedAnime : PagedResult<RankedAnime> { }
 }

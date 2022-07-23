@@ -58,17 +58,11 @@ public class UserListViewModel : ReactiveObject, INavigationAware
         var token = _localSettingsService.ReadSetting<OAuthToken>("MalToken");
         var client = new MalClient(token.AccessToken);
 
-        var userAnime = await client.GetAnime()
+        var userAnime = await client.Anime()
                                     .OfUser()
                                     .WithFields(FieldName.UserStatus)
-                                    .SortBy(Sort.Title)
+                                    .SortBy(UserAnimeSort.Title)
                                     .Find();
-
-        var update = await client.GetAnime()
-                                 .WithId(42963)
-                                 .UpdateStatus()
-                                 .WithEpisodesWatched(4)
-                                 .Publish();
 
         UserAnime = new(userAnime.Data)
         {

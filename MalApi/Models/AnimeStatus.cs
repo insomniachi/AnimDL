@@ -40,16 +40,26 @@ namespace MalApi
             };
         }
 
-        public static string GetMalApiString(this Sort sort)
+        public static string GetMalApiString(this UserAnimeSort sort)
         {
             return sort switch
             {
-                Sort.Score => "list_score",
-                Sort.LastUpdated => "list_updated_at",
-                Sort.Title => "anime_title",
-                Sort.StartDate => "anime_start_date",
-                Sort.Id => "anime_id ",
+                UserAnimeSort.UserScore => "list_score",
+                UserAnimeSort.LastUpdated => "list_updated_at",
+                UserAnimeSort.Title => "anime_title",
+                UserAnimeSort.StartDate => "anime_start_date",
+                UserAnimeSort.Id => "anime_id ",
                 _ => string.Empty
+            };
+        }
+
+        public static string GetMalApiString(this SeasonalAnimeSort sort)
+        {
+            return sort switch
+            {
+                SeasonalAnimeSort.Score => "anime_score",
+                SeasonalAnimeSort.NumberOfUsers => "anime_num_list_users",
+                _ => throw new System.NotImplementedException(),
             };
         }
 

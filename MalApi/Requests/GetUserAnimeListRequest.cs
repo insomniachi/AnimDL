@@ -28,16 +28,16 @@ namespace MalApi.Requests
         IGetUserAnimeListRequest WithFields(params string[] fields);
         IGetUserAnimeListRequest WithOffset(int offset);
         IGetUserAnimeListRequest WithLimit(int limit);
-        IGetUserAnimeListRequest SortBy(Sort sort);
+        IGetUserAnimeListRequest SortBy(UserAnimeSort sort);
         IGetUserAnimeListRequest WithStatus(AnimeStatus status);
         Task<PagedAnime> Find();
     }
 
-    public partial class GetAnimeRequestBuilder : IGetUserAnimeListRequest
+    public partial class AnimeEndPoint : IGetUserAnimeListRequest
     {
         public string User { get; set; }
         public AnimeStatus Status { get; set; } = AnimeStatus.None;
-        public Sort Sort { get; set; } = Sort.Score;
+        public UserAnimeSort Sort { get; set; } = UserAnimeSort.UserScore;
 
         async Task<PagedAnime> IGetUserAnimeListRequest.Find()
         {
@@ -73,13 +73,13 @@ namespace MalApi.Requests
             return this;
         }
 
-        public IGetUserAnimeListRequest SortBy(Sort sort)
+        public IGetUserAnimeListRequest SortBy(UserAnimeSort sort)
         {
             Sort = sort;
             return this;
         }
 
-        public GetAnimeRequestBuilder WithStatus(AnimeStatus status)
+        public AnimeEndPoint WithStatus(AnimeStatus status)
         {
             Status = status;
             return this;
@@ -91,12 +91,18 @@ namespace MalApi.Requests
         IGetUserAnimeListRequest IGetUserAnimeListRequest.WithOffset(int offset) => WithOffset(offset);
     }
 
-    public enum Sort
+    public enum UserAnimeSort
     {
-        Score,
+        UserScore,
         LastUpdated,
         Title,
         StartDate,
-        Id
+        Id,
+    }
+
+    public enum SeasonalAnimeSort
+    {
+        Score,
+        NumberOfUsers
     }
 }

@@ -18,11 +18,14 @@ namespace MalApi.Requests
         }
     }
 
-    public interface IMalEndPoint
+    public interface IAnimeEndPoint
     {
         IGetAnimeRequest WithId(long id);
         IGetAnimeListRequest WithName(string name);
         IGetUserAnimeListRequest OfUser(string user = "@me");
+        ISeasonalAnimeListRequest OfSeason(AnimeSeason season, int year);
+        IRecommentedAnimeListRequest SuggestedForMe();
+        IRankedAnimeListRequest Top(AnimeRankingType rankingType);
     }
 
     public interface IGetAnimeRequest
@@ -32,7 +35,7 @@ namespace MalApi.Requests
         Task<Anime> Find();
     }
 
-    public partial class GetAnimeRequestBuilder : IMalEndPoint, IGetAnimeRequest
+    public partial class AnimeEndPoint : IAnimeEndPoint, IGetAnimeRequest
     {
         public long Id { get; set; }
         public List<string> Fields { get; set; } = new() { FieldName.Id, FieldName.Title, FieldName.MainPicture };
@@ -50,7 +53,7 @@ namespace MalApi.Requests
             return WithFields(fields);
         }
 
-        private GetAnimeRequestBuilder WithFields(params string[] fields)
+        private AnimeEndPoint WithFields(params string[] fields)
         {
             foreach (var item in fields)
             {

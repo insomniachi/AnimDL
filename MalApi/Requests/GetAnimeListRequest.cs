@@ -34,14 +34,14 @@ namespace MalApi.Requests
         Task<PagedAnime> Find();
     }
 
-    public partial class GetAnimeRequestBuilder : IGetAnimeListRequestBuilder, IGetAnimeListRequest
+    public partial class AnimeEndPoint : IGetAnimeListRequestBuilder, IGetAnimeListRequest
     {
         public string Name { get; set; }
         public int Limit { get; set; }
         public int Offset { get; set; }
         public int MaxLimit { get; set; }
 
-        public GetAnimeRequestBuilder WithLimit(int limit)
+        public AnimeEndPoint WithLimit(int limit)
         {
             if(Limit > MaxLimit)
             {
@@ -52,7 +52,7 @@ namespace MalApi.Requests
             return this;
         }
         
-        public GetAnimeRequestBuilder WithOffset(int offset)
+        public AnimeEndPoint WithOffset(int offset)
         {
             Offset = offset;
             return this;

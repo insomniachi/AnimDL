@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
-using System.Net.Http;
+using System.Text.Json;
 using System.Threading.Tasks;
-using MalApi.Models;
 using MalApi.Requests;
+using Microsoft.AspNetCore.WebUtilities;
 
 namespace MalApi
 {
@@ -15,7 +15,19 @@ namespace MalApi
             Http.Client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", accessToken);
         }
 
-        public IMalEndPoint GetAnime() => new GetAnimeRequestBuilder();
+        public IAnimeEndPoint Anime() => new AnimeEndPoint();
+
+        public async Task<MalUser> User()
+        {
+            var url = QueryHelpers.AddQueryString("https://api.myanimelist.net/v2/users/@me", new Dictionary<string, string>
+            {
+                ["fields"] = "anime_statistics"
+            });
+
+            var stream = await Http.Client.GetStreamAsync(url);
+            return await JsonSerializer.DeserializeAsync<MalUser>(stream);
+        }
+
 
         public async Task<List<Anime>> SearchAnimeAsync(string name, int limit = 25)
         {
