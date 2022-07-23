@@ -5,6 +5,8 @@
     <RootNamespace>AnimDL.WinUI.Core</RootNamespace>
     <Platforms>x64</Platforms>
     <Platforms>x64</Platforms>
+    <Nullable>disable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
 
   <ItemGroup>

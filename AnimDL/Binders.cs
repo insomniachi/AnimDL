@@ -7,11 +7,24 @@ namespace AnimDL;
 public class ResolveBinder<T> : BinderBase<T>
     where T : notnull
 {
-
-
     protected override T GetBoundValue(BindingContext bindingContext)
     {
         return Program.Resolve<T>();
+    }
+}
+
+public class InstanceBinder<T> : BinderBase<T>
+{
+    private readonly T _instance;
+
+    public InstanceBinder(T instance)
+    {
+        _instance = instance;
+    }
+
+    protected override T GetBoundValue(BindingContext bindingContext)
+    {
+        return _instance;
     }
 }
 
