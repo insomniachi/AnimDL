@@ -47,11 +47,14 @@
                 TODO: Update item icons by updating FontIcon.Glyph properties.
                 https://docs.microsoft.com/windows/apps/design/style/segoe-fluent-icons-font#icon-list
                 -->
-                <NavigationViewItem x:Uid="Shell_UserList" helpers:NavigationHelper.NavigateTo="AnimDL.WinUI.ViewModels.UserListViewModel">
-                    <NavigationViewItem.Icon>
-                        <FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="&#xe8fd;" />
-                    </NavigationViewItem.Icon>
-                </NavigationViewItem>
+                <NavigationViewItem
+                    x:Uid="Shell_UserList"
+                    helpers:NavigationHelper.NavigateTo="AnimDL.WinUI.ViewModels.UserListViewModel"
+                    Icon="List" />
+                <NavigationViewItem
+                    helpers:NavigationHelper.NavigateTo="AnimDL.WinUI.ViewModels.WatchViewModel"
+                    Content="Watch"
+                    Icon="Play" />
             </NavigationView.MenuItems>
             <NavigationView.HeaderTemplate>
                 <DataTemplate>
