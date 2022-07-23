@@ -1,6 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Collections.Generic;
+using System.Linq;
+using System.Text.Json;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.WebUtilities;
 
 namespace MalApi.Requests
 {
@@ -19,5 +21,82 @@ namespace MalApi.Requests
 
             Count = 1000;
         }
+    }
+
+    public interface IGetUserAnimeListRequest
+    {
+        IGetUserAnimeListRequest WithFields(params string[] fields);
+        IGetUserAnimeListRequest WithOffset(int offset);
+        IGetUserAnimeListRequest WithLimit(int limit);
+        IGetUserAnimeListRequest SortBy(Sort sort);
+        IGetUserAnimeListRequest WithStatus(AnimeStatus status);
+        Task<PagedAnime> Find();
+    }
+
+    public partial class GetAnimeRequestBuilder : IGetUserAnimeListRequest
+    {
+        public string User { get; set; }
+        public AnimeStatus Status { get; set; } = AnimeStatus.None;
+        public Sort Sort { get; set; } = Sort.Score;
+
+        async Task<PagedAnime> IGetUserAnimeListRequest.Find()
+        {
+            var @params = new Dictionary<string, string>
+            {
+                ["limit"] = Limit.ToString(),
+                ["offset"] = Offset.ToString(),
+                ["sort"] = Sort.GetMalApiString(),
+                ["fields"] = string.Join(",", Fields)
+            };
+
+            if(Status != AnimeStatus.None)
+            {
+                @params.Add("status", Status.GetMalApiString());
+            }
+
+            var url = QueryHelpers.AddQueryString($"https://api.myanimelist.net/v2/users/{User}/animelist", @params);
+            var json = await Http.Client.GetStringAsync(url);
+            var root = JsonSerializer.Deserialize<AnimeListRoot>(json);
+
+            return new PagedAnime
+            {
+                Paging = root.Paging,
+                Data = root.AnimeList.Select(x => x.Anime).ToList()
+            };
+        }
+
+        public IGetUserAnimeListRequest OfUser(string user = @"me")
+        {
+            User = user;
+            Limit = 500;
+            MaxLimit = 1000;
+            return this;
+        }
+
+        public IGetUserAnimeListRequest SortBy(Sort sort)
+        {
+            Sort = sort;
+            return this;
+        }
+
+        public GetAnimeRequestBuilder WithStatus(AnimeStatus status)
+        {
+            Status = status;
+            return this;
+        }
+
+        IGetUserAnimeListRequest IGetUserAnimeListRequest.WithStatus(AnimeStatus status) => WithStatus(status);
+        IGetUserAnimeListRequest IGetUserAnimeListRequest.WithFields(params string[] fields) => WithFields(fields);
+        IGetUserAnimeListRequest IGetUserAnimeListRequest.WithLimit(int limit) => WithLimit(limit);
+        IGetUserAnimeListRequest IGetUserAnimeListRequest.WithOffset(int offset) => WithOffset(offset);
+    }
+
+    public enum Sort
+    {
+        Score,
+        LastUpdated,
+        Title,
+        StartDate,
+        Id
     }
 }

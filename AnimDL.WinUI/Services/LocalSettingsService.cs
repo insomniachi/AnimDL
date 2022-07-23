@@ -9,15 +9,14 @@ using Microsoft.Extensions.Options;
 
 namespace AnimDL.WinUI.Services;
 
-public class LocalSettingsServiceUnpackaged : ILocalSettingsService
+public class LocalSettingsService : ILocalSettingsService
 {
     private readonly IFileService _fileService;
     private readonly LocalSettingsOptions _options;
     private readonly string _localAppData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+    private readonly IDictionary<string, object> _settings;
 
-    private IDictionary<string, object> _settings;
-
-    public LocalSettingsServiceUnpackaged(IFileService fileService, IOptions<LocalSettingsOptions> options)
+    public LocalSettingsService(IFileService fileService, IOptions<LocalSettingsOptions> options)
     {
         _fileService = fileService;
         _options = options.Value;

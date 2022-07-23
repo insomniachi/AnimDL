@@ -28,7 +28,7 @@ public partial class App : Application
             // Other Activation Handlers
 
             // Services
-            services.AddSingleton<ILocalSettingsService, LocalSettingsServiceUnpackaged>();
+            services.AddSingleton<ILocalSettingsService, LocalSettingsService>();
             services.AddSingleton<IThemeSelectorService, ThemeSelectorService>();
             services.AddTransient<INavigationViewService, NavigationViewService>();
 

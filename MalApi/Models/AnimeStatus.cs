@@ -1,4 +1,6 @@
-﻿namespace MalApi
+﻿using MalApi.Requests;
+
+namespace MalApi
 {
     public enum AnimeStatus
     {
@@ -10,47 +12,58 @@
         None,
     }
 
-    public static class StatusExtensions
+    public static class EnumExtensions
     {
         public static string GetMalApiString(this AnimeStatus status)
         {
-            switch(status)
+            return status switch
             {
-                case AnimeStatus.Completed: return "completed";
-                case AnimeStatus.Dropped: return "dropped";
-                case AnimeStatus.None: return string.Empty;
-                case AnimeStatus.OnHold: return "on_hold";
-                case AnimeStatus.PlanToWatch: return "plan_to_watch";
-                case AnimeStatus.Watching: return "watching";
-                default: return string.Empty;
-            }
+                AnimeStatus.Completed => "completed",
+                AnimeStatus.Dropped => "dropped",
+                AnimeStatus.OnHold => "on_hold",
+                AnimeStatus.PlanToWatch => "plan_to_watch",
+                AnimeStatus.Watching => "watching",
+                _ => string.Empty,
+            };
         }
 
         public static string GetMalApiString(this MangaStatus status)
         {
-            switch (status)
+            return status switch
             {
-                case MangaStatus.Completed: return "completed";
-                case MangaStatus.Dropped: return "dropped";
-                case MangaStatus.None: return string.Empty;
-                case MangaStatus.OnHold: return "on_hold";
-                case MangaStatus.PlanToRead: return "plan_to_read";
-                case MangaStatus.Reading: return "reading";
-                default: return string.Empty;
-            }
+                MangaStatus.Completed => "completed",
+                MangaStatus.Dropped => "dropped",
+                MangaStatus.OnHold => "on_hold",
+                MangaStatus.PlanToRead => "plan_to_read",
+                MangaStatus.Reading => "reading",
+                _ => string.Empty,
+            };
+        }
+
+        public static string GetMalApiString(this Sort sort)
+        {
+            return sort switch
+            {
+                Sort.Score => "list_score",
+                Sort.LastUpdated => "list_updated_at",
+                Sort.Title => "anime_title",
+                Sort.StartDate => "anime_start_date",
+                Sort.Id => "anime_id ",
+                _ => string.Empty
+            };
         }
 
         public static AnimeStatus GetAnimeStatus(this string status)
         {
-            switch (status)
+            return status switch
             {
-                case "completed": return AnimeStatus.Completed;
-                case "dropped": return AnimeStatus.Dropped;
-                case "on_hold": return AnimeStatus.OnHold;
-                case "plan_to_watch": return AnimeStatus.PlanToWatch;
-                case "watching": return AnimeStatus.Watching;
-                default: return AnimeStatus.None;
-            }
+                "completed" => AnimeStatus.Completed,
+                "dropped" => AnimeStatus.Dropped,
+                "on_hold" => AnimeStatus.OnHold,
+                "plan_to_watch" => AnimeStatus.PlanToWatch,
+                "watching" => AnimeStatus.Watching,
+                _ => AnimeStatus.None,
+            };
         }
     }
 }

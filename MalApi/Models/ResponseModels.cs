@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Text.Json;
 using System.Text.Json.Serialization;
+using System.Threading.Tasks;
 
 namespace MalApi
 {
@@ -24,7 +26,28 @@ namespace MalApi
         public Paging Paging { get; set; }
     }
 
-    internal class Paging
+    public class PagedResult<T>
+    {
+        [JsonPropertyName("data")]
+        public List<T> Data { get; set; }
+
+        [JsonPropertyName("paging")]
+        public Paging Paging { get; set; }
+    }
+
+    public class PagedAnime : PagedResult<Anime> 
+    {
+        public async Task<PagedAnime> GetNextPage() => await Parse(Paging.Next);
+        public async Task<PagedAnime> GetPrevPage() => await Parse(Paging.Previous);
+
+        internal static async Task<PagedAnime> Parse(string url)
+        {
+            var json = await Http.Client.GetStringAsync(url);
+            return JsonSerializer.Deserialize<PagedAnime>(json);
+        }
+    }
+
+    public class Paging
     {
         [JsonPropertyName("next")]
         public string Next { get; set; }
