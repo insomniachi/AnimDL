@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.WebUtilities;
 
 namespace MalApi.Requests
 {
@@ -47,5 +48,52 @@ namespace MalApi.Requests
 
             return result.Take(Count).ToList();
         }
+    }
+
+    public interface IRankedAnimeListRequest
+    {
+        IRankedAnimeListRequest Top(AnimeRankingType rankingType);
+        IRankedAnimeListRequest WithLimit(int limits);
+        IRankedAnimeListRequest WithOffset(int offset);
+        IRankedAnimeListRequest WithFields(params string[] fields);
+        Task<PagedRankedAnime> Find();
+    }
+
+    public partial class AnimeEndPoint : IRankedAnimeListRequest
+    {
+        public AnimeRankingType RankingType { get; set; } = AnimeRankingType.Airing;
+
+        async Task<PagedRankedAnime> IRankedAnimeListRequest.Find()
+        {
+            var url = QueryHelpers.AddQueryString("https://api.myanimelist.net/v2/anime/ranking", new Dictionary<string, string>
+            {
+                ["ranking_type"] = RankingType.ToString().ToLower(),
+                ["limit"] = Limit.ToString(),
+                ["offset"] = Offset.ToString(),
+                ["fields"] = string.Join(",", Fields)
+            });
+
+            var content = await Http.Client.GetAsync(url);
+            var json = await content.Content.ReadAsStringAsync();
+            var root = JsonSerializer.Deserialize<AnimeListRoot>(json);
+
+            return new PagedRankedAnime
+            {
+                Paging = root.Paging,
+                Data = root.AnimeList.Select(x => new RankedAnime { Anime = x.Anime, Ranking = x.Ranking }).ToList()
+            };
+        }
+
+        public IRankedAnimeListRequest Top(AnimeRankingType rankingType)
+        {
+            Limit = 100;
+            MaxLimit = 500;
+            RankingType = rankingType;
+            return this;
+        }
+
+        IRankedAnimeListRequest IRankedAnimeListRequest.WithFields(params string[] fields) => WithFields(fields);
+        IRankedAnimeListRequest IRankedAnimeListRequest.WithLimit(int limits) => WithLimit(limits);
+        IRankedAnimeListRequest IRankedAnimeListRequest.WithOffset(int offset) => WithOffset(offset);
     }
 }

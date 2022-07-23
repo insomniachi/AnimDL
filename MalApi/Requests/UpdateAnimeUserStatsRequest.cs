@@ -62,6 +62,10 @@ namespace MalApi.Requests
         }
     }
 
+    public interface IDeleteRequest
+    {
+        Task<bool> RemoveFromMyList();
+    }
 
     public interface IUpdateRequest
     {
@@ -78,7 +82,7 @@ namespace MalApi.Requests
 
     }
 
-    public partial class GetAnimeRequestBuilder : IUpdateRequest
+    public partial class AnimeEndPoint : IUpdateRequest, IDeleteRequest
     {
         public bool? IsRewatching { get; set; }
         public int? Score { get; set; }
@@ -99,6 +103,13 @@ namespace MalApi.Requests
             var response = await Http.Client.PutAsync(url, httpContent);
             var json = await response.Content.ReadAsStringAsync();
             return JsonSerializer.Deserialize<UserAnimeStatus>(json);
+        }
+
+        public async Task<bool> RemoveFromMyList()
+        {
+            var url = $"https://api.myanimelist.net/v2/anime/{Id}/my_list_status";
+            var response = await Http.Client.DeleteAsync(url);
+            return response.IsSuccessStatusCode;
         }
 
         public IUpdateRequest WithComments(string comments)
