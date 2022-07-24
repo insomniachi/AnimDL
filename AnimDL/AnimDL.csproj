@@ -9,7 +9,18 @@
 		<ToolCommandName>animdl</ToolCommandName>
 		<PackageOutputPath>./nupkg</PackageOutputPath>
 		<Platforms>x64</Platforms>
+		<RepositoryUrl>https://github.com/athulrajts/AnimDL</RepositoryUrl>
+		<PackageReadmeFile>README.md</PackageReadmeFile>
+		<PackageTags>anime;myanimelist;mal;cli</PackageTags>
+		<Description>A highly efficient, powerful and fast anime scraper.</Description>
 	</PropertyGroup>
+
+	<ItemGroup>
+	  <None Include="..\README.md">
+	    <Pack>True</Pack>
+	    <PackagePath>\</PackagePath>
+	  </None>
+	</ItemGroup>
 
 	<ItemGroup>
 		<PackageReference Include="CliWrap" Version="3.4.4" />
