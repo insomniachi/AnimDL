@@ -7,6 +7,7 @@ using AnimDL.WinUI.Contracts.ViewModels;
 using AnimDL.WinUI.Core.Contracts.Services;
 using CommunityToolkit.WinUI.UI;
 using MalApi;
+using MalApi.Interfaces;
 using MalApi.Requests;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
@@ -16,12 +17,12 @@ namespace AnimDL.WinUI.ViewModels;
 
 public class UserListViewModel : ReactiveObject, INavigationAware
 {
-    private readonly IAnimeListService _animeListService;
+    private readonly IMalClient _malClient;
     private readonly ILocalSettingsService _localSettingsService;
 
-    public UserListViewModel(IAnimeListService animeListService, ILocalSettingsService localSettingsService)
+    public UserListViewModel(IMalClient malClient, ILocalSettingsService localSettingsService)
     {
-        _animeListService = animeListService;
+        _malClient = malClient;
         _localSettingsService = localSettingsService;
         ItemClicked = ReactiveCommand.CreateFromTask<Anime>(OnItemClicked);
 
@@ -55,14 +56,8 @@ public class UserListViewModel : ReactiveObject, INavigationAware
     {
         IsLoading = true;
 
-        var token = _localSettingsService.ReadSetting<OAuthToken>("MalToken");
-        var client = new MalClient(token.AccessToken);
-
-        var userAnime = await client.Anime()
-                                    .OfUser()
-                                    .WithFields(FieldName.UserStatus)
-                                    .SortBy(UserAnimeSort.Title)
-                                    .Find();
+        var userAnime = await _malClient.Anime().OfUser().WithFields(FieldName.UserStatus)
+                                        .SortBy(UserAnimeSort.Title).Find();
 
         UserAnime = new(userAnime.Data)
         {

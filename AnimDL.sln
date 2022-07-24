@@ -11,8 +11,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AnimDL.WinUI", "AnimDL.WinU
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AnimDL.WinUI.Core", "AnimDL.WinUI.Core\AnimDL.WinUI.Core.csproj", "{E5F3FCD1-666E-4B0E-BEC2-812C1BDD5D25}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MalApi", "MalApi\MalApi.csproj", "{3738332E-92D5-4445-AB49-A906D95A78B4}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -37,10 +35,6 @@ Global
 		{E5F3FCD1-666E-4B0E-BEC2-812C1BDD5D25}.Debug|x64.Build.0 = Debug|x64
 		{E5F3FCD1-666E-4B0E-BEC2-812C1BDD5D25}.Release|x64.ActiveCfg = Release|x64
 		{E5F3FCD1-666E-4B0E-BEC2-812C1BDD5D25}.Release|x64.Build.0 = Release|x64
-		{3738332E-92D5-4445-AB49-A906D95A78B4}.Debug|x64.ActiveCfg = Debug|x64
-		{3738332E-92D5-4445-AB49-A906D95A78B4}.Debug|x64.Build.0 = Debug|x64
-		{3738332E-92D5-4445-AB49-A906D95A78B4}.Release|x64.ActiveCfg = Release|x64
-		{3738332E-92D5-4445-AB49-A906D95A78B4}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

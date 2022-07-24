@@ -9,6 +9,7 @@ using AnimDL.WinUI.Services;
 using AnimDL.WinUI.ViewModels;
 using AnimDL.WinUI.Views;
 using MalApi;
+using MalApi.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.UI.Xaml;
@@ -50,7 +51,7 @@ public partial class App : Application
             services.AddTransient<WatchViewModel>();
             services.AddTransient<WatchPage>();
 
-            services.AddSingleton<IAnimeListService, AnimeListService>(x => 
+            services.AddSingleton<IMalClient, MalClient>(x => 
             {
                 var token = x.GetRequiredService<ILocalSettingsService>().ReadSetting<OAuthToken>("MalToken");
                 if(token.IsExpired)
@@ -59,7 +60,7 @@ public partial class App : Application
                     token = MalAuthHelper.RefreshToken(token.RefreshToken, clientId).Result;
                 }
 
-                return new AnimeListService(token.AccessToken);
+                return new MalClient(token.AccessToken);
             });
 
             // Configuration
