@@ -1,9 +1,9 @@
-﻿using AnimDL.Api;
+﻿using System.CommandLine;
+using AnimDL.Api;
 using AnimDL.Core.Models;
 using AnimDL.Helpers;
 using Microsoft.Extensions.Logging;
 using Sharprompt;
-using System.CommandLine;
 
 namespace AnimDL.Commands
 {
@@ -16,7 +16,7 @@ namespace AnimDL.Commands
             command.AddOption(AppOptions.ProviderType);
             command.AddOption(AppOptions.Range);
             command.AddOption(AppOptions.MediaPlayer);
-            command.SetHandler(Execute, 
+            command.SetHandler(Execute,
                                AppArguments.Title,
                                new ProviderBinder(AppOptions.ProviderType),
                                AppOptions.Range,
@@ -37,9 +37,9 @@ namespace AnimDL.Commands
             logger.LogInformation("Searching in {Type}", provider.ProviderType);
 
             var results = await provider.Catalog.Search(query).ToListAsync();
-            
+
             SearchResult selectedResult;
-            if(results.Count > 1)
+            if (results.Count > 1)
             {
                 selectedResult = Prompt.Select("Select", results, textSelector: x => x.Title, pageSize: 10);
             }
@@ -49,7 +49,7 @@ namespace AnimDL.Commands
                 logger.LogInformation("only 1 anime found, auto selecting.. {Title}", selectedResult.Title);
             }
 
-            await foreach(var episodeStream in provider.StreamProvider.GetStreams(selectedResult.Url, eps))
+            await foreach (var episodeStream in provider.StreamProvider.GetStreams(selectedResult.Url, eps))
             {
                 if (!episodeStream.Qualities.Any())
                 {
