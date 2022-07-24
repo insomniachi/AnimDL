@@ -19,7 +19,7 @@ public class Program
     .ConfigureLogging(builder => builder.AddConsole())
     .ConfigureServices((ctx, services) =>
     {
-        services.AddAnimeDL();
+        services.AddAnimDL();
         services.AddMediaPlayers();
         services.AddSingleton<IDownloader, Downloader>();
     })

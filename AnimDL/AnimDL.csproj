@@ -8,6 +8,7 @@
 		<PackAsTool>true</PackAsTool>
 		<ToolCommandName>animdl</ToolCommandName>
 		<PackageOutputPath>./nupkg</PackageOutputPath>
+		<Platforms>x64</Platforms>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -18,6 +19,7 @@
 		<PackageReference Include="System.CommandLine" Version="2.0.0-beta4.22272.1" />
 		<PackageReference Include="System.Linq.Async" Version="6.0.1" />
 		<PackageReference Include="Xabe.FFmpeg" Version="5.2.0" />
+		<PackageReference Include="System.Reactive" Version="5.0.0" />
 	</ItemGroup>
 
 	<ItemGroup>
