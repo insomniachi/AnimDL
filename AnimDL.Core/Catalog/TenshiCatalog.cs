@@ -18,10 +18,10 @@ public class TenshiCatalog : ICatalog
     public async IAsyncEnumerable<SearchResult> Search(string query)
     {
         await _client.BypassDDoS(Constants.Tenshi);
-        var html = await _client.GetStringAsync(Constants.Tenshi + "anime", parameters: new() { ["q"] = query });
+        var html = await _client.GetStreamAsync(Constants.Tenshi + "anime", parameters: new() { ["q"] = query });
 
         var doc = new HtmlDocument();
-        doc.LoadHtml(html);
+        doc.Load(html);
         foreach (var item in doc.QuerySelectorAll(".list > li > a"))
         {
             yield return new SearchResult

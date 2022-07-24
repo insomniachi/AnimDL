@@ -34,7 +34,6 @@ internal class ZoroStreamProvider : BaseStreamProvider
         _extractor = extractor;
     }
 
-
     public override async IAsyncEnumerable<VideoStreamsForEpisode> GetStreams(string url, Range range)
     {
         var match = Regex.Match(url, "(/watch)?/[\\w-]+-(\\d+)");

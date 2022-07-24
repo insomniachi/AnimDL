@@ -21,10 +21,10 @@ internal class TenshiMoeStreamProvider : BaseStreamProvider
     public override async Task<int> GetNumberOfStreams(string url)
     {
         await _client.BypassDDoS(BASE_URL);
-        var html = await _client.GetStringAsync(url);
+        var html = await _client.GetStreamAsync(url);
 
         var doc = new HtmlDocument();
-        doc.LoadHtml(html);
+        doc.Load(html);
 
         return int.Parse(doc.QuerySelector("span.badge").InnerText);
     }
@@ -32,10 +32,10 @@ internal class TenshiMoeStreamProvider : BaseStreamProvider
     public override async IAsyncEnumerable<VideoStreamsForEpisode> GetStreams(string url, Range range)
     {
         await _client.BypassDDoS(BASE_URL);
-        var html = await _client.GetStringAsync(url);
+        var html = await _client.GetStreamAsync(url);
 
         var doc = new HtmlDocument();
-        doc.LoadHtml(html);
+        doc.Load(html);
 
         var count = int.Parse(doc.QuerySelector("span.badge").InnerText);
         (int start, int end) = range.Extract(count);
@@ -52,10 +52,10 @@ internal class TenshiMoeStreamProvider : BaseStreamProvider
 
     private async Task<VideoStreamsForEpisode?> ExtractUrls(HttpClient client, string url)
     {
-        var html = await client.GetStringAsync(url);
+        var htmlStream = await client.GetStreamAsync(url);
 
         var doc = new HtmlDocument();
-        doc.LoadHtml(html);
+        doc.Load(htmlStream);
         var embedStream = doc.QuerySelector("iframe")?.Attributes["src"].Value;
 
         if (string.IsNullOrEmpty(embedStream))
@@ -64,7 +64,7 @@ internal class TenshiMoeStreamProvider : BaseStreamProvider
             return null;
         }
 
-        html = await client.GetStringAsync(embedStream);
+        var html = await client.GetStringAsync(embedStream);
 
         var streamsForEp = new VideoStreamsForEpisode();
         foreach (Match match in _streamRegex.Matches(html))
