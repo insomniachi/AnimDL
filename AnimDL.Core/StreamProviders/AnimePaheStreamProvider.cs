@@ -58,7 +58,7 @@ internal class AnimePaheStreamProvider : BaseStreamProvider
 
     private async Task<AnimePaheEpisodePage> GetSessionPage(string page, string releaseId)
     {
-        var content = await _client.GetStringAsync(API, parameters: new() 
+        var content = await _client.GetStreamAsync(API, parameters: new() 
         {
             ["m"] = "release",
             ["id"] = releaseId,
@@ -66,12 +66,12 @@ internal class AnimePaheStreamProvider : BaseStreamProvider
             ["page"] = page
         });
 
-        return JsonSerializer.Deserialize<AnimePaheEpisodePage>(content) ?? new();
+        return await JsonSerializer.DeserializeAsync<AnimePaheEpisodePage>(content) ?? new();
     }
 
     private async Task<Dictionary<string, Quality>> GetStreamUrl(string releaseId, string streamSession)
     {
-        var content = await _client.GetStringAsync(API, parameters: new()
+        var content = await _client.GetStreamAsync(API, parameters: new()
         {
             ["m"] = "links",
             ["id"] = releaseId,
@@ -79,7 +79,7 @@ internal class AnimePaheStreamProvider : BaseStreamProvider
             ["p"] = "kwik"
         });
 
-        var result = JsonSerializer.Deserialize<AnimePaheQualityModel>(content) ?? new();
+        var result = await JsonSerializer.DeserializeAsync<AnimePaheQualityModel>(content) ?? new();
         return result.GetQualities();
     }
 

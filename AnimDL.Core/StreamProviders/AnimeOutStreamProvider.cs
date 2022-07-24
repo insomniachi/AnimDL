@@ -30,9 +30,9 @@ internal class AnimeOutStreamProvider : BaseStreamProvider
 
     public async override IAsyncEnumerable<VideoStreamsForEpisode> GetStreams(string url, Range stream)
     {
-        var html = await _client.CfGetStringAsync(url);
         var doc = new HtmlDocument();
-        doc.LoadHtml(html);
+        var htmlStream = await _client.CfGetStreamAsync(url);
+        doc.Load(htmlStream);
 
         foreach (var item in doc.QuerySelectorAll(".article-content a[href$=\"mkv\"]").Where(x => x?.InnerText?.Contains("Download") == true))
         {
@@ -67,8 +67,10 @@ internal class AnimeOutStreamProvider : BaseStreamProvider
 
         if (_publicDomains.ContainsKey(host_prefix[0]))
         {
-            var uriBuilder = new UriBuilder(uri);
-            uriBuilder.Host = $"{_publicDomains[host_prefix[0]]}.{host_prefix[1]}";
+            var uriBuilder = new UriBuilder(uri)
+            {
+                Host = $"{_publicDomains[host_prefix[0]]}.{host_prefix[1]}"
+            };
             uri = uriBuilder.Uri;
         }
 

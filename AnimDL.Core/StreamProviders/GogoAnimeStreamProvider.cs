@@ -106,7 +106,7 @@ internal class GogoAnimeStreamProvider : BaseStreamProvider
 
     private async IAsyncEnumerable<(int ep, string embedUrl)> GetEpisodeList(HttpClient client, string contentId, int start, int end)
     {
-        var html = await client.GetStringAsync(EPISODE_LOAD_AJAX, parameters: new()
+        var html = await client.GetStreamAsync(EPISODE_LOAD_AJAX, parameters: new()
         {
             ["ep_start"] = $"{start}",
             ["ep_end"] = $"{end}",
@@ -114,7 +114,7 @@ internal class GogoAnimeStreamProvider : BaseStreamProvider
         });
 
         var doc = new HtmlDocument();
-        doc.LoadHtml(html);
+        doc.Load(html);
 
         foreach (var item in doc.QuerySelectorAll("a[class=\"\"] , a[class=\"\"]").Reverse())
         {
@@ -137,9 +137,9 @@ internal class GogoAnimeStreamProvider : BaseStreamProvider
 
     private static async Task<string> GetEmbedPage(HttpClient client, string url)
     {
-        var html = await client.GetStringAsync(url);
+        var html = await client.GetStreamAsync(url);
         var doc = new HtmlDocument();
-        doc.LoadHtml(html);
+        doc.Load(html);
         return $"https:{doc.QuerySelector("iframe").Attributes["src"].Value}";
     }
 }

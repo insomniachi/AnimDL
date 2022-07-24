@@ -40,6 +40,31 @@ internal static class HttpHelper
         }
     }
 
+    internal static async Task<Stream> GetStreamAsync(this HttpClient client, string url, Dictionary<string, string>? parameters = null, Dictionary<string, string>? headers = null)
+    {
+        var actualUrl = parameters is null
+            ? url
+            : QueryHelpers.AddQueryString(url, parameters);
+
+        if (headers is not null)
+        {
+            using var request = new HttpRequestMessage(HttpMethod.Get, actualUrl);
+
+            foreach (var header in headers)
+            {
+                request.Headers.Add(header.Key, header.Value);
+            }
+
+            var response = await client.SendAsync(request);
+
+            return await response.Content.ReadAsStreamAsync();
+        }
+        else
+        {
+            return await client.GetStreamAsync(actualUrl);
+        }
+    }
+
     internal static async Task<string> CfGetStringAsync(this HttpClient client, string url, Dictionary<string, string>? parameters = null, Dictionary<string,string>? headers = null)
     {
         if(headers is null)
@@ -50,5 +75,17 @@ internal static class HttpHelper
         headers.Add("referer", url);
 
         return await client.GetStringAsync(CORS_PROXY + "?" + url, parameters ?? new());
+    }
+
+    internal static async Task<Stream> CfGetStreamAsync(this HttpClient client, string url, Dictionary<string, string>? parameters = null, Dictionary<string, string>? headers = null)
+    {
+        if (headers is null)
+        {
+            headers = new();
+        }
+
+        headers.Add("referer", url);
+
+        return await client.GetStreamAsync(CORS_PROXY + "?" + url, parameters ?? new());
     }
 }

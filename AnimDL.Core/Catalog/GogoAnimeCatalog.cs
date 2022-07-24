@@ -19,10 +19,10 @@ public class GogoAnimeCatalog : ICatalog
 
     public async IAsyncEnumerable<SearchResult> Search(string query)
     {
-        var html = await _client.GetStringAsync(SEARCH_URL, parameters: new() { ["keyword"] = query });
+        var html = await _client.GetStreamAsync(SEARCH_URL, parameters: new() { ["keyword"] = query });
 
         var doc = new HtmlDocument();
-        doc.LoadHtml(html);
+        doc.Load(html);
 
         foreach (var item in doc.DocumentNode.SelectNodes("//p[@class=\"name\"]/a"))
         {
