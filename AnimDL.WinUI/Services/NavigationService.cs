@@ -1,4 +1,5 @@
-﻿using AnimDL.WinUI.Contracts.Services;
+﻿using System.Collections.Generic;
+using AnimDL.WinUI.Contracts.Services;
 using AnimDL.WinUI.Contracts.ViewModels;
 using AnimDL.WinUI.Helpers;
 
@@ -78,7 +79,7 @@ public class NavigationService : INavigationService
         return false;
     }
 
-    public bool NavigateTo(string pageKey, object parameter = null, bool clearNavigation = false)
+    public bool NavigateTo(string pageKey, IReadOnlyDictionary<string,object> parameter = null, bool clearNavigation = false)
     {
         var pageType = _pageService.GetPageType(pageKey);
 
@@ -114,7 +115,7 @@ public class NavigationService : INavigationService
 
             if (frame.GetPageViewModel() is INavigationAware navigationAware)
             {
-                navigationAware.OnNavigatedTo(e.Parameter);
+                navigationAware.OnNavigatedTo(e.Parameter as IReadOnlyDictionary<string,object> ?? new Dictionary<string, object>());
             }
 
             Navigated?.Invoke(sender, e);

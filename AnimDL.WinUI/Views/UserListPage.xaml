@@ -137,110 +137,25 @@
             IsItemClickEnabled="True">
             <GridView.ItemTemplate>
                 <DataTemplate x:DataType="mal:Anime">
-                    <FlipView Width="290" Height="400">
-                        <FlipView.Background>
+                    <Grid Width="290" Height="400">
+                        <Grid.Background>
                             <ImageBrush ImageSource="{x:Bind MainPicture.Large}" />
-                        </FlipView.Background>
-                        <Grid>
-                            <StackPanel
-                                Height="60"
-                                Padding="3"
-                                VerticalAlignment="Bottom">
-                                <StackPanel.Background>
-                                    <SolidColorBrush Opacity="0.8" Color="Black" />
-                                </StackPanel.Background>
-                                <TextBlock
-                                    FontSize="15"
-                                    FontWeight="Bold"
-                                    Text="{x:Bind Title}"
-                                    TextAlignment="Center"
-                                    TextWrapping="Wrap" />
-                            </StackPanel>
-                        </Grid>
-                        <Grid>
-                            <Grid.Resources>
-                                <Style TargetType="TextBlock">
-                                    <Setter Property="FontWeight" Value="Bold" />
-                                </Style>
-                            </Grid.Resources>
-                            <Grid.Background>
+                        </Grid.Background>
+                        <StackPanel
+                            Height="60"
+                            Padding="3"
+                            VerticalAlignment="Bottom">
+                            <StackPanel.Background>
                                 <SolidColorBrush Opacity="0.8" Color="Black" />
-                            </Grid.Background>
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition />
-                                <RowDefinition Height="Auto" />
-                            </Grid.RowDefinitions>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition />
-                                <ColumnDefinition />
-                            </Grid.ColumnDefinitions>
+                            </StackPanel.Background>
                             <TextBlock
-                                Grid.ColumnSpan="2"
-                                Margin="3,3,3,10"
                                 FontSize="15"
                                 FontWeight="Bold"
                                 Text="{x:Bind Title}"
                                 TextAlignment="Center"
                                 TextWrapping="Wrap" />
-
-                            <TextBlock
-                                Grid.Row="1"
-                                HorizontalAlignment="Center"
-                                Text="User Score" />
-                            <TextBlock
-                                Grid.Row="1"
-                                Grid.Column="1"
-                                Text="{x:Bind UserStatus.Score}" />
-
-                            <TextBlock
-                                Grid.Row="2"
-                                HorizontalAlignment="Center"
-                                Text="Mal Score" />
-                            <TextBlock
-                                Grid.Row="2"
-                                Grid.Column="1"
-                                Text="{x:Bind MeanScore}" />
-
-                            <TextBlock
-                                Grid.Row="3"
-                                HorizontalAlignment="Center"
-                                Text="Popularity" />
-                            <TextBlock
-                                Grid.Row="3"
-                                Grid.Column="1"
-                                Text="{x:Bind Popularity}" />
-
-                            <ItemsRepeater
-                                Grid.Row="5"
-                                Grid.ColumnSpan="2"
-                                Margin="5,10"
-                                HorizontalAlignment="Center"
-                                ItemsSource="{x:Bind Genres}">
-                                <ItemsRepeater.ItemTemplate>
-                                    <DataTemplate>
-                                        <Border
-                                            Margin="3,0"
-                                            Padding="10"
-                                            BorderBrush="White"
-                                            BorderThickness="1"
-                                            CornerRadius="5">
-                                            <TextBlock Text="{Binding}" />
-                                        </Border>
-                                    </DataTemplate>
-                                </ItemsRepeater.ItemTemplate>
-                                <ItemsRepeater.Layout>
-                                    <ctk:WrapLayout
-                                        HorizontalSpacing="5"
-                                        Orientation="Horizontal"
-                                        VerticalSpacing="10" />
-                                </ItemsRepeater.Layout>
-                            </ItemsRepeater>
-                        </Grid>
-                    </FlipView>
+                        </StackPanel>
+                    </Grid>
                 </DataTemplate>
             </GridView.ItemTemplate>
             <GridView.ItemContainerStyle>

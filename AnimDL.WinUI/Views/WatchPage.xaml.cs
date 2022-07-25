@@ -1,15 +1,12 @@
 ﻿using System;
+using System.Linq;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
-using System.Threading.Tasks;
 using AnimDL.Core.Models;
+using AnimDL.WinUI.Helpers;
 using AnimDL.WinUI.ViewModels;
 using ReactiveMarbles.ObservableEvents;
 using ReactiveUI;
-using System.Linq;
-using AnimDL.WinUI.Helpers;
-using System.Net.Http;
-using System.IO;
 
 namespace AnimDL.WinUI.Views;
 
@@ -17,12 +14,11 @@ public class WatchPageBase : ReactivePage<WatchViewModel> { }
 
 public sealed partial class WatchPage : WatchPageBase
 {
-    private readonly HttpClient _client = new();
-
     public WatchPage()
     {
         ViewModel = App.GetService<WatchViewModel>();
         InitializeComponent();
+        
         // ComboBox
         this.OneWayBind(ViewModel, vm => vm.Providers, view => view.Providers.ItemsSource);
         this.Bind(ViewModel, vm => vm.SelectedProviderType, view => view.Providers.SelectedItem);
@@ -30,50 +26,34 @@ public sealed partial class WatchPage : WatchPageBase
         // AutoSuggesBox
         this.OneWayBind(ViewModel, vm => vm.SearchResult, view => view.SearchBox.ItemsSource);
         this.Bind(ViewModel, vm => vm.Query, view => view.SearchBox.Text);
+        this.Bind(ViewModel, vm => vm.IsSuggestionListOpen, view => view.SearchBox.IsSuggestionListOpen);
 
         // Episode List
         this.OneWayBind(ViewModel, vm => vm.Episdoes, view => view.EpisodeList.ItemsSource);
 
+        // Load video html
+        this.ObservableForProperty(x => x.ViewModel.Url, x => x)
+            .Subscribe(async x =>
+            {
+                var html = VideoJsHelper.GetPlayerHtml(x);
+                await WebView.EnsureCoreWebView2Async();
+                WebView.NavigateToString(html);
+            });
+
         this.WhenActivated(d =>
         {
-            // Update suggestions
-            SearchBox.Events().TextChanged
-                              .Select(x => x.sender.Text.Trim())
-                              .Where(x => x.Length > 3)
-                              .Throttle(TimeSpan.FromMilliseconds(800))
-                              .DistinctUntilChanged()
-                              .ObserveOn(RxApp.MainThreadScheduler)
-                              .Subscribe(ViewModel.Search)
-                              .DisposeWith(d);
-
-            // Clear suggestions
-            SearchBox.Events().TextChanged
-                              .Select(x => x.sender.Text.Trim())
-                              .Where(x => x.Length <= 3)
-                              .SubscribeOn(RxApp.MainThreadScheduler)
-                              .Subscribe(_ => ViewModel.SearchResult.Clear());
-
             // Suggestion Choosen
             SearchBox.Events().SuggestionChosen
                               .Select(x => x.args.SelectedItem as SearchResult)
-                              .Subscribe(ViewModel.FetchEpisodes);
+                              .InvokeCommand(ViewModel.SearchResultPicked)
+                              .DisposeWith(d);
 
             // Episode Choosen
             EpisodeList.Events().SelectionChanged
                                 .Where(x => x.AddedItems.Count == 1)
-                                .Select(x => x.AddedItems[0] as VideoStreamsForEpisode)
-                                .Subscribe(async x =>
-                                {
-                                    var url = x.Qualities.Values.ElementAt(0).Url;
-                                    var html = VideoJsHelper.GetPlayerHtml(url);
-                                    await WebView.EnsureCoreWebView2Async();
-                                    WebView.NavigateToString(html);
-                                });
+                                .Select(x => (int)x.AddedItems[0])
+                                .Subscribe(async x => await ViewModel.FetchUrlForEp(x))
+                                .DisposeWith(d);
         });
-    }
-
-    public void Execute(Action action)
-    {
-        DispatcherQueue.TryEnqueue(() => action());
     }
 }

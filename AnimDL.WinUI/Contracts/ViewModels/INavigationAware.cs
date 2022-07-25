@@ -1,8 +1,11 @@
-﻿namespace AnimDL.WinUI.Contracts.ViewModels;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
+
+namespace AnimDL.WinUI.Contracts.ViewModels;
 
 public interface INavigationAware
 {
-    void OnNavigatedTo(object parameter);
+    Task OnNavigatedTo(IReadOnlyDictionary<string,object> parameters);
 
-    void OnNavigatedFrom();
+    Task OnNavigatedFrom();
 }

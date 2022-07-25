@@ -40,7 +40,7 @@
             </ComboBox>
         </StackPanel>
 
-        <Grid Grid.Row="1">
+        <Grid Grid.Row="1" Margin="0,50,0,0">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition />
@@ -48,18 +48,22 @@
             <ListView
                 x:Name="EpisodeList"
                 Grid.Row="1"
-                Margin="10,20">
+                Margin="10,0,10,0">
                 <ListView.ItemTemplate>
-                    <DataTemplate x:DataType="adlm:VideoStreamsForEpisode">
+                    <DataTemplate x:DataType="x:Int32">
                         <TextBlock>
                             <Run Text="Episode " />
-                            <Run Text="{x:Bind Episode}" />
+                            <Run Text="{x:Bind}" />
                         </TextBlock>
                     </DataTemplate>
                 </ListView.ItemTemplate>
             </ListView>
 
-            <WebView2 x:Name="WebView" Grid.Column="1" />
+            <WebView2
+                x:Name="WebView"
+                Grid.Column="1"
+                Margin="0,0,0,20" />
+
         </Grid>
 
 

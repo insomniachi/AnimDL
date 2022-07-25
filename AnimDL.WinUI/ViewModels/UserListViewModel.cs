@@ -1,14 +1,15 @@
 ﻿using System;
-using System.Linq;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Reactive.Disposables;
+using System.Reactive.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using AnimDL.WinUI.Contracts.Services;
 using AnimDL.WinUI.Contracts.ViewModels;
-using AnimDL.WinUI.Core.Contracts.Services;
-using CommunityToolkit.WinUI.UI;
+using DynamicData;
 using MalApi;
 using MalApi.Interfaces;
-using MalApi.Requests;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 
@@ -17,64 +18,54 @@ namespace AnimDL.WinUI.ViewModels;
 
 public class UserListViewModel : ReactiveObject, INavigationAware
 {
+    protected CompositeDisposable Garbage { get; } = new CompositeDisposable();
     private readonly IMalClient _malClient;
-    private readonly ILocalSettingsService _localSettingsService;
+    private readonly INavigationService _navigationService;
+    private readonly SourceCache<Anime, long> _animeCache = new(x => x.ID);
+    private readonly ReadOnlyObservableCollection<Anime> _anime;
 
-    public UserListViewModel(IMalClient malClient, ILocalSettingsService localSettingsService)
+    public UserListViewModel(IMalClient malClient,
+                             INavigationService navigationService)
     {
         _malClient = malClient;
-        _localSettingsService = localSettingsService;
-        ItemClicked = ReactiveCommand.CreateFromTask<Anime>(OnItemClicked);
+        _navigationService = navigationService;
+        
+        ItemClicked = ReactiveCommand.Create<Anime>(OnItemClicked);
 
-        this.WhenAnyValue(x => x.CurrentView)
-            .Subscribe(x =>
-            {
-                UserAnime.Filter = y =>
-                {
-                    var anime = y as Anime;
-                    return anime.UserStatus.Status == x;
-                };
-            });
+        var filter = this.WhenAnyValue(x => x.CurrentView)
+                         .Select(FilterByStatusPredicate);
+
+        _animeCache
+            .Connect()
+            .RefCount()
+            .Filter(filter)
+            .Bind(out _anime)
+            .DisposeMany()
+            .Subscribe(_ => { }, RxApp.DefaultExceptionHandler.OnNext)
+            .DisposeWith(Garbage);
     }
 
-    [Reactive]
-    public AdvancedCollectionView UserAnime { get; set; } = new();
+    [Reactive] public AnimeStatus CurrentView { get; set; } = AnimeStatus.Watching;
+    [Reactive] public bool IsLoading { get; set; }
 
-    [Reactive]
-    public AnimeStatus CurrentView { get; set; } = AnimeStatus.Watching;
-
-    [Reactive]
-    public bool IsLoading { get; set; }
-
+    public ReadOnlyObservableCollection<Anime> UserAnime => _anime;
     public ICommand ItemClicked { get; }
 
-    public void OnNavigatedFrom()
-    {
-    }
 
-    public async void OnNavigatedTo(object parameter)
+    public Task OnNavigatedFrom() => Task.CompletedTask;
+    
+    public async Task OnNavigatedTo(IReadOnlyDictionary<string, object> parameters)
     {
         IsLoading = true;
-
-        var userAnime = await _malClient.Anime().OfUser().WithFields(FieldName.UserStatus)
-                                        .SortBy(UserAnimeSort.Title).Find();
-
-        UserAnime = new(userAnime.Data)
-        {
-            Filter = y =>
-            {
-                var anime = y as Anime;
-                return anime.UserStatus.Status == CurrentView;
-            }
-        };
-        UserAnime.SortDescriptions.Add(new SortDescription("MeanScore", SortDirection.Descending));
-        UserAnime.SortDescriptions.Add(new SortDescription("Title", SortDirection.Ascending));
-
+        var userAnime = await _malClient.Anime().OfUser().WithFields(FieldName.UserStatus).Find();
+        _animeCache.AddOrUpdate(userAnime.Data);        
         IsLoading = false;
     }
 
-    private Task OnItemClicked(Anime anime)
+    private void OnItemClicked(Anime anime)
     {
-        return Task.CompletedTask;
+        _navigationService.NavigateTo(typeof(WatchViewModel).FullName, new Dictionary<string, object> { ["Title"] = anime.Title });
     }
+
+    private Func<Anime, bool> FilterByStatusPredicate(AnimeStatus status) => x => x.UserStatus.Status == status;
 }
