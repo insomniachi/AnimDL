@@ -82,16 +82,12 @@ public partial class App : Application
         UnhandledException += App_UnhandledException;
     }
 
-    private void App_UnhandledException(object sender, UnhandledExceptionEventArgs e)
-    {
-        // TODO: Log and handle exceptions as appropriate.
-        // For more details, see https://docs.microsoft.com/windows/winui/api/microsoft.ui.xaml.unhandledexceptioneventargs.
-    }
+    private void App_UnhandledException(object sender, UnhandledExceptionEventArgs e) { }
 
     protected async override void OnLaunched(LaunchActivatedEventArgs args)
     {
         base.OnLaunched(args);
-        var activationService = App.GetService<IActivationService>();
+        var activationService = GetService<IActivationService>();
         await activationService.ActivateAsync(args);
     }
 }
