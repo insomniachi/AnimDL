@@ -115,6 +115,7 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition />
+            <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
         <StackPanel Margin="{StaticResource SmallTopBottomMargin}">
@@ -137,24 +138,34 @@
             IsItemClickEnabled="True">
             <GridView.ItemTemplate>
                 <DataTemplate x:DataType="mal:Anime">
-                    <Grid Width="290" Height="400">
-                        <Grid.Background>
-                            <ImageBrush ImageSource="{x:Bind MainPicture.Large}" />
-                        </Grid.Background>
-                        <StackPanel
+                    <Grid Width="240" Height="400">
+                        <Grid.RowDefinitions>
+                            <RowDefinition />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+                        <ctk:ImageEx
+                            Grid.Row="0"
+                            CacheMode="BitmapCache"
+                            IsCacheEnabled="True"
+                            Source="{x:Bind MainPicture.Large}"
+                            Stretch="UniformToFill" />
+
+                        <Border
+                            Grid.Row="1"
                             Height="60"
                             Padding="3"
-                            VerticalAlignment="Bottom">
-                            <StackPanel.Background>
-                                <SolidColorBrush Opacity="0.8" Color="Black" />
-                            </StackPanel.Background>
+                            Background="#2f2f2f"
+                            BorderBrush="Red"
+                            BorderThickness="0,2,0,0">
                             <TextBlock
+                                Margin="0,3,0,0"
+                                Padding="3"
                                 FontSize="15"
-                                FontWeight="Bold"
                                 Text="{x:Bind Title}"
                                 TextAlignment="Center"
+                                TextTrimming="WordEllipsis"
                                 TextWrapping="Wrap" />
-                        </StackPanel>
+                        </Border>
                     </Grid>
                 </DataTemplate>
             </GridView.ItemTemplate>
@@ -172,5 +183,39 @@
             <ProgressRing Margin="0,0,12,0" IsActive="True" />
         </ctk:Loading>
 
+
+        <CommandBar
+            Grid.Row="2"
+            Background="#202020"
+            DefaultLabelPosition="Bottom">
+            <AppBarButton Icon="Refresh" Label="Refresh" />
+            <AppBarButton Icon="View" Label="Display mode">
+                <AppBarButton.Flyout>
+                    <MenuFlyout>
+                        <MenuFlyoutItem Text="Grid view">
+                            <MenuFlyoutItem.Icon>
+                                <FontIcon Glyph="&#xf0e2;" />
+                            </MenuFlyoutItem.Icon>
+                        </MenuFlyoutItem>
+                        <MenuFlyoutItem Text="List view">
+                            <MenuFlyoutItem.Icon>
+                                <FontIcon Glyph="&#xf0e4;" />
+                            </MenuFlyoutItem.Icon>
+                        </MenuFlyoutItem>
+                    </MenuFlyout>
+                </AppBarButton.Flyout>
+            </AppBarButton>
+            <AppBarButton Icon="Filter" Label="Filter">
+                <AppBarButton.Flyout>
+                    <MenuFlyout>
+                        <MenuFlyoutItem Text="Watching" />
+                        <MenuFlyoutItem Text="Plan to watch" />
+                        <MenuFlyoutItem Text="On Hold" />
+                        <MenuFlyoutItem Text="Completed" />
+                        <MenuFlyoutItem Text="Dropped" />
+                    </MenuFlyout>
+                </AppBarButton.Flyout>
+            </AppBarButton>
+        </CommandBar>
     </Grid>
 </v:UserListPageBase>
