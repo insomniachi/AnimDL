@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using AnimDL.WinUI.ViewModels;
@@ -8,26 +10,69 @@ using ReactiveUI;
 
 namespace AnimDL.WinUI.Views;
 
-public class UserListPageBase : ReactivePage<UserListViewModel> { }
+public class UserListPageBase : ReactivePageEx<UserListViewModel> { }
 public sealed partial class UserListPage : UserListPageBase
 {
+    public List<AnimeStatus> Statuses { get; set; } = new List<AnimeStatus>
+    {
+        AnimeStatus.Watching,
+        AnimeStatus.PlanToWatch,
+        AnimeStatus.OnHold,
+        AnimeStatus.Completed,
+        AnimeStatus.Dropped
+    };
+
+    public static string ToStatusString(AnimeStatus status)
+    {
+        return status switch
+        {
+            AnimeStatus.Watching => "Watching",
+            AnimeStatus.PlanToWatch => "Plan to watch",
+            AnimeStatus.OnHold => "On Hold",
+            AnimeStatus.Completed => "Completed",
+            AnimeStatus.Dropped => "Dropped",
+            _ => throw new ArgumentException()
+        };
+    }
+
     public UserListPage()
     {
-        ViewModel = App.GetService<UserListViewModel>();
         InitializeComponent();
 
         this.OneWayBind(ViewModel, vm => vm.UserAnime, view => view.AnimeListView.ItemsSource);
         this.OneWayBind(ViewModel, vm => vm.IsLoading, view => view.LoadingControl.IsLoading);
+        this.Bind(ViewModel, vm => vm.CurrentView, view => view.StatusStrip.SelectedItem);
+
+        this.WhenAnyValue(x => x.ViewModel.CurrentView)
+            .Subscribe(x =>
+            {
+                switch (x)
+                {
+                    case AnimeStatus.Watching:
+                        WatchingFlyoutToggle.IsChecked = true;
+                        break;
+                    case AnimeStatus.PlanToWatch:
+                        PtwFlyoutToggle.IsChecked = true;
+                        break;
+                    case AnimeStatus.Completed:
+                        CompletedFlyoutToggle.IsChecked = true;
+                        break;
+                    case AnimeStatus.OnHold:
+                        OnHoldFlyoutToggle.IsChecked = true;
+                        break;
+                    case AnimeStatus.Dropped:
+                        DroppedFlyoutToggle.IsChecked = true;
+                        break;
+                }
+            });
 
         this.WhenActivated(d =>
         {
-            AnimeListView.Events().ItemClick.Select(x => x.ClickedItem as Anime).InvokeCommand(ViewModel.ItemClicked);
-            
-            WatchingToggleBtn.Events().Checked.Subscribe(_ => ViewModel.CurrentView = AnimeStatus.Watching).DisposeWith(d);
-            PtwToggleBtn.Events().Checked.Subscribe(_ => ViewModel.CurrentView = AnimeStatus.PlanToWatch).DisposeWith(d);
-            CompletedToggleBtn.Events().Checked.Subscribe(_ => ViewModel.CurrentView = AnimeStatus.Completed).DisposeWith(d);
-            OnHoldToggleBtn.Events().Checked.Subscribe(_ => ViewModel.CurrentView = AnimeStatus.OnHold).DisposeWith(d);
-            DroppedToggleBtn.Events().Checked.Subscribe(_ => ViewModel.CurrentView = AnimeStatus.Dropped).DisposeWith(d);
+            AnimeListView.Events()
+            .ItemClick
+            .Select(x => x.ClickedItem as Anime)
+            .InvokeCommand(ViewModel.ItemClickedCommand)
+            .DisposeWith(d);
         });
     }
 }

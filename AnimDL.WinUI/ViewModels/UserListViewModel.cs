@@ -6,7 +6,7 @@ using System.Reactive.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using AnimDL.WinUI.Contracts.Services;
-using AnimDL.WinUI.Contracts.ViewModels;
+using AnimDL.WinUI.Core.Contracts;
 using DynamicData;
 using MalApi;
 using MalApi.Interfaces;
@@ -16,7 +16,7 @@ using ReactiveUI.Fody.Helpers;
 namespace AnimDL.WinUI.ViewModels;
 
 
-public class UserListViewModel : ReactiveObject, INavigationAware
+public class UserListViewModel : ViewModel, IHaveState
 {
     protected CompositeDisposable Garbage { get; } = new CompositeDisposable();
     private readonly IMalClient _malClient;
@@ -30,7 +30,8 @@ public class UserListViewModel : ReactiveObject, INavigationAware
         _malClient = malClient;
         _navigationService = navigationService;
         
-        ItemClicked = ReactiveCommand.Create<Anime>(OnItemClicked);
+        ItemClickedCommand = ReactiveCommand.Create<Anime>(OnItemClicked);
+        ChangeCurrentViewCommand = ReactiveCommand.Create<AnimeStatus>(x => CurrentView = x);
 
         var filter = this.WhenAnyValue(x => x.CurrentView)
                          .Select(FilterByStatusPredicate);
@@ -49,18 +50,8 @@ public class UserListViewModel : ReactiveObject, INavigationAware
     [Reactive] public bool IsLoading { get; set; }
 
     public ReadOnlyObservableCollection<Anime> UserAnime => _anime;
-    public ICommand ItemClicked { get; }
-
-
-    public Task OnNavigatedFrom() => Task.CompletedTask;
-    
-    public async Task OnNavigatedTo(IReadOnlyDictionary<string, object> parameters)
-    {
-        IsLoading = true;
-        var userAnime = await _malClient.Anime().OfUser().WithFields(FieldName.UserStatus).Find();
-        _animeCache.AddOrUpdate(userAnime.Data);        
-        IsLoading = false;
-    }
+    public ICommand ItemClickedCommand { get; }
+    public ICommand ChangeCurrentViewCommand { get; set; }
 
     private void OnItemClicked(Anime anime)
     {
@@ -68,4 +59,25 @@ public class UserListViewModel : ReactiveObject, INavigationAware
     }
 
     private Func<Anime, bool> FilterByStatusPredicate(AnimeStatus status) => x => x.UserStatus.Status == status;
+
+    public async Task SetInitialState()
+    {
+        IsLoading = true;
+        var userAnime = await _malClient.Anime().OfUser().WithFields(FieldName.UserStatus).Find();
+        _animeCache.AddOrUpdate(userAnime.Data);
+        IsLoading = false;
+    }
+
+    public void StoreState(IState state)
+    {
+        state.AddOrUpdate(UserAnime);
+        state.AddOrUpdate(CurrentView);
+    }
+
+    public void RestoreState(IState state)
+    {
+        var anime = state.GetValue<ReadOnlyObservableCollection<Anime>>(nameof(UserAnime));
+        _animeCache.Edit(x => x.AddOrUpdate(anime));
+        CurrentView = state.GetValue<AnimeStatus>(nameof(CurrentView));
+    }
 }

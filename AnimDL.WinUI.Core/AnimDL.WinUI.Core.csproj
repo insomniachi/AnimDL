@@ -16,8 +16,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="JikanDotNet" Version="2.2.0" />
-    <PackageReference Include="MalApi.V2" Version="1.1.0" />
+    <PackageReference Include="MalApi.V2" Version="1.1.1" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
   </ItemGroup>
 </Project>

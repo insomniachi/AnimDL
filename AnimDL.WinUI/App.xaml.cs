@@ -39,6 +39,7 @@ public partial class App : Application
 
             // Core Services
             services.AddSingleton<IFileService, FileService>();
+            services.AddSingleton<IVolatileStateStorage, VolatileStateStorage>();
             services.AddAnimDL();
 
             // Views and ViewModels
@@ -50,6 +51,8 @@ public partial class App : Application
             services.AddTransient<ShellViewModel>();
             services.AddTransient<WatchViewModel>();
             services.AddTransient<WatchPage>();
+            services.AddTransient<SeasonalPage>();
+            services.AddTransient<SeasonalViewModel>();
 
             services.AddSingleton<IMalClient, MalClient>(x => 
             {

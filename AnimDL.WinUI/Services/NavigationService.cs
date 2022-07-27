@@ -1,6 +1,8 @@
 ﻿using System.Collections.Generic;
 using AnimDL.WinUI.Contracts.Services;
 using AnimDL.WinUI.Contracts.ViewModels;
+using AnimDL.WinUI.Core.Contracts;
+using AnimDL.WinUI.Core.Contracts.Services;
 using AnimDL.WinUI.Helpers;
 
 using Microsoft.UI.Xaml.Controls;
@@ -13,6 +15,7 @@ namespace AnimDL.WinUI.Services;
 public class NavigationService : INavigationService
 {
     private readonly IPageService _pageService;
+    private readonly IVolatileStateStorage _stateStorage;
     private object _lastParameterUsed;
     private Frame _frame;
 
@@ -41,9 +44,11 @@ public class NavigationService : INavigationService
 
     public bool CanGoBack => Frame.CanGoBack;
 
-    public NavigationService(IPageService pageService)
+    public NavigationService(IPageService pageService, 
+                             IVolatileStateStorage stateStorage)
     {
         _pageService = pageService;
+        _stateStorage = stateStorage;
     }
 
     private void RegisterFrameEvents()
@@ -95,6 +100,11 @@ public class NavigationService : INavigationService
                 {
                     navigationAware.OnNavigatedFrom();
                 }
+                if(vmBeforeNavigation is IHaveState stateAware)
+                {
+                    var state = _stateStorage.GetState(stateAware.GetType());
+                    stateAware.StoreState(state);
+                }
             }
 
             return navigated;
@@ -103,22 +113,40 @@ public class NavigationService : INavigationService
         return false;
     }
 
-    private void OnNavigated(object sender, NavigationEventArgs e)
+    private async void OnNavigated(object sender, NavigationEventArgs e)
     {
-        if (sender is Frame frame)
+        if (sender is not Frame frame)
         {
-            var clearNavigation = (bool)frame.Tag;
-            if (clearNavigation)
-            {
-                frame.BackStack.Clear();
-            }
-
-            if (frame.GetPageViewModel() is INavigationAware navigationAware)
-            {
-                navigationAware.OnNavigatedTo(e.Parameter as IReadOnlyDictionary<string,object> ?? new Dictionary<string, object>());
-            }
-
-            Navigated?.Invoke(sender, e);
+            return;
         }
+        
+        var clearNavigation = (bool)frame.Tag;
+        if (clearNavigation)
+        {
+            frame.BackStack.Clear();
+        }
+
+        var vm = frame.GetPageViewModel();
+
+        if (vm is INavigationAware navigationAware)
+        {
+            await navigationAware.OnNavigatedTo(e.Parameter as IReadOnlyDictionary<string, object> ?? new Dictionary<string, object>());
+        }
+        
+        if (vm is IHaveState stateAware)
+        {
+            var state = _stateStorage.GetState(stateAware.GetType());
+
+            if(state.IsEmpty)
+            {
+                await stateAware.SetInitialState();
+            }
+            else
+            {
+                stateAware.RestoreState(state);
+            }
+        }
+
+        Navigated?.Invoke(sender, e);
     }
 }
