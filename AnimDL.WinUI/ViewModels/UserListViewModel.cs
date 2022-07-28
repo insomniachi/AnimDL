@@ -18,7 +18,6 @@ namespace AnimDL.WinUI.ViewModels;
 
 public class UserListViewModel : ViewModel, IHaveState
 {
-    protected CompositeDisposable Garbage { get; } = new CompositeDisposable();
     private readonly IMalClient _malClient;
     private readonly INavigationService _navigationService;
     private readonly SourceCache<Anime, long> _animeCache = new(x => x.ID);

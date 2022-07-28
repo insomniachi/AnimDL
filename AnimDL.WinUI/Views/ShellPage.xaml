@@ -52,6 +52,10 @@
                     helpers:NavigationHelper.NavigateTo="AnimDL.WinUI.ViewModels.SeasonalViewModel"
                     Content="Seasonal"
                     Icon="Calendar" />
+                <NavigationViewItem
+                    helpers:NavigationHelper.NavigateTo="AnimDL.WinUI.ViewModels.ScheduleViewModel"
+                    Content="Schedule"
+                    Icon="Clock" />
             </NavigationView.MenuItems>
             <NavigationView.HeaderTemplate>
                 <DataTemplate>

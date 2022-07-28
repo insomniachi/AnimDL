@@ -11,6 +11,7 @@
   </PropertyGroup>
   <ItemGroup>
     <None Remove="Styles\RadioButton.xaml" />
+    <None Remove="Views\SchedulePage.xaml" />
     <None Remove="Views\SeasonalPage.xaml" />
     <None Remove="Views\WatchPage.xaml" />
   </ItemGroup>
@@ -40,6 +41,9 @@
     <None Update="appsettings.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <Page Update="Views\SchedulePage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Update="Styles\RadioButton.xaml">
       <Generator>MSBuild:Compile</Generator>
     </Page>

@@ -53,6 +53,8 @@ public partial class App : Application
             services.AddTransient<WatchPage>();
             services.AddTransient<SeasonalPage>();
             services.AddTransient<SeasonalViewModel>();
+            services.AddTransient<SchedulePage>();
+            services.AddTransient<ScheduleViewModel>();
 
             services.AddSingleton<IMalClient, MalClient>(x => 
             {

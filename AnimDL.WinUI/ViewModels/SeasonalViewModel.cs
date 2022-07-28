@@ -16,7 +16,6 @@ namespace AnimDL.WinUI.ViewModels;
 
 public class SeasonalViewModel : ViewModel, IHaveState
 {
-    protected CompositeDisposable Garbage { get; } = new CompositeDisposable();
     private readonly IMalClient _client;
     private readonly SourceCache<Anime, long> _animeCache = new(x => x.ID);
     private readonly ReadOnlyObservableCollection<Anime> _anime;
