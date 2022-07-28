@@ -19,7 +19,7 @@ namespace AnimDL.WinUI.ViewModels;
 public class ScheduleViewModel : ViewModel, IHaveState
 {
     private readonly IMalClient _client;
-    private readonly SourceCache<Anime, long> _animeCache = new(x => x.ID);
+    private readonly SourceCache<Anime, long> _animeCache = new(x => x.Id);
     private readonly ReadOnlyObservableCollection<Anime> _anime;
 
     public ScheduleViewModel(IMalClient client)
@@ -64,8 +64,7 @@ public class ScheduleViewModel : ViewModel, IHaveState
                                      .Find();
 
         var current = AnimeHelpers.CurrentSeason();
-        var userAnimeInCurrentSeason = userAnime.Data.Where(x => x.StartSeason.SeasonName == current.season.ToString().ToLower() &&
-                                                                 x.StartSeason.Year == current.year);
+        var userAnimeInCurrentSeason = userAnime.Data.Where(x => x.StartSeason.Equals(current));
 
         
         InitSchedule(userAnimeInCurrentSeason);
@@ -82,49 +81,23 @@ public class ScheduleViewModel : ViewModel, IHaveState
 
     private void InitSchedule(IEnumerable<Anime> anime)
     {
-        var grouping = anime.GroupBy(x => x.Broadcast.DayOfWeek.Trim());
+        var grouping = anime.GroupBy(x => x.Broadcast.DayOfWeek);
         
-        foreach (var item in grouping)
+        foreach (var item in grouping.Where(x => x.Key is not null))
         {
-            if(item.Key == "monday")
-            {
-                Schedule.Monday.Count = item.Count();
-            }
-            else if(item.Key == "tuesday")
-            {
-                Schedule.Tuesday.Count = item.Count();
-            }
-            else if(item.Key == "wednesday")
-            {
-                Schedule.Wednesday.Count = item.Count();
-            }
-            else if(item.Key == "thursday")
-            {
-                Schedule.Thursday.Count = item.Count();
-            }
-            else if(item.Key == "friday")
-            {
-                Schedule.Friday.Count = item.Count();
-            }
-            else if(item.Key == "saturday")
-            {
-                Schedule.Saturday.Count = item.Count();
-            }
-            else if(item.Key == "sunday")
-            {
-                Schedule.Sunday.Count = item.Count();
-            }
+            Schedule[item.Key.Value].Count = item.Count();
         }
 
         this.RaisePropertyChanged(nameof(Schedule));
     }
 
-    private static Func<Anime, bool> FilterByDay(DayOfWeek day) => a => a.Broadcast.DayOfWeek == day.ToString().ToLower();
+    private static Func<Anime, bool> FilterByDay(DayOfWeek day) => a => a.Broadcast.DayOfWeek == day;
+
 }
 
 public class ScheduleModel : ReactiveObject
 {
-    [Reactive] 
+    [Reactive]
     public int Count { get; set; }
     public string UIText { get; init; }
     public string Key { get; init; }
@@ -133,14 +106,28 @@ public class ScheduleModel : ReactiveObject
 public class WeeklyScheduleModel
 {
     public ScheduleModel Monday { get; } = new ScheduleModel { UIText = "Mon", Key = "monday" };
-    public ScheduleModel Tuesday { get; } = new ScheduleModel { UIText = "Tue", Key ="tuesday" };
+    public ScheduleModel Tuesday { get; } = new ScheduleModel { UIText = "Tue", Key = "tuesday" };
     public ScheduleModel Wednesday { get; } = new ScheduleModel { UIText = "Wed", Key = "wednesday" };
     public ScheduleModel Thursday { get; } = new ScheduleModel { UIText = "Thu", Key = "thursday" };
-    public ScheduleModel Friday { get; } = new ScheduleModel { UIText = "Fri" , Key = "friday"};
+    public ScheduleModel Friday { get; } = new ScheduleModel { UIText = "Fri", Key = "friday" };
     public ScheduleModel Saturday { get; } = new ScheduleModel { UIText = "Sat", Key = "saturday" };
-    public ScheduleModel Sunday { get; } = new ScheduleModel { UIText = "Sun" , Key = "wednesday"};
+    public ScheduleModel Sunday { get; } = new ScheduleModel { UIText = "Sun", Key = "wednesday" };
 
-    public IEnumerable<ScheduleModel> ToList() => 
+    public ScheduleModel this[DayOfWeek day]
+    {
+        get => day switch
+        {
+            DayOfWeek.Monday => Monday,
+            DayOfWeek.Tuesday => Tuesday,
+            DayOfWeek.Wednesday => Wednesday,
+            DayOfWeek.Thursday => Thursday,
+            DayOfWeek.Friday => Friday,
+            DayOfWeek.Saturday => Saturday,
+            DayOfWeek.Sunday => Sunday,
+            _ => throw new ArgumentException("invalid", nameof(day))
+        };
+    }
+
+    public IEnumerable<ScheduleModel> ToList() =>
         new List<ScheduleModel> { Monday, Tuesday, Wednesday, Thursday, Friday, Saturday, Sunday }.Where(x => x.Count > 0);
-
 }

@@ -20,17 +20,21 @@ public class UserListViewModel : ViewModel, IHaveState
 {
     private readonly IMalClient _malClient;
     private readonly INavigationService _navigationService;
-    private readonly SourceCache<Anime, long> _animeCache = new(x => x.ID);
+    private readonly IViewService _viewService;
+    private readonly SourceCache<Anime, long> _animeCache = new(x => x.Id);
     private readonly ReadOnlyObservableCollection<Anime> _anime;
 
     public UserListViewModel(IMalClient malClient,
-                             INavigationService navigationService)
+                             INavigationService navigationService,
+                             IViewService viewService)
     {
         _malClient = malClient;
         _navigationService = navigationService;
-        
+        _viewService = viewService;
         ItemClickedCommand = ReactiveCommand.Create<Anime>(OnItemClicked);
         ChangeCurrentViewCommand = ReactiveCommand.Create<AnimeStatus>(x => CurrentView = x);
+        RefreshCommand = ReactiveCommand.CreateFromTask(SetInitialState);
+        UpdateStatusCommand = ReactiveCommand.Create<Anime>(async x => await _viewService.UpdateAnimeStatus(x));
 
         var filter = this.WhenAnyValue(x => x.CurrentView)
                          .Select(FilterByStatusPredicate);
@@ -50,7 +54,9 @@ public class UserListViewModel : ViewModel, IHaveState
 
     public ReadOnlyObservableCollection<Anime> UserAnime => _anime;
     public ICommand ItemClickedCommand { get; }
-    public ICommand ChangeCurrentViewCommand { get; set; }
+    public ICommand ChangeCurrentViewCommand { get; }
+    public ICommand RefreshCommand { get; }
+    public ICommand UpdateStatusCommand { get; }
 
     private void OnItemClicked(Anime anime)
     {
@@ -62,7 +68,8 @@ public class UserListViewModel : ViewModel, IHaveState
     public async Task SetInitialState()
     {
         IsLoading = true;
-        var userAnime = await _malClient.Anime().OfUser().WithFields(FieldName.UserStatus).Find();
+        _animeCache.Clear();
+        var userAnime = await _malClient.Anime().OfUser().WithField(x => x.UserStatus).Find();
         _animeCache.AddOrUpdate(userAnime.Data);
         IsLoading = false;
     }

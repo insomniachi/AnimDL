@@ -10,6 +10,7 @@
     <WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
   </PropertyGroup>
   <ItemGroup>
+    <None Remove="Dialogs\AddAnimeToListView.xaml" />
     <None Remove="Styles\RadioButton.xaml" />
     <None Remove="Views\SchedulePage.xaml" />
     <None Remove="Views\SeasonalPage.xaml" />
@@ -41,6 +42,9 @@
     <None Update="appsettings.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <Page Update="Dialogs\Views\UpdateAnimeStatusView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Update="Views\SchedulePage.xaml">
       <Generator>MSBuild:Compile</Generator>
     </Page>

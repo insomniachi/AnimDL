@@ -5,7 +5,7 @@ namespace AnimDL.WinUI.Helpers;
 
 public class AnimeHelpers
 {
-    public static (AnimeSeason season, int year) PrevSeason()
+    public static Season PrevSeason()
     {
         var date = DateTime.Now;
         var year = date.Year;
@@ -25,10 +25,10 @@ public class AnimeHelpers
             year--;
         }
 
-        return (current, year);
+        return new(current, year);
     }
 
-    public static (AnimeSeason seaons, int year) NextSeason()
+    public static Season NextSeason()
     {
         var date = DateTime.Now;
         var year = date.Year;
@@ -48,10 +48,10 @@ public class AnimeHelpers
             year++;
         }
 
-        return (current, year);
+        return new(current, year);
     }
 
-    public static (AnimeSeason season, int year) CurrentSeason()
+    public static Season CurrentSeason()
     {
         var date = DateTime.Now;
         var year = date.Year;
@@ -66,6 +66,6 @@ public class AnimeHelpers
             _ => throw new InvalidOperationException()
         };
 
-        return (current, year);
+        return new(current, year);
     }
 }

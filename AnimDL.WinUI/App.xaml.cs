@@ -3,6 +3,8 @@ using AnimDL.WinUI.Activation;
 using AnimDL.WinUI.Contracts.Services;
 using AnimDL.WinUI.Core.Contracts.Services;
 using AnimDL.WinUI.Core.Services;
+using AnimDL.WinUI.Dialogs.ViewModels;
+using AnimDL.WinUI.Dialogs.Views;
 using AnimDL.WinUI.Helpers;
 using AnimDL.WinUI.Models;
 using AnimDL.WinUI.Services;
@@ -13,6 +15,7 @@ using MalApi.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.UI.Xaml;
+using ReactiveUI;
 
 // To learn more about WinUI3, see: https://docs.microsoft.com/windows/apps/winui/winui3/.
 namespace AnimDL.WinUI;
@@ -36,6 +39,8 @@ public partial class App : Application
             services.AddSingleton<IActivationService, ActivationService>();
             services.AddSingleton<IPageService, PageService>();
             services.AddSingleton<INavigationService, NavigationService>();
+            services.AddTransient<IContentDialogService, ContentDialogService>();
+            services.AddTransient<IViewService, ViewService>();
 
             // Core Services
             services.AddSingleton<IFileService, FileService>();
@@ -55,6 +60,11 @@ public partial class App : Application
             services.AddTransient<SeasonalViewModel>();
             services.AddTransient<SchedulePage>();
             services.AddTransient<ScheduleViewModel>();
+
+
+            // Dialogs
+            services.AddTransient<UpdateAnimeStatusViewModel>();
+            services.AddTransient<IViewFor<UpdateAnimeStatusViewModel>, UpdateAnimeStatusView>();
 
             services.AddSingleton<IMalClient, MalClient>(x => 
             {

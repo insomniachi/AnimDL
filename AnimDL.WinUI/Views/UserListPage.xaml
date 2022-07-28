@@ -9,6 +9,7 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:v="using:AnimDL.WinUI.Views"
     xmlns:viewmodels="using:AnimDL.WinUI.ViewModels"
+    Name="Page"
     d:DataContext="{d:DesignInstance Type=viewmodels:UserListViewModel}"
     mc:Ignorable="d">
     <v:UserListPageBase.Resources>
@@ -86,6 +87,19 @@
                                 TextTrimming="WordEllipsis"
                                 TextWrapping="Wrap" />
                         </Border>
+
+                        <Grid.ContextFlyout>
+                            <MenuFlyout>
+                                <MenuFlyoutItem
+                                    Command="{Binding ElementName=Page, Path=ViewModel.UpdateStatusCommand}"
+                                    CommandParameter="{x:Bind}"
+                                    Text="Update">
+                                    <MenuFlyoutItem.Icon>
+                                        <SymbolIcon Symbol="PostUpdate" />
+                                    </MenuFlyoutItem.Icon>
+                                </MenuFlyoutItem>
+                            </MenuFlyout>
+                        </Grid.ContextFlyout>
                     </Grid>
                 </DataTemplate>
             </GridView.ItemTemplate>
@@ -108,7 +122,10 @@
             Grid.Row="2"
             Background="#202020"
             DefaultLabelPosition="Bottom">
-            <AppBarButton Icon="Refresh" Label="Refresh" />
+            <AppBarButton
+                Command="{x:Bind ViewModel.RefreshCommand}"
+                Icon="Refresh"
+                Label="Refresh" />
             <AppBarButton Icon="View" Label="Display mode">
                 <AppBarButton.Flyout>
                     <MenuFlyout>
