@@ -1,6 +1,4 @@
-﻿using ColorCode.Compilation.Languages;
-using Microsoft.VisualBasic.Devices;
-using System.Reactive.Joins;
+﻿using AnimDL.WinUI.Core.Helpers;
 
 namespace AnimDL.WinUI.Helpers;
 
@@ -23,6 +21,22 @@ public class VideoJsHelper
 
         <script>
             var player = videojs('my_video_1');
+            player.ready(function () {{
+                this.on('timeupdate', function () {{
+                   var obj = new Object();
+                   obj.MessageType = ""TimeUpdate"";
+                   obj.Content  = this.currentTime().toString();
+                   window.chrome.webview.postMessage(obj);
+                }})
+                this.on('durationchange', function () {{
+                   var obj = new Object();
+                   obj.MessageType = ""DurationUpdate"";
+                   obj.Content  = this.duration().toString();
+                   window.chrome.webview.postMessage(obj);
+                }})
+                player.play();
+                player.currentTime(666);
+              }});
             player.play();
         </script>
     </body>

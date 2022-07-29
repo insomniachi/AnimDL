@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using AnimDL.Api;
 using AnimDL.Core.Models;
 using AnimDL.WinUI.Contracts.ViewModels;
+using AnimDL.WinUI.Views;
 using DynamicData;
 using DynamicData.Binding;
 using ReactiveUI;
@@ -71,6 +72,11 @@ public class WatchViewModel : ReactiveObject, INavigationAware
     public IProvider Provider { get; private set; }
 
     public ReactiveCommand<SearchResult, Unit> SearchResultPicked { get; }
+
+    public void OnVideoPlayerMessageRecieved(VideoPlayerMessage message)
+    {
+
+    }
 
     public async Task FetchEpisodes(SearchResult result)
     {

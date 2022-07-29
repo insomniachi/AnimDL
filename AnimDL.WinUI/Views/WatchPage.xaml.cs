@@ -2,6 +2,8 @@
 using System.Linq;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using AnimDL.Core.Models;
 using AnimDL.WinUI.Helpers;
 using AnimDL.WinUI.ViewModels;
@@ -18,7 +20,8 @@ public sealed partial class WatchPage : WatchPageBase
     {
         ViewModel = App.GetService<WatchViewModel>();
         InitializeComponent();
-        
+
+        var resut = JsonSerializer.Serialize(new VideoPlayerMessage { MessageType = VideoPlayerMessageType.DurationUpdate, Content = "12.402"});
         // ComboBox
         this.OneWayBind(ViewModel, vm => vm.Providers, view => view.Providers.ItemsSource);
         this.Bind(ViewModel, vm => vm.SelectedProviderType, view => view.Providers.SelectedItem);
@@ -54,6 +57,26 @@ public sealed partial class WatchPage : WatchPageBase
                                 .Select(x => (int)x.AddedItems[0])
                                 .Subscribe(async x => await ViewModel.FetchUrlForEp(x))
                                 .DisposeWith(d);
+
+            WebView.Events()
+                   .WebMessageReceived
+                   .Select(x => JsonSerializer.Deserialize<VideoPlayerMessage>(x.args.WebMessageAsJson))
+                   .Subscribe(ViewModel.OnVideoPlayerMessageRecieved)
+                   .DisposeWith(d);
         });
     }
+}
+
+public enum VideoPlayerMessageType
+{
+    Ready,
+    TimeUpdate,
+    DurationUpdate
+}
+
+public class VideoPlayerMessage
+{
+    [JsonConverter(typeof(JsonStringEnumConverter))]
+    public VideoPlayerMessageType MessageType { get; set; }
+    public string Content { get; set; }
 }
