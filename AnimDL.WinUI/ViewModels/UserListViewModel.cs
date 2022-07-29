@@ -31,6 +31,7 @@ public class UserListViewModel : ViewModel, IHaveState
         _malClient = malClient;
         _navigationService = navigationService;
         _viewService = viewService;
+
         ItemClickedCommand = ReactiveCommand.Create<Anime>(OnItemClicked);
         ChangeCurrentViewCommand = ReactiveCommand.Create<AnimeStatus>(x => CurrentView = x);
         RefreshCommand = ReactiveCommand.CreateFromTask(SetInitialState);
@@ -60,7 +61,7 @@ public class UserListViewModel : ViewModel, IHaveState
 
     private void OnItemClicked(Anime anime)
     {
-        _navigationService.NavigateTo(typeof(WatchViewModel).FullName, new Dictionary<string, object> { ["Title"] = anime.Title });
+        _navigationService.NavigateTo(typeof(WatchViewModel).FullName, new Dictionary<string, object> { ["Anime"] = anime });
     }
 
     private Func<Anime, bool> FilterByStatusPredicate(AnimeStatus status) => x => x.UserStatus.Status == status;

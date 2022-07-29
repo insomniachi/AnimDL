@@ -12,27 +12,13 @@ using ReactiveUI;
 
 namespace AnimDL.WinUI.Views;
 
-public class WatchPageBase : ReactivePage<WatchViewModel> { }
+public class WatchPageBase : ReactivePageEx<WatchViewModel> { }
 
 public sealed partial class WatchPage : WatchPageBase
 {
     public WatchPage()
     {
-        ViewModel = App.GetService<WatchViewModel>();
         InitializeComponent();
-
-        var resut = JsonSerializer.Serialize(new VideoPlayerMessage { MessageType = VideoPlayerMessageType.DurationUpdate, Content = "12.402"});
-        // ComboBox
-        this.OneWayBind(ViewModel, vm => vm.Providers, view => view.Providers.ItemsSource);
-        this.Bind(ViewModel, vm => vm.SelectedProviderType, view => view.Providers.SelectedItem);
-
-        // AutoSuggesBox
-        this.OneWayBind(ViewModel, vm => vm.SearchResult, view => view.SearchBox.ItemsSource);
-        this.Bind(ViewModel, vm => vm.Query, view => view.SearchBox.Text);
-        this.Bind(ViewModel, vm => vm.IsSuggestionListOpen, view => view.SearchBox.IsSuggestionListOpen);
-
-        // Episode List
-        this.OneWayBind(ViewModel, vm => vm.Episdoes, view => view.EpisodeList.ItemsSource);
 
         // Load video html
         this.ObservableForProperty(x => x.ViewModel.Url, x => x)
@@ -58,25 +44,27 @@ public sealed partial class WatchPage : WatchPageBase
                                 .Subscribe(async x => await ViewModel.FetchUrlForEp(x))
                                 .DisposeWith(d);
 
+            // Relay messages from webview
             WebView.Events()
                    .WebMessageReceived
-                   .Select(x => JsonSerializer.Deserialize<VideoPlayerMessage>(x.args.WebMessageAsJson))
-                   .Subscribe(ViewModel.OnVideoPlayerMessageRecieved)
+                   .Select(x => JsonSerializer.Deserialize<WebMessage>(x.args.WebMessageAsJson))
+                   .Subscribe(async x => await ViewModel.OnVideoPlayerMessageRecieved(x))
                    .DisposeWith(d);
         });
     }
 }
 
-public enum VideoPlayerMessageType
+public enum WebMessageType
 {
     Ready,
     TimeUpdate,
-    DurationUpdate
+    DurationUpdate,
+    Ended
 }
 
-public class VideoPlayerMessage
+public class WebMessage
 {
     [JsonConverter(typeof(JsonStringEnumConverter))]
-    public VideoPlayerMessageType MessageType { get; set; }
+    public WebMessageType MessageType { get; set; }
     public string Content { get; set; }
 }

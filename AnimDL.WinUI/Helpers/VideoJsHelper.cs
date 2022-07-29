@@ -22,6 +22,9 @@ public class VideoJsHelper
         <script>
             var player = videojs('my_video_1');
             player.ready(function () {{
+                var obj = new Object();
+                obj.MessageType = ""Ready"";
+                window.chrome.webview.postMessage(obj);
                 this.on('timeupdate', function () {{
                    var obj = new Object();
                    obj.MessageType = ""TimeUpdate"";
@@ -34,10 +37,12 @@ public class VideoJsHelper
                    obj.Content  = this.duration().toString();
                    window.chrome.webview.postMessage(obj);
                 }})
-                player.play();
-                player.currentTime(666);
+                this.on('ended', function () {{
+                   var obj = new Object();
+                   obj.MessageType = ""Ended"";
+                   window.chrome.webview.postMessage(obj);
+                }})
               }});
-            player.play();
         </script>
     </body>
 </html>";

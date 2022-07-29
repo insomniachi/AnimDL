@@ -60,11 +60,12 @@ public class ScheduleViewModel : ViewModel, IHaveState
     {
         var userAnime = await _client.Anime().OfUser()
                                      .WithStatus(AnimeStatus.Watching)
-                                     .WithFields("broadcast", "start_season")
+                                     .WithField(x => x.Broadcast)
+                                     .WithField(x => x.Status)
                                      .Find();
 
         var current = AnimeHelpers.CurrentSeason();
-        var userAnimeInCurrentSeason = userAnime.Data.Where(x => x.StartSeason.Equals(current));
+        var userAnimeInCurrentSeason = userAnime.Data.Where(x => x.Status is AiringStatus.CurrentlyAiring);
 
         
         InitSchedule(userAnimeInCurrentSeason);
