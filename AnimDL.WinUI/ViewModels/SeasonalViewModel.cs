@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
@@ -94,15 +95,14 @@ public class SeasonalViewModel : ViewModel, IHaveState
 
     public void StoreState(IState state)
     {
-        state.AddOrUpdate(Anime);
+        state.AddOrUpdate(_animeCache.Items, nameof(Anime));
         state.AddOrUpdate(Season);
     }
 
     public void RestoreState(IState state)
     {
-        var anime = state.GetValue<ReadOnlyObservableCollection<Anime>>(nameof(Anime));
+        var anime = state.GetValue<IEnumerable<Anime>>(nameof(Anime));
         _animeCache.Edit(x => x.AddOrUpdate(anime));
-
         Season = state.GetValue<Season>(nameof(Season));
     }
 

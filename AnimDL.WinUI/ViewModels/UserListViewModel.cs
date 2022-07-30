@@ -53,7 +53,7 @@ public class UserListViewModel : ViewModel, IHaveState
     [Reactive] public AnimeStatus CurrentView { get; set; } = AnimeStatus.Watching;
     [Reactive] public bool IsLoading { get; set; }
 
-    public ReadOnlyObservableCollection<Anime> UserAnime => _anime;
+    public ReadOnlyObservableCollection<Anime> Anime => _anime;
     public ICommand ItemClickedCommand { get; }
     public ICommand ChangeCurrentViewCommand { get; }
     public ICommand RefreshCommand { get; }
@@ -77,13 +77,13 @@ public class UserListViewModel : ViewModel, IHaveState
 
     public void StoreState(IState state)
     {
-        state.AddOrUpdate(UserAnime);
+        state.AddOrUpdate(_animeCache.Items, nameof(Anime));
         state.AddOrUpdate(CurrentView);
     }
 
     public void RestoreState(IState state)
     {
-        var anime = state.GetValue<ReadOnlyObservableCollection<Anime>>(nameof(UserAnime));
+        var anime = state.GetValue<IEnumerable<Anime>>(nameof(Anime));
         _animeCache.Edit(x => x.AddOrUpdate(anime));
         CurrentView = state.GetValue<AnimeStatus>(nameof(CurrentView));
     }

@@ -50,7 +50,7 @@ public class ScheduleViewModel : ViewModel, IHaveState
 
     public void RestoreState(IState state)
     {
-        var anime = state.GetValue<ReadOnlyCollection<Anime>>(nameof(Anime));
+        var anime = state.GetValue<IEnumerable<Anime>>(nameof(Anime));
         InitSchedule(anime);
         _animeCache.Edit(x => x.AddOrUpdate(anime));
         Filter = state.GetValue<DayOfWeek>(nameof(Filter));
@@ -76,7 +76,7 @@ public class ScheduleViewModel : ViewModel, IHaveState
 
     public void StoreState(IState state)
     {
-        state.AddOrUpdate(Anime);
+        state.AddOrUpdate(_animeCache.Items, nameof(Anime));
         state.AddOrUpdate(Filter);
     }
 

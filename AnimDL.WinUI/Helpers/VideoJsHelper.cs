@@ -15,7 +15,7 @@ public class VideoJsHelper
     </head>
 
     <body>
-        <video id = ""my_video_1"" class=""video-js vjs-fluid vjs-default-skin vjs-fill"" controls autoplay>
+        <video id = ""my_video_1"" class=""video-js vjs-fluid vjs-default-skin vjs-fill vjs-big-play-centered"" controls autoplay preload=""auto"">
             <source src = ""{0}"" type=""application/x-mpegURL"">
         </video>
 
@@ -41,6 +41,9 @@ public class VideoJsHelper
                    var obj = new Object();
                    obj.MessageType = ""Ended"";
                    window.chrome.webview.postMessage(obj);
+                }})
+                this.on('play', function () {{
+                    this.requestFullscreen();
                 }})
               }});
         </script>

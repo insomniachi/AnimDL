@@ -5,18 +5,23 @@
     xmlns:adlm="using:AnimDL.Core.Models"
     xmlns:api="using:AnimDL.Api"
     xmlns:behaviors="using:AnimDL.WinUI.Behaviors"
+    xmlns:ctk="using:CommunityToolkit.WinUI.UI.Controls"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:help="using:AnimDL.WinUI.Helpers"
     xmlns:local="using:AnimDL.WinUI.Views"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:viewmodels="using:AnimDL.WinUI.ViewModels"
     d:DataContext="{d:DesignInstance Type=viewmodels:WatchViewModel}"
     mc:Ignorable="d">
 
-    <behaviors:NavigationViewHeaderBehavior.HeaderTemplate>
-        <DataTemplate>
-            <Border />
+    <local:WatchPageBase.Resources>
+        <DataTemplate x:Key="EpisodeUpdateTemplate" x:DataType="viewmodels:WatchViewModel">
+            <TextBlock>
+                <Run Text="Updating progress to Episode " />
+                <Run Text="{x:Bind CurrentEpisode}" />
+            </TextBlock>
         </DataTemplate>
-    </behaviors:NavigationViewHeaderBehavior.HeaderTemplate>
+    </local:WatchPageBase.Resources>
 
     <Grid>
         <Grid.RowDefinitions>
@@ -24,7 +29,7 @@
             <RowDefinition />
         </Grid.RowDefinitions>
 
-        <StackPanel Orientation="Horizontal">
+        <StackPanel Orientation="Horizontal" Visibility="{x:Bind help:Converters.InvertedBooleanToVisibility(ViewModel.NavigatedToWithParameter), Mode=OneWay}">
             <AutoSuggestBox
                 x:Name="SearchBox"
                 Width="400"
@@ -53,7 +58,7 @@
             </ComboBox>
         </StackPanel>
 
-        <Grid Grid.Row="1" Margin="0,50,0,0">
+        <Grid Grid.Row="1" Margin="0,10,0,0">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition />
@@ -61,8 +66,9 @@
             <ListView
                 x:Name="EpisodeList"
                 Grid.Row="1"
-                Margin="10,0,10,0"
-                ItemsSource="{x:Bind ViewModel.Episdoes}">
+                Margin="0,0,10,0"
+                ItemsSource="{x:Bind ViewModel.Episodes}"
+                SelectedItem="{x:Bind ViewModel.CurrentEpisode, Mode=TwoWay}">
                 <ListView.ItemTemplate>
                     <DataTemplate x:DataType="x:Int32">
                         <TextBlock>
@@ -76,10 +82,8 @@
             <WebView2
                 x:Name="WebView"
                 Grid.Column="1"
-                Margin="0,0,0,20" />
-
+                Margin="0,0,0,20"
+                Canvas.ZIndex="0" />
         </Grid>
-
-
     </Grid>
 </local:WatchPageBase>

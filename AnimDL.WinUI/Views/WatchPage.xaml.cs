@@ -7,6 +7,7 @@ using System.Text.Json.Serialization;
 using AnimDL.Core.Models;
 using AnimDL.WinUI.Helpers;
 using AnimDL.WinUI.ViewModels;
+using Microsoft.UI.Xaml;
 using ReactiveMarbles.ObservableEvents;
 using ReactiveUI;
 
@@ -37,13 +38,6 @@ public sealed partial class WatchPage : WatchPageBase
                               .InvokeCommand(ViewModel.SearchResultPicked)
                               .DisposeWith(d);
 
-            // Episode Choosen
-            EpisodeList.Events().SelectionChanged
-                                .Where(x => x.AddedItems.Count == 1)
-                                .Select(x => (int)x.AddedItems[0])
-                                .Subscribe(async x => await ViewModel.FetchUrlForEp(x))
-                                .DisposeWith(d);
-
             // Relay messages from webview
             WebView.Events()
                    .WebMessageReceived
@@ -52,6 +46,7 @@ public sealed partial class WatchPage : WatchPageBase
                    .DisposeWith(d);
         });
     }
+
 }
 
 public enum WebMessageType

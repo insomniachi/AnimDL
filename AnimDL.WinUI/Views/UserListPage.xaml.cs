@@ -39,10 +39,6 @@ public sealed partial class UserListPage : UserListPageBase
     {
         InitializeComponent();
 
-        this.OneWayBind(ViewModel, vm => vm.UserAnime, view => view.AnimeListView.ItemsSource);
-        this.OneWayBind(ViewModel, vm => vm.IsLoading, view => view.LoadingControl.IsLoading);
-        this.Bind(ViewModel, vm => vm.CurrentView, view => view.StatusStrip.SelectedItem);
-
         this.WhenAnyValue(x => x.ViewModel.CurrentView)
             .Subscribe(x =>
             {
