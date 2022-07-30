@@ -65,6 +65,10 @@ public partial class App : Application
             // Dialogs
             services.AddTransient<UpdateAnimeStatusViewModel>();
             services.AddTransient<IViewFor<UpdateAnimeStatusViewModel>, UpdateAnimeStatusView>();
+            services.AddTransient<ChooseSearchResultViewModel>();
+            services.AddTransient<IViewFor<ChooseSearchResultViewModel>, ChooseSearchResultView>();
+            services.AddTransient<AuthenticateMyAnimeListViewModel>();
+            services.AddTransient<IViewFor<AuthenticateMyAnimeListViewModel>, AuthenticateMyAnimeListView>();
 
             services.AddSingleton<IMalClient, MalClient>(x => 
             {

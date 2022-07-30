@@ -4,76 +4,114 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:helpers="using:AnimDL.WinUI.Helpers"
+    xmlns:labs="using:CommunityToolkit.Labs.WinUI"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:views="using:AnimDL.WinUI.Views"
-    xmlns:xaml="using:Microsoft.UI.Xaml"
+    xmlns:vm="using:AnimDL.WinUI.ViewModels"
+    Name="Page"
     mc:Ignorable="d">
     <Page.Resources>
         <helpers:EnumToBooleanConverter x:Key="EnumToBooleanConverter" />
     </Page.Resources>
     <Grid>
-        <SplitView
-            x:Name="SplitView"
-            OpenPaneLength="600"
-            PanePlacement="Right">
-            <SplitView.Pane>
-                <Grid>
-                    <WebView2 x:Name="WebView" />
-                </Grid>
-            </SplitView.Pane>
-            <StackPanel x:Name="ContentArea">
-                <TextBlock x:Uid="Settings_Personalization" Style="{ThemeResource SubtitleTextBlockStyle}" />
-                <StackPanel Margin="{StaticResource SmallTopBottomMargin}">
-                    <TextBlock x:Uid="Settings_Theme" />
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition />
+        </Grid.RowDefinitions>
 
-                    <StackPanel Margin="{StaticResource XSmallTopMargin}">
-                        <RadioButton
-                            x:Uid="Settings_Theme_Light"
-                            Command="{x:Bind ViewModel.SwitchThemeCommand}"
-                            FontSize="15"
-                            GroupName="AppTheme"
-                            IsChecked="{x:Bind ViewModel.ElementTheme, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=Light, Mode=OneWay}">
-                            <RadioButton.CommandParameter>
-                                <xaml:ElementTheme>Light</xaml:ElementTheme>
-                            </RadioButton.CommandParameter>
-                        </RadioButton>
-                        <RadioButton
-                            x:Uid="Settings_Theme_Dark"
-                            Command="{x:Bind ViewModel.SwitchThemeCommand}"
-                            FontSize="15"
-                            GroupName="AppTheme"
-                            IsChecked="{x:Bind ViewModel.ElementTheme, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=Dark, Mode=OneWay}">
-                            <RadioButton.CommandParameter>
-                                <xaml:ElementTheme>Dark</xaml:ElementTheme>
-                            </RadioButton.CommandParameter>
-                        </RadioButton>
-                        <RadioButton
-                            x:Uid="Settings_Theme_Default"
-                            Command="{x:Bind ViewModel.SwitchThemeCommand}"
-                            FontSize="15"
-                            GroupName="AppTheme"
-                            IsChecked="{x:Bind ViewModel.ElementTheme, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=Default, Mode=OneWay}">
-                            <RadioButton.CommandParameter>
-                                <xaml:ElementTheme>Default</xaml:ElementTheme>
-                            </RadioButton.CommandParameter>
-                        </RadioButton>
-                    </StackPanel>
-                </StackPanel>
+        <TextBlock
+            Padding="20"
+            FontSize="30"
+            FontWeight="SemiBold"
+            Text="Settings" />
 
-                <TextBlock x:Uid="Settings_About" Style="{ThemeResource SubtitleTextBlockStyle}" />
+        <StackPanel
+            Grid.Row="1"
+            Width="1200"
+            Padding="20"
+            HorizontalAlignment="Left"
+            Spacing="10">
+            <labs:SettingsCard
+                Description="Change the colors that appear"
+                Header="Choose your mode"
+                Icon="&#xe790;">
+                <ComboBox
+                    Width="150"
+                    ItemsSource="{x:Bind ViewModel.Themes}"
+                    SelectedItem="{x:Bind ViewModel.ElementTheme, Mode=TwoWay}">
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate x:DataType="ElementTheme">
+                            <TextBlock Text="{x:Bind vm:SettingsViewModel.ElementThemeToString((ElementTheme))}" />
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                </ComboBox>
+            </labs:SettingsCard>
+            <labs:SettingsCard
+                Description="Authenticate your account to use MyAnimeList public apis."
+                Header="Link MyAnimeList"
+                Icon="&#xe71b;">
+                <Button
+                    Width="150"
+                    Command="{x:Bind ViewModel.AuthenticateCommand}"
+                    Content="Authenticate"
+                    Style="{StaticResource AccentButtonStyle}" />
+            </labs:SettingsCard>
+        </StackPanel>
+        <!--<StackPanel x:Name="ContentArea">
+            <TextBlock x:Uid="Settings_Personalization" Style="{ThemeResource SubtitleTextBlockStyle}" />
+            <StackPanel Margin="{StaticResource SmallTopBottomMargin}">
+                <TextBlock x:Uid="Settings_Theme" />
 
                 <StackPanel Margin="{StaticResource XSmallTopMargin}">
-                    <TextBlock Style="{ThemeResource BodyTextBlockStyle}" Text="{x:Bind ViewModel.VersionDescription, Mode=OneWay}" />
-
-                    <TextBlock
-                        x:Uid="Settings_AboutDescription"
-                        Margin="{StaticResource XSmallTopMargin}"
-                        Style="{ThemeResource BodyTextBlockStyle}" />
-                    <HyperlinkButton x:Uid="SettingsPage_PrivacyTermsLink" Margin="{StaticResource SettingsPageHyperlinkButtonMargin}" />
+                    <RadioButton
+                        x:Uid="Settings_Theme_Light"
+                        Command="{x:Bind ViewModel.SwitchThemeCommand}"
+                        FontSize="15"
+                        GroupName="AppTheme"
+                        IsChecked="{x:Bind ViewModel.ElementTheme, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=Light, Mode=OneWay}">
+                        <RadioButton.CommandParameter>
+                            <xaml:ElementTheme>Light</xaml:ElementTheme>
+                        </RadioButton.CommandParameter>
+                    </RadioButton>
+                    <RadioButton
+                        x:Uid="Settings_Theme_Dark"
+                        Command="{x:Bind ViewModel.SwitchThemeCommand}"
+                        FontSize="15"
+                        GroupName="AppTheme"
+                        IsChecked="{x:Bind ViewModel.ElementTheme, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=Dark, Mode=OneWay}">
+                        <RadioButton.CommandParameter>
+                            <xaml:ElementTheme>Dark</xaml:ElementTheme>
+                        </RadioButton.CommandParameter>
+                    </RadioButton>
+                    <RadioButton
+                        x:Uid="Settings_Theme_Default"
+                        Command="{x:Bind ViewModel.SwitchThemeCommand}"
+                        FontSize="15"
+                        GroupName="AppTheme"
+                        IsChecked="{x:Bind ViewModel.ElementTheme, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=Default, Mode=OneWay}">
+                        <RadioButton.CommandParameter>
+                            <xaml:ElementTheme>Default</xaml:ElementTheme>
+                        </RadioButton.CommandParameter>
+                    </RadioButton>
                 </StackPanel>
-                <Button x:Name="AuthenticateButton" Content="Authenticate Mal" />
             </StackPanel>
-        </SplitView>
+
+            <TextBlock x:Uid="Settings_About" Style="{ThemeResource SubtitleTextBlockStyle}" />
+
+            <StackPanel Margin="{StaticResource XSmallTopMargin}">
+                <TextBlock Style="{ThemeResource BodyTextBlockStyle}" Text="{x:Bind ViewModel.VersionDescription, Mode=OneWay}" />
+
+                <TextBlock
+                    x:Uid="Settings_AboutDescription"
+                    Margin="{StaticResource XSmallTopMargin}"
+                    Style="{ThemeResource BodyTextBlockStyle}" />
+                <HyperlinkButton x:Uid="SettingsPage_PrivacyTermsLink" Margin="{StaticResource SettingsPageHyperlinkButtonMargin}" />
+            </StackPanel>
+            <Button
+                x:Name="AuthenticateButton"
+                Command="{x:Bind ViewModel.AuthenticateCommand}"
+                Content="Authenticate Mal" />
+        </StackPanel>-->
     </Grid>
 </views:SettingsPageBase>
 

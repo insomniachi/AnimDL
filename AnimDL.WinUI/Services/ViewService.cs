@@ -1,4 +1,7 @@
-﻿using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
+using AnimDL.Api;
+using AnimDL.Core.Models;
 using AnimDL.WinUI.Contracts.Services;
 using AnimDL.WinUI.Dialogs.ViewModels;
 using MalApi;
@@ -50,5 +53,36 @@ public class ViewService : IViewService
 
             a.UserStatus = await request.Publish();
         }
+    }
+
+    public async Task<SearchResult> ChoooseSearchResult(List<SearchResult> searchResults, ProviderType providerType)
+    {
+        var vm = App.GetService<ChooseSearchResultViewModel>();
+        vm.SetValues(searchResults);
+        vm.SelectedSearchResult = searchResults[0];
+        vm.SelectedProviderType = providerType;
+
+        await _contentDialogService.ShowDialog(vm, d =>
+        {
+            d.Title = "Choose title";
+            d.IsPrimaryButtonEnabled = false;
+            d.IsSecondaryButtonEnabled = false;
+            d.CloseButtonText = "Ok";
+        });
+
+        vm.Dispose();
+        return vm.SelectedSearchResult;
+    }
+
+    public async Task AuthenticateMal()
+    {
+        await _contentDialogService.ShowDialog<AuthenticateMyAnimeListViewModel>(d =>
+        {
+            d.Title = "Authenticate";
+            d.IsPrimaryButtonEnabled = false;
+            d.IsSecondaryButtonEnabled = false;
+            d.CloseButtonText = "Ok";
+            d.Width = App.MainWindow.Bounds.Width;
+        });
     }
 }

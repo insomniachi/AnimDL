@@ -11,6 +11,8 @@
   </PropertyGroup>
   <ItemGroup>
     <None Remove="Dialogs\AddAnimeToListView.xaml" />
+    <None Remove="Dialogs\Views\AuthenticateMyAnimeListView.xaml" />
+    <None Remove="Dialogs\Views\ChooseSearchResultView.xaml" />
     <None Remove="Styles\RadioButton.xaml" />
     <None Remove="Views\SchedulePage.xaml" />
     <None Remove="Views\SeasonalPage.xaml" />
@@ -18,6 +20,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="CommunityToolkit.Labs.WinUI.SettingsControls" Version="0.0.1" />
     <PackageReference Include="CommunityToolkit.Mvvm" Version="7.1.2" />
     <PackageReference Include="CommunityToolkit.WinUI.UI.Behaviors" Version="7.1.2" />
     <PackageReference Include="CommunityToolkit.WinUI.UI.Controls" Version="7.1.2" />
@@ -42,6 +45,12 @@
     <None Update="appsettings.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <Page Update="Dialogs\Views\AuthenticateMyAnimeListView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Update="Dialogs\Views\ChooseSearchResultView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Update="Dialogs\Views\UpdateAnimeStatusView.xaml">
       <Generator>MSBuild:Compile</Generator>
     </Page>

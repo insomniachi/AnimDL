@@ -8,6 +8,7 @@ using System.Reactive.Linq;
 using System.Threading.Tasks;
 using AnimDL.Api;
 using AnimDL.Core.Models;
+using AnimDL.WinUI.Contracts.Services;
 using AnimDL.WinUI.Views;
 using DynamicData;
 using DynamicData.Binding;
@@ -23,10 +24,12 @@ public class WatchViewModel : ViewModel
     private readonly SourceCache<SearchResult, string> _searchResultCache = new(x => x.Title);
     private readonly ReadOnlyObservableCollection<SearchResult> _searchResults;
     private readonly IMalClient _client;
+    private readonly IViewService _viewService;
 
-    public WatchViewModel(IProviderFactory providerFactory, IMalClient client)
+    public WatchViewModel(IProviderFactory providerFactory, IMalClient client, IViewService viewService)
     {
         _client = client;
+        _viewService = viewService;
 
         SearchResultPicked = ReactiveCommand.CreateFromTask<SearchResult>(FetchEpisodes);
 
@@ -46,28 +49,13 @@ public class WatchViewModel : ViewModel
             .Throttle(TimeSpan.FromMilliseconds(500), RxApp.TaskpoolScheduler)
             .SelectMany(async x => await Provider.Catalog.Search(x).ToListAsync())
             .ObserveOn(RxApp.MainThreadScheduler)
-            .Subscribe(x =>
-            {
-                _searchResultCache.EditDiff(x, (first, second) => first.Title == second.Title);
-                IsSuggestionListOpen = true;
-            });
+            .Subscribe(x => _searchResultCache.EditDiff(x, (first, second) => first.Title == second.Title));
 
         this.WhenAnyValue(x => x.CurrentPlayerTime)
+            .Where(_ => Anime is not null)
+            .Where(_ => Anime.UserStatus.WatchedEpisodes >= CurrentEpisode)
             .Where(x => CurrentMediaDuration - x <= 135)
-            .Subscribe(async _ => 
-            {
-                if (Anime is null)
-                {
-                    return;
-                }
-
-                if(Anime.UserStatus.WatchedEpisodes >= CurrentEpisode)
-                {
-                    return;
-                }
-
-                await IncrementEpisode();
-            });
+            .Subscribe(async _ => await IncrementEpisode());
 
         this.WhenAnyValue(x => x.CurrentEpisode)
             .Where(x => x > 0)
@@ -84,6 +72,7 @@ public class WatchViewModel : ViewModel
     [Reactive] public bool NavigatedToWithParameter { get; set; }
     public double CurrentMediaDuration { get; set; }
     public Anime Anime { get; set; }
+    public long? MalId { get;}
     public SearchResult SelectedResult { get; set; }
     public List<ProviderType> Providers { get; set; } = Enum.GetValues<ProviderType>().Cast<ProviderType>().ToList();
     public IProvider Provider { get; private set; }
@@ -154,14 +143,12 @@ public class WatchViewModel : ViewModel
             NavigatedToWithParameter = true;
             Anime = parameters["Anime"] as Anime;
             var results = await Provider.Catalog.Search(Anime.Title).ToListAsync();
-            if (results.Count == 1)
-            {
-                await FetchEpisodes(results[0]);
-            }
-            else
-            {
-                Query = Anime.Title;
-            }
+
+            var selected = results.Count == 1
+                ? results[0]
+                : await _viewService.ChoooseSearchResult(results, SelectedProviderType);
+            
+            await FetchEpisodes(selected);
         }
     }
 }

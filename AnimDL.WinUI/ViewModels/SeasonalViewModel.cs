@@ -31,7 +31,7 @@ public class SeasonalViewModel : ViewModel, IHaveState
         SetSeasonCommand = ReactiveCommand.Create<string>(SwitchSeasonFilter);
         AddToListCommand = ReactiveCommand.CreateFromTask<Anime>(AddToList);
 
-        var filter = this.WhenAnyValue(x => x.Season).Select(FilterBySeason);
+        var filter = this.WhenAnyValue(x => x.Season).WhereNotNull().Select(FilterBySeason);
         _animeCache
             .Connect()
             .RefCount()
@@ -102,8 +102,8 @@ public class SeasonalViewModel : ViewModel, IHaveState
     public void RestoreState(IState state)
     {
         var anime = state.GetValue<IEnumerable<Anime>>(nameof(Anime));
-        _animeCache.Edit(x => x.AddOrUpdate(anime));
         Season = state.GetValue<Season>(nameof(Season));
+        _animeCache.Edit(x => x.AddOrUpdate(anime));
     }
 
     private void SwitchSeasonFilter(string filter)
