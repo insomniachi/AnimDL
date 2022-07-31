@@ -50,6 +50,11 @@ public sealed partial class WatchPage : WatchPageBase
                    .Select(x => JsonSerializer.Deserialize<WebMessage>(x.args.WebMessageAsJson))
                    .Subscribe(async x => await ViewModel.OnVideoPlayerMessageRecieved(x))
                    .DisposeWith(d);
+
+            WebView.Events()
+                   .NavigationCompleted
+                   .Where(x => x.args.IsSuccess)
+                   .Subscribe(async x => await x.sender.ExecuteScriptAsync("document.querySelector('body').style.overflow='hidden'"));
         });
     }
 
