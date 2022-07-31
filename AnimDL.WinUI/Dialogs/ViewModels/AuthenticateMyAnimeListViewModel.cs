@@ -26,7 +26,7 @@ public class AuthenticateMyAnimeListViewModel : ReactiveObject
                 IsAuthenticated = true;
                 var code = HttpUtility.ParseQueryString(x)[0];
                 var token = await MalAuthHelper.DoAuth(clientId, code);
-                localSettingsService.SaveSetting("MalToken", token);
+                localSettingsService.SaveSetting(token, "MalToken");
                 IsLoading = false;
             });
     }

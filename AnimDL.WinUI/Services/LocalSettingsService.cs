@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Runtime.CompilerServices;
 using AnimDL.WinUI.Contracts.Services;
 using AnimDL.WinUI.Core.Contracts.Services;
 using AnimDL.WinUI.Core.Helpers;
@@ -26,17 +27,17 @@ public class LocalSettingsService : ILocalSettingsService
         _settings = _fileService.Read<IDictionary<string, object>>(folderPath, fileName) ?? new Dictionary<string, object>();
     }
 
-    public T ReadSetting<T>(string key)
+    public T ReadSetting<T>(string key, T defaultVaue = default)
     {
         if (_settings.TryGetValue(key, out object obj))
         {
             return Json.ToObject<T>((string)obj);
         }
 
-        return default;
+        return defaultVaue;
     }
 
-    public void SaveSetting<T>(string key, T value)
+    public void SaveSetting<T>(T value, [CallerArgumentExpression("value")] string key = "")
     {
         _settings[key] = Json.Stringify(value);
         var folderPath = Path.Combine(_localAppData, _options.ApplicationDataFolder);

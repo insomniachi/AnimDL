@@ -10,27 +10,31 @@
     mc:Ignorable="d">
 
     <Grid>
-        <StackPanel>
-            <StackPanel Orientation="Horizontal">
+        <StackPanel Spacing="10">
+            <Grid>
                 <TextBox
-                    Width="200"
                     Margin="5,0"
+                    HorizontalAlignment="Stretch"
                     Text="{x:Bind ViewModel.Title, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                 <ComboBox
                     Width="200"
                     ItemsSource="{x:Bind ViewModel.Providers}"
-                    SelectedItem="{x:Bind ViewModel.SelectedProviderType, Mode=TwoWay}">
+                    SelectedItem="{x:Bind ViewModel.SelectedProviderType, Mode=TwoWay}"
+                    Visibility="Collapsed">
                     <ComboBox.ItemTemplate>
                         <DataTemplate x:DataType="api:ProviderType">
                             <TextBlock Text="{x:Bind}" />
                         </DataTemplate>
                     </ComboBox.ItemTemplate>
                 </ComboBox>
-            </StackPanel>
+            </Grid>
 
             <ListView
                 MinHeight="200"
                 MaxHeight="400"
+                Margin="5,0"
+                Background="{StaticResource ApplicationPageBackgroundThemeBrush}"
+                CornerRadius="5"
                 ItemsSource="{x:Bind ViewModel.SearchResults, Mode=OneWay}"
                 SelectedItem="{x:Bind ViewModel.SelectedSearchResult, Mode=TwoWay}">
                 <ListView.ItemTemplate>

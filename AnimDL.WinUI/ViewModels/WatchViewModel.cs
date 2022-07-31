@@ -8,6 +8,7 @@ using System.Reactive.Linq;
 using System.Threading.Tasks;
 using AnimDL.Api;
 using AnimDL.Core.Models;
+using AnimDL.WinUI.Contracts;
 using AnimDL.WinUI.Contracts.Services;
 using AnimDL.WinUI.Views;
 using DynamicData;
@@ -25,12 +26,18 @@ public class WatchViewModel : ViewModel
     private readonly ReadOnlyObservableCollection<SearchResult> _searchResults;
     private readonly IMalClient _client;
     private readonly IViewService _viewService;
+    private readonly ISettings _settings;
 
-    public WatchViewModel(IProviderFactory providerFactory, IMalClient client, IViewService viewService)
+    public WatchViewModel(IProviderFactory providerFactory,
+                          IMalClient client,
+                          IViewService viewService,
+                          ISettings settings)
     {
         _client = client;
         _viewService = viewService;
+        _settings = settings;
 
+        SelectedProviderType = _settings.DefaultProviderType;
         SearchResultPicked = ReactiveCommand.CreateFromTask<SearchResult>(FetchEpisodes);
 
         _searchResultCache
@@ -49,7 +56,15 @@ public class WatchViewModel : ViewModel
             .Throttle(TimeSpan.FromMilliseconds(500), RxApp.TaskpoolScheduler)
             .SelectMany(async x => await Provider.Catalog.Search(x).ToListAsync())
             .ObserveOn(RxApp.MainThreadScheduler)
-            .Subscribe(x => _searchResultCache.EditDiff(x, (first, second) => first.Title == second.Title));
+            .Subscribe(x => 
+            {
+                if(_settings.PreferSubs)
+                {
+                    RemoveDubs(x);
+                }
+
+                _searchResultCache.EditDiff(x, (first, second) => first.Title == second.Title);
+            });
 
         this.WhenAnyValue(x => x.CurrentPlayerTime)
             .Where(_ => Anime is not null)
@@ -63,7 +78,7 @@ public class WatchViewModel : ViewModel
     }
 
     [Reactive] public string Query { get; set; }
-    [Reactive] public ProviderType SelectedProviderType { get; set; } = ProviderType.AnimixPlay;
+    [Reactive] public ProviderType SelectedProviderType { get; set; }
     [Reactive] public ObservableCollection<int> Episodes { get; set; } = new();
     [Reactive] public string Url { get; set; }
     [Reactive] public bool IsSuggestionListOpen { get; set; }
@@ -144,11 +159,21 @@ public class WatchViewModel : ViewModel
             Anime = parameters["Anime"] as Anime;
             var results = await Provider.Catalog.Search(Anime.Title).ToListAsync();
 
+            if(_settings.PreferSubs)
+            {
+                RemoveDubs(results);
+            }
+
             var selected = results.Count == 1
                 ? results[0]
                 : await _viewService.ChoooseSearchResult(results, SelectedProviderType);
             
             await FetchEpisodes(selected);
         }
+    }
+
+    private void RemoveDubs(List<SearchResult> results)
+    {
+        results.RemoveAll(x => x.Title.Contains("(DUB)", StringComparison.OrdinalIgnoreCase) || x.Title.Contains("[DUB]", StringComparison.OrdinalIgnoreCase));
     }
 }

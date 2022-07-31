@@ -1,5 +1,6 @@
 ﻿using AnimDL.Core;
 using AnimDL.WinUI.Activation;
+using AnimDL.WinUI.Contracts;
 using AnimDL.WinUI.Contracts.Services;
 using AnimDL.WinUI.Core.Contracts.Services;
 using AnimDL.WinUI.Core.Services;
@@ -48,8 +49,9 @@ public partial class App : Application
             services.AddAnimDL();
 
             // Views and ViewModels
-            services.AddTransient<SettingsViewModel>();
+            services.AddSingleton<SettingsViewModel>();
             services.AddTransient<SettingsPage>();
+            services.AddTransient<ISettings>(x => x.GetRequiredService<SettingsViewModel>());
             services.AddTransient<UserListViewModel>();
             services.AddTransient<UserListPage>();
             services.AddTransient<ShellPage>();
