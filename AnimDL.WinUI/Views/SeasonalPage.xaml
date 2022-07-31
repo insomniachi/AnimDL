@@ -73,7 +73,7 @@
                             Padding="3"
                             Background="{ThemeResource SystemControlBackgroundChromeMediumBrush}"
                             BorderBrush="{ThemeResource SystemControlBackgroundAccentBrush}"
-                            BorderThickness="0,2,0,0">
+                            BorderThickness="0,3,0,0">
                             <Grid>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition />
