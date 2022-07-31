@@ -7,7 +7,6 @@ using System.Text.Json.Serialization;
 using AnimDL.Core.Models;
 using AnimDL.WinUI.Helpers;
 using AnimDL.WinUI.ViewModels;
-using Microsoft.UI.Xaml;
 using ReactiveMarbles.ObservableEvents;
 using ReactiveUI;
 
@@ -28,6 +27,13 @@ public sealed partial class WatchPage : WatchPageBase
                 var html = VideoJsHelper.GetPlayerHtml(x);
                 await WebView.EnsureCoreWebView2Async();
                 WebView.NavigateToString(html);
+            });
+
+        this.ObservableForProperty(x => x.ViewModel.VideoPlayerRequestMessage, x => x)
+            .Subscribe(async x =>
+            {
+                await WebView.EnsureCoreWebView2Async();
+                WebView.CoreWebView2.PostWebMessageAsJson(x);
             });
 
         this.WhenActivated(d =>
@@ -54,7 +60,8 @@ public enum WebMessageType
     Ready,
     TimeUpdate,
     DurationUpdate,
-    Ended
+    Ended,
+    CanPlay
 }
 
 public class WebMessage

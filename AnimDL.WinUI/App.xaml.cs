@@ -2,6 +2,7 @@
 using AnimDL.WinUI.Activation;
 using AnimDL.WinUI.Contracts;
 using AnimDL.WinUI.Contracts.Services;
+using AnimDL.WinUI.Core.Contracts;
 using AnimDL.WinUI.Core.Contracts.Services;
 using AnimDL.WinUI.Core.Services;
 using AnimDL.WinUI.Dialogs.ViewModels;
@@ -42,6 +43,7 @@ public partial class App : Application
             services.AddSingleton<INavigationService, NavigationService>();
             services.AddTransient<IContentDialogService, ContentDialogService>();
             services.AddTransient<IViewService, ViewService>();
+            services.AddSingleton<IPlaybackStateStorage, PlaybackStateStorage>();
 
             // Core Services
             services.AddSingleton<IFileService, FileService>();
@@ -102,6 +104,7 @@ public partial class App : Application
         InitializeComponent();
         UnhandledException += App_UnhandledException;
     }
+
 
     private void App_UnhandledException(object sender, UnhandledExceptionEventArgs e) { }
 

@@ -42,9 +42,22 @@ public class VideoJsHelper
                    obj.MessageType = ""Ended"";
                    window.chrome.webview.postMessage(obj);
                 }})
+                this.on('canplay', function () {{
+                   var obj = new Object();
+                   obj.MessageType = ""CanPlay"";
+                   window.chrome.webview.postMessage(obj);
+                }})
                 this.on('play', function () {{
                     this.requestFullscreen();
                 }})
+              }});
+              window.chrome.webview.addEventListener('message', event => {{
+                if(event.data.MessageType == ""Play"")
+                {{
+                    player.currentTime(event.data.StartTime);
+                    player.requestFullscreen();
+                    player.play();
+                }}
               }});
         </script>
     </body>

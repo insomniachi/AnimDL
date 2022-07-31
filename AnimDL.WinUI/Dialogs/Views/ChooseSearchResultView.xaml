@@ -30,6 +30,7 @@
             </Grid>
 
             <ListView
+                Width="500"
                 MinHeight="200"
                 MaxHeight="400"
                 Margin="5,0"

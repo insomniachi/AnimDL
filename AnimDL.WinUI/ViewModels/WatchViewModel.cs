@@ -5,11 +5,13 @@ using System.Linq;
 using System.Reactive;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
+using System.Text.Json;
 using System.Threading.Tasks;
 using AnimDL.Api;
 using AnimDL.Core.Models;
 using AnimDL.WinUI.Contracts;
 using AnimDL.WinUI.Contracts.Services;
+using AnimDL.WinUI.Core.Contracts;
 using AnimDL.WinUI.Views;
 using DynamicData;
 using DynamicData.Binding;
@@ -27,16 +29,18 @@ public class WatchViewModel : ViewModel
     private readonly IMalClient _client;
     private readonly IViewService _viewService;
     private readonly ISettings _settings;
+    private readonly IPlaybackStateStorage _playbackStateStorage;
 
     public WatchViewModel(IProviderFactory providerFactory,
                           IMalClient client,
                           IViewService viewService,
-                          ISettings settings)
+                          ISettings settings,
+                          IPlaybackStateStorage playbackStateStorage)
     {
         _client = client;
         _viewService = viewService;
         _settings = settings;
-
+        _playbackStateStorage = playbackStateStorage;
         SelectedProviderType = _settings.DefaultProviderType;
         SearchResultPicked = ReactiveCommand.CreateFromTask<SearchResult>(FetchEpisodes);
 
@@ -56,9 +60,9 @@ public class WatchViewModel : ViewModel
             .Throttle(TimeSpan.FromMilliseconds(500), RxApp.TaskpoolScheduler)
             .SelectMany(async x => await Provider.Catalog.Search(x).ToListAsync())
             .ObserveOn(RxApp.MainThreadScheduler)
-            .Subscribe(x => 
+            .Subscribe(x =>
             {
-                if(_settings.PreferSubs)
+                if (_settings.PreferSubs)
                 {
                     RemoveDubs(x);
                 }
@@ -68,7 +72,7 @@ public class WatchViewModel : ViewModel
 
         this.WhenAnyValue(x => x.CurrentPlayerTime)
             .Where(_ => Anime is not null)
-            .Where(_ => Anime.UserStatus.WatchedEpisodes >= CurrentEpisode)
+            .Where(_ => Anime.UserStatus.WatchedEpisodes <= CurrentEpisode)
             .Where(x => CurrentMediaDuration - x <= 135)
             .Subscribe(async _ => await IncrementEpisode());
 
@@ -85,15 +89,14 @@ public class WatchViewModel : ViewModel
     [Reactive] public double CurrentPlayerTime { get; set; }
     [Reactive] public int CurrentEpisode { get; set; }
     [Reactive] public bool NavigatedToWithParameter { get; set; }
+    [Reactive] public string VideoPlayerRequestMessage { get; set; }
     public double CurrentMediaDuration { get; set; }
     public Anime Anime { get; set; }
-    public long? MalId { get;}
+    public long? MalId { get; }
     public SearchResult SelectedResult { get; set; }
     public List<ProviderType> Providers { get; set; } = Enum.GetValues<ProviderType>().Cast<ProviderType>().ToList();
     public IProvider Provider { get; private set; }
     public Action<string, int> ShowNotification { get; set; }
-
-
     public ReactiveCommand<SearchResult, Unit> SearchResultPicked { get; }
     public ReadOnlyObservableCollection<SearchResult> SearchResult => _searchResults;
 
@@ -106,6 +109,10 @@ public class WatchViewModel : ViewModel
                 break;
             case WebMessageType.TimeUpdate:
                 CurrentPlayerTime = double.Parse(message.Content);
+                if (Anime is not null)
+                {
+                    _playbackStateStorage.Update(Anime.Id, CurrentEpisode, CurrentPlayerTime);
+                }
                 break;
             case WebMessageType.DurationUpdate:
                 CurrentMediaDuration = double.Parse(message.Content);
@@ -114,6 +121,14 @@ public class WatchViewModel : ViewModel
                 if (Anime is not null)
                 {
                     await IncrementEpisode();
+                    CurrentEpisode++;
+                }
+                break;
+            case WebMessageType.CanPlay:
+                if (Anime is not null)
+                {
+                    var time = _playbackStateStorage.GetTime(Anime.Id, CurrentEpisode);
+                    VideoPlayerRequestMessage = JsonSerializer.Serialize(new { MessageType = "Play", StartTime = time });
                 }
                 break;
         }
@@ -123,10 +138,14 @@ public class WatchViewModel : ViewModel
     {
         Episodes.Clear();
         var count = await Provider.StreamProvider.GetNumberOfStreams(result.Url);
-        Observable.Range(1, count)
-                  .ObserveOn(RxApp.MainThreadScheduler)
-                  .Subscribe(x => Episodes.Add(x));
+        var obs = Observable.Range(1, count).ObserveOn(RxApp.MainThreadScheduler);
+        obs.Subscribe(x => Episodes.Add(x));
+        await obs.LastAsync();
         SelectedResult = result;
+        if (Anime is not null)
+        {
+            CurrentEpisode = Anime.UserStatus.WatchedEpisodes + 1;
+        }
     }
 
     public async Task FetchUrlForEp(int ep)
@@ -137,6 +156,8 @@ public class WatchViewModel : ViewModel
 
     private async Task IncrementEpisode()
     {
+        _playbackStateStorage.Reset(Anime.Id, CurrentEpisode);
+        
         var request = _client
             .Anime()
             .WithId(Anime.Id)
@@ -159,7 +180,7 @@ public class WatchViewModel : ViewModel
             Anime = parameters["Anime"] as Anime;
             var results = await Provider.Catalog.Search(Anime.Title).ToListAsync();
 
-            if(_settings.PreferSubs)
+            if (_settings.PreferSubs)
             {
                 RemoveDubs(results);
             }
@@ -167,12 +188,12 @@ public class WatchViewModel : ViewModel
             var selected = results.Count == 1
                 ? results[0]
                 : await _viewService.ChoooseSearchResult(results, SelectedProviderType);
-            
+
             await FetchEpisodes(selected);
         }
     }
 
-    private void RemoveDubs(List<SearchResult> results)
+    private static void RemoveDubs(List<SearchResult> results)
     {
         results.RemoveAll(x => x.Title.Contains("(DUB)", StringComparison.OrdinalIgnoreCase) || x.Title.Contains("[DUB]", StringComparison.OrdinalIgnoreCase));
     }

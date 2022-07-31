@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using AnimDL.WinUI.Activation;
 using AnimDL.WinUI.Contracts.Services;
+using AnimDL.WinUI.Core.Contracts;
 using AnimDL.WinUI.Views;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
@@ -14,13 +15,18 @@ public class ActivationService : IActivationService
     private readonly ActivationHandler<LaunchActivatedEventArgs> _defaultHandler;
     private readonly IEnumerable<IActivationHandler> _activationHandlers;
     private readonly IThemeSelectorService _themeSelectorService;
+    private readonly IPlaybackStateStorage _playbackStateStorage;
     private UIElement _shell = null;
 
-    public ActivationService(ActivationHandler<LaunchActivatedEventArgs> defaultHandler, IEnumerable<IActivationHandler> activationHandlers, IThemeSelectorService themeSelectorService)
+    public ActivationService(ActivationHandler<LaunchActivatedEventArgs> defaultHandler, 
+                             IEnumerable<IActivationHandler> activationHandlers,
+                             IThemeSelectorService themeSelectorService,
+                             IPlaybackStateStorage playbackStateStorage)
     {
         _defaultHandler = defaultHandler;
         _activationHandlers = activationHandlers;
         _themeSelectorService = themeSelectorService;
+        _playbackStateStorage = playbackStateStorage;
     }
 
     public async Task ActivateAsync(object activationArgs)
@@ -41,8 +47,16 @@ public class ActivationService : IActivationService
         // Activate the MainWindow.
         App.MainWindow.Activate();
 
+        App.MainWindow.Closed += MainWindow_Closed;
+
         // Execute tasks after activation.
         await StartupAsync();
+    }
+
+    private void MainWindow_Closed(object sender, WindowEventArgs args)
+    {
+        _playbackStateStorage.StoreState();
+        App.MainWindow.Closed -= MainWindow_Closed;
     }
 
     private async Task HandleActivationAsync(object activationArgs)
