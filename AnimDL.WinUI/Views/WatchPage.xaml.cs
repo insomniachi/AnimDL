@@ -7,6 +7,7 @@ using System.Text.Json.Serialization;
 using AnimDL.Core.Models;
 using AnimDL.WinUI.Helpers;
 using AnimDL.WinUI.ViewModels;
+using Microsoft.UI.Xaml.Navigation;
 using ReactiveMarbles.ObservableEvents;
 using ReactiveUI;
 
@@ -58,7 +59,14 @@ public sealed partial class WatchPage : WatchPageBase
         });
     }
 
+    protected override async void OnNavigatingFrom(NavigatingCancelEventArgs e)
+    {
+        await WebView.EnsureCoreWebView2Async();
+        WebView.NavigateToString("");
+    }
+
 }
+
 
 public enum WebMessageType
 {

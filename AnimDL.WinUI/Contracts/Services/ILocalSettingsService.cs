@@ -5,5 +5,5 @@ namespace AnimDL.WinUI.Contracts.Services;
 public interface ILocalSettingsService
 {
     T ReadSetting<T>(string key, T deafultValue = default);
-    void SaveSetting<T>(T value, [CallerArgumentExpression("value")] string key = "");
+    void SaveSetting<T>(string key, T value);
 }

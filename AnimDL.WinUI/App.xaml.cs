@@ -14,10 +14,12 @@ using AnimDL.WinUI.ViewModels;
 using AnimDL.WinUI.Views;
 using MalApi;
 using MalApi.Interfaces;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.UI.Xaml;
 using ReactiveUI;
+using Windows.ApplicationModel;
 
 // To learn more about WinUI3, see: https://docs.microsoft.com/windows/apps/winui/winui3/.
 namespace AnimDL.WinUI;
@@ -26,6 +28,14 @@ public partial class App : Application
 {
     private static readonly IHost _host = Host
         .CreateDefaultBuilder()
+        .ConfigureAppConfiguration(config => 
+        {
+            if(RuntimeHelper.IsMSIX)
+            {
+                config.SetBasePath(Package.Current.InstalledLocation.Path)
+                      .AddJsonFile("appsettings.json");
+            }
+        })
         .ConfigureServices((context, services) =>
         {
             // Default Activation Handler
@@ -77,13 +87,12 @@ public partial class App : Application
             services.AddSingleton<IMalClient, MalClient>(x => 
             {
                 var token = x.GetRequiredService<ILocalSettingsService>().ReadSetting<OAuthToken>("MalToken");
-                if(token.IsExpired)
+                if(token is { IsExpired : true })
                 {
                     var clientId = context.Configuration["ClientId"];
                     token = MalAuthHelper.RefreshToken(token.RefreshToken, clientId).Result;
                 }
-
-                return new MalClient(token.AccessToken);
+                return new MalClient(token?.AccessToken ?? "");
             });
 
             // Configuration

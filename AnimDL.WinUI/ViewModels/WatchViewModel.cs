@@ -142,7 +142,8 @@ public class WatchViewModel : ViewModel
         obs.Subscribe(x => Episodes.Add(x));
         await obs.LastAsync();
         SelectedResult = result;
-        if (Anime is not null)
+        
+        if (Anime is not null && Episodes.Contains(Anime.UserStatus.WatchedEpisodes + 1))
         {
             CurrentEpisode = Anime.UserStatus.WatchedEpisodes + 1;
         }
