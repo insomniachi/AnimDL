@@ -5,6 +5,7 @@
 		<RootNamespace>AnimDL.WinUI</RootNamespace>
 		<ApplicationManifest>app.manifest</ApplicationManifest>
 		<Platforms>x64</Platforms>
+		<Platform>x64</Platform>
 		<RuntimeIdentifiers>win10-x64</RuntimeIdentifiers>
 		<UseWinUI>true</UseWinUI>
 		<PublishProfile>Properties\PublishProfiles\win10-$(Platform).pubxml</PublishProfile>
