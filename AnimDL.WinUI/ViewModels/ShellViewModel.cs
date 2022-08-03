@@ -1,25 +1,22 @@
 ﻿using AnimDL.WinUI.Contracts.Services;
 using AnimDL.WinUI.Views;
-
-using CommunityToolkit.Mvvm.ComponentModel;
-
 using Microsoft.UI.Xaml.Navigation;
+using ReactiveUI;
+using ReactiveUI.Fody.Helpers;
 
 namespace AnimDL.WinUI.ViewModels;
 
-public partial class ShellViewModel : ObservableRecipient
+public partial class ShellViewModel : ReactiveObject
 {
-    [ObservableProperty]
-    private object _selected;
-
-    [ObservableProperty]
-    private bool _isBackEnabled;
+    [Reactive] public object Selected { get; set; }
+    [Reactive] public bool IsBackEnabled { get; set; }
+    [Reactive] public bool IsAuthenticated { get; set; }
 
     public INavigationService NavigationService { get; }
-
     public INavigationViewService NavigationViewService { get; set; }
 
-    public ShellViewModel(INavigationService navigationService, INavigationViewService navigationViewService)
+    public ShellViewModel(INavigationService navigationService,
+                          INavigationViewService navigationViewService)
     {
         NavigationService = navigationService;
         NavigationService.Navigated += OnNavigated;

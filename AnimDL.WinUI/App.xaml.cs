@@ -67,7 +67,7 @@ public partial class App : Application
             services.AddTransient<UserListViewModel>();
             services.AddTransient<UserListPage>();
             services.AddTransient<ShellPage>();
-            services.AddTransient<ShellViewModel>();
+            services.AddSingleton<ShellViewModel>();
             services.AddTransient<WatchViewModel>();
             services.AddTransient<WatchPage>();
             services.AddTransient<SeasonalPage>();

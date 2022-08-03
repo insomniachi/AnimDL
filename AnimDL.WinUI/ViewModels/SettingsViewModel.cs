@@ -32,7 +32,10 @@ public class SettingsViewModel : ViewModel, ISettings
         PreferSubs = localSettingsService.ReadSetting(nameof(PreferSubs), true);
         DefaultProviderType = localSettingsService.ReadSetting(nameof(DefaultProviderType), ProviderType.AnimixPlay);
         
-        AuthenticateCommand = ReactiveCommand.Create(async () => await viewService.AuthenticateMal());
+        AuthenticateCommand = ReactiveCommand.Create(async () => 
+        {
+            await viewService.AuthenticateMal();
+        });
 
         this.ObservableForProperty(x => x.ElementTheme, x => x)
             .Subscribe(themeSelectorService.SetTheme);

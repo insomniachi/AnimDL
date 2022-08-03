@@ -5,6 +5,7 @@ using AnimDL.WinUI.Activation;
 using AnimDL.WinUI.Contracts.Services;
 using AnimDL.WinUI.Core.Contracts;
 using AnimDL.WinUI.Views;
+using MalApi;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 
@@ -16,17 +17,28 @@ public class ActivationService : IActivationService
     private readonly IEnumerable<IActivationHandler> _activationHandlers;
     private readonly IThemeSelectorService _themeSelectorService;
     private readonly IPlaybackStateStorage _playbackStateStorage;
+    private readonly ILocalSettingsService _localSettingsService;
     private UIElement _shell = null;
+
+    public bool IsAuthenticated { get; set; } = true;
 
     public ActivationService(ActivationHandler<LaunchActivatedEventArgs> defaultHandler, 
                              IEnumerable<IActivationHandler> activationHandlers,
                              IThemeSelectorService themeSelectorService,
-                             IPlaybackStateStorage playbackStateStorage)
+                             IPlaybackStateStorage playbackStateStorage,
+                             ILocalSettingsService localSettingsService)
     {
         _defaultHandler = defaultHandler;
         _activationHandlers = activationHandlers;
         _themeSelectorService = themeSelectorService;
         _playbackStateStorage = playbackStateStorage;
+        _localSettingsService = localSettingsService;
+
+        var token = _localSettingsService.ReadSetting<OAuthToken>("MalToken");
+        if(token is null)
+        {
+            IsAuthenticated = false;
+        }
     }
 
     public async Task ActivateAsync(object activationArgs)
@@ -37,7 +49,9 @@ public class ActivationService : IActivationService
         // Set the MainWindow Content.
         if (App.MainWindow.Content == null)
         {
-            _shell = App.GetService<ShellPage>();
+            var shell = App.GetService<ShellPage>();
+            _shell = shell;
+            shell.ViewModel.IsAuthenticated = IsAuthenticated;
             App.MainWindow.Content = _shell ?? new Frame();
         }
 

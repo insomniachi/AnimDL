@@ -2,13 +2,9 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
-
 using AnimDL.WinUI.Contracts.Services;
 using AnimDL.WinUI.ViewModels;
 using AnimDL.WinUI.Views;
-
-using CommunityToolkit.Mvvm.ComponentModel;
-
 using Microsoft.UI.Xaml.Controls;
 
 namespace AnimDL.WinUI.Services;
