@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Linq;
 using MalApi;
@@ -12,6 +11,10 @@ public class UpdateAnimeStatusViewModel : ReactiveObject
 {
     public UpdateAnimeStatusViewModel()
     {
+        this.ObservableForProperty(x => x.Anime, x => x)
+            .WhereNotNull()
+            .Subscribe(x => TotalEpisodes = x.TotalEpisodes ?? 0);
+
         this.WhenAnyValue(x => x.Anime)
             .WhereNotNull()
             .Select(x => x.UserStatus)
@@ -21,9 +24,14 @@ public class UpdateAnimeStatusViewModel : ReactiveObject
                 Status = x.Status;
                 EpisodesWatched = x.WatchedEpisodes;
                 Score = x.Score;
-                StartDate = x.StartDate == new DateTime() ? null : new DateTimeOffset(x.StartDate);
-                EndDate = x.FinishDate == new DateTime() ? null : new DateTimeOffset(x.FinishDate);
             });
+
+        this.ObservableForProperty(x => x.EpisodesWatched, x => x)
+            .DistinctUntilChanged()
+            .Where(_ => Anime is not null)
+            .Where(x => x == Anime.TotalEpisodes)
+            .Subscribe(x => Status = AnimeStatus.Completed);
+
     }
 
 
@@ -31,11 +39,9 @@ public class UpdateAnimeStatusViewModel : ReactiveObject
     [Reactive] public AnimeStatus Status { get; set; }
     [Reactive] public double EpisodesWatched { get; set; }
     [Reactive] public Score Score { get; set; }
-    [Reactive] public DateTimeOffset? StartDate { get; set; }
-    [Reactive] public DateTimeOffset? EndDate { get; set; }
     [Reactive] public string Tags { get; set; }
     [Reactive] public Priority? Priority { get; set; }
     [Reactive] public int? RewatchCount { get; set; }
-    [Reactive] public RewatchValue? RewatchValue { get; set; }
-    public double TotalEpisodes => Anime?.TotalEpisodes ?? double.MaxValue;     
+    [Reactive] public Value? RewatchValue { get; set; }
+    [Reactive] public double TotalEpisodes { get; set; } 
 }

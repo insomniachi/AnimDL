@@ -87,12 +87,18 @@ public partial class App : Application
             services.AddSingleton<IMalClient, MalClient>(x => 
             {
                 var token = x.GetRequiredService<ILocalSettingsService>().ReadSetting<OAuthToken>("MalToken");
-                if(token is { IsExpired : true })
+                var clientId = context.Configuration["ClientId"];
+                if (token is { IsExpired : true })
                 {
-                    var clientId = context.Configuration["ClientId"];
                     token = MalAuthHelper.RefreshToken(token.RefreshToken, clientId).Result;
                 }
-                return new MalClient(token?.AccessToken ?? "");
+                var client = new MalClient();
+                if(token is not null && !string.IsNullOrEmpty(token.AccessToken))
+                {
+                    client.SetAccessToken(token.AccessToken);
+                }
+                client.SetClientId(clientId);
+                return client;
             });
 
             // Configuration

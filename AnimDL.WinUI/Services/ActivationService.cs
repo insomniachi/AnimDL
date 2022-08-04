@@ -6,6 +6,7 @@ using AnimDL.WinUI.Contracts.Services;
 using AnimDL.WinUI.Core.Contracts;
 using AnimDL.WinUI.Views;
 using MalApi;
+using MalApi.Interfaces;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 
@@ -17,7 +18,6 @@ public class ActivationService : IActivationService
     private readonly IEnumerable<IActivationHandler> _activationHandlers;
     private readonly IThemeSelectorService _themeSelectorService;
     private readonly IPlaybackStateStorage _playbackStateStorage;
-    private readonly ILocalSettingsService _localSettingsService;
     private UIElement _shell = null;
 
     public bool IsAuthenticated { get; set; } = true;
@@ -26,19 +26,13 @@ public class ActivationService : IActivationService
                              IEnumerable<IActivationHandler> activationHandlers,
                              IThemeSelectorService themeSelectorService,
                              IPlaybackStateStorage playbackStateStorage,
-                             ILocalSettingsService localSettingsService)
+                             IMalClient malClient)
     {
         _defaultHandler = defaultHandler;
         _activationHandlers = activationHandlers;
         _themeSelectorService = themeSelectorService;
         _playbackStateStorage = playbackStateStorage;
-        _localSettingsService = localSettingsService;
-
-        var token = _localSettingsService.ReadSetting<OAuthToken>("MalToken");
-        if(token is null)
-        {
-            IsAuthenticated = false;
-        }
+        IsAuthenticated = malClient.IsAuthenticated;
     }
 
     public async Task ActivateAsync(object activationArgs)

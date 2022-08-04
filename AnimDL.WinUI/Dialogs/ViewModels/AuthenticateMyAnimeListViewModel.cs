@@ -5,6 +5,7 @@ using System.Web;
 using AnimDL.WinUI.Contracts.Services;
 using AnimDL.WinUI.ViewModels;
 using MalApi;
+using MalApi.Interfaces;
 using Microsoft.Extensions.Configuration;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
@@ -13,11 +14,12 @@ namespace AnimDL.WinUI.Dialogs.ViewModels;
 
 public class AuthenticateMyAnimeListViewModel : ReactiveObject, IClosable
 {
-    private readonly ScheduledSubject<Unit> _close = new ScheduledSubject<Unit>(RxApp.MainThreadScheduler);
+    private readonly ScheduledSubject<Unit> _close = new(RxApp.MainThreadScheduler);
 
     public AuthenticateMyAnimeListViewModel(IConfiguration configuration,
                                             ILocalSettingsService localSettingsService,
-                                            INavigationService navigationService)
+                                            INavigationService navigationService,
+                                            IMalClient malClient)
     {
         var clientId = configuration["ClientId"];
         AuthUrl = MalAuthHelper.GetAuthUrl(clientId);
@@ -34,7 +36,7 @@ public class AuthenticateMyAnimeListViewModel : ReactiveObject, IClosable
                 localSettingsService.SaveSetting("MalToken", token);
                 IsLoading = false;
                 _close.OnNext(Unit.Default);
-                MalClient.SetAccessToken(token.AccessToken);
+                malClient.SetAccessToken(token.AccessToken);
                 App.GetService<ShellViewModel>().IsAuthenticated = true;
                 navigationService.NavigateTo(typeof(UserListViewModel).FullName);
             });

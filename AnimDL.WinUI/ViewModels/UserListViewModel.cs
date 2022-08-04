@@ -70,7 +70,12 @@ public class UserListViewModel : ViewModel, IHaveState
     {
         IsLoading = true;
         _animeCache.Clear();
-        var userAnime = await _malClient.Anime().OfUser().WithField(x => x.UserStatus).Find();
+        var userAnime = await _malClient.Anime()
+                                        .OfUser()
+                                        .WithField(x => x.UserStatus)
+                                        .WithField(x => x.TotalEpisodes)
+                                        .Find();
+        
         _animeCache.AddOrUpdate(userAnime.Data);
         IsLoading = false;
     }
