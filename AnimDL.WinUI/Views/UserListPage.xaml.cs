@@ -72,3 +72,9 @@ public sealed partial class UserListPage : UserListPageBase
         });
     }
 }
+
+public enum DisplayMode
+{
+    Grid,
+    List
+}
