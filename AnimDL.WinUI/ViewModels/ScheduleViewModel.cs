@@ -62,6 +62,8 @@ public class ScheduleViewModel : ViewModel, IHaveState
                                      .WithStatus(AnimeStatus.Watching)
                                      .WithField(x => x.Broadcast)
                                      .WithField(x => x.Status)
+                                     .WithField(x => x.UserStatus)
+                                     .WithField(x => x.TotalEpisodes)
                                      .Find();
 
         var current = AnimeHelpers.CurrentSeason();

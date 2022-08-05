@@ -7,6 +7,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mal="using:MalApi"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:uc="using:AnimDL.WinUI.UserControls"
     xmlns:views="using:AnimDL.WinUI.Views"
     x:Name="Page"
     mc:Ignorable="d">
@@ -57,52 +58,20 @@
             ItemsSource="{x:Bind ViewModel.Anime}">
             <GridView.ItemTemplate>
                 <DataTemplate x:DataType="mal:Anime">
-                    <Grid Width="240" Height="400">
-                        <Grid.RowDefinitions>
-                            <RowDefinition />
-                            <RowDefinition Height="Auto" />
-                        </Grid.RowDefinitions>
-                        <ctk:ImageEx
-                            Grid.Row="0"
-                            CacheMode="BitmapCache"
-                            IsCacheEnabled="True"
-                            Source="{x:Bind MainPicture.Large}"
-                            Stretch="UniformToFill" />
-
-                        <Border
-                            Grid.Row="1"
-                            Height="60"
-                            Padding="3"
-                            Background="{ThemeResource SystemControlBackgroundChromeMediumBrush}"
-                            BorderBrush="{ThemeResource SystemControlBackgroundAccentBrush}"
-                            BorderThickness="0,3,0,0">
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition />
-                                    <ColumnDefinition Width="Auto" />
-                                </Grid.ColumnDefinitions>
-                                <TextBlock
-                                    Margin="0,3,0,0"
-                                    Padding="3"
-                                    VerticalAlignment="Center"
-                                    FontSize="15"
-                                    Text="{x:Bind Title}"
-                                    TextAlignment="Center"
-                                    TextTrimming="WordEllipsis"
-                                    TextWrapping="Wrap"
-                                    ToolTipService.ToolTip="{x:Bind Title}" />
-                                <Button
-                                    Grid.Column="1"
-                                    Width="45"
-                                    Height="45"
-                                    Command="{Binding ElementName=Page, Path=ViewModel.AddToListCommand}"
+                    <uc:AnimeCard x:Name="Card" Anime="{x:Bind}">
+                        <uc:AnimeCard.Flyout>
+                            <MenuFlyout>
+                                <MenuFlyoutItem
+                                    Command="{Binding ElementName=Card, Path=UpdateStatusCommand}"
                                     CommandParameter="{x:Bind}"
-                                    Visibility="{x:Bind views:SeasonalPage.AddToListButtonVisibility((mal:Anime))}">
-                                    <SymbolIcon Symbol="Add" />
-                                </Button>
-                            </Grid>
-                        </Border>
-                    </Grid>
+                                    Text="Update">
+                                    <MenuFlyoutItem.Icon>
+                                        <SymbolIcon Symbol="PostUpdate" />
+                                    </MenuFlyoutItem.Icon>
+                                </MenuFlyoutItem>
+                            </MenuFlyout>
+                        </uc:AnimeCard.Flyout>
+                    </uc:AnimeCard>
                 </DataTemplate>
             </GridView.ItemTemplate>
             <GridView.ItemContainerStyle>

@@ -25,6 +25,7 @@
 		<None Remove="Dialogs\Views\AuthenticateMyAnimeListView.xaml" />
 		<None Remove="Dialogs\Views\ChooseSearchResultView.xaml" />
 		<None Remove="Styles\RadioButton.xaml" />
+		<None Remove="UserControls\AnimeCard.xaml" />
 		<None Remove="Views\SchedulePage.xaml" />
 		<None Remove="Views\SeasonalPage.xaml" />
 		<None Remove="Views\WatchPage.xaml" />
@@ -55,6 +56,9 @@
 		<None Update="appsettings.json">
 			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
 		</None>
+		<Page Update="UserControls\AnimeCard.xaml">
+		  <Generator>MSBuild:Compile</Generator>
+		</Page>
 		<Page Update="Dialogs\Views\AuthenticateMyAnimeListView.xaml">
 			<Generator>MSBuild:Compile</Generator>
 		</Page>

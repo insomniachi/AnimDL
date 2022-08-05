@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using System.Windows.Input;
 using AnimDL.WinUI.Contracts.Services;
 using AnimDL.WinUI.Core.Contracts;
+using AnimDL.WinUI.Views;
 using DynamicData;
 using MalApi;
 using MalApi.Interfaces;
@@ -20,22 +21,19 @@ public class UserListViewModel : ViewModel, IHaveState
 {
     private readonly IMalClient _malClient;
     private readonly INavigationService _navigationService;
-    private readonly IViewService _viewService;
     private readonly SourceCache<Anime, long> _animeCache = new(x => x.Id);
     private readonly ReadOnlyObservableCollection<Anime> _anime;
 
     public UserListViewModel(IMalClient malClient,
-                             INavigationService navigationService,
-                             IViewService viewService)
+                             INavigationService navigationService)
     {
         _malClient = malClient;
         _navigationService = navigationService;
-        _viewService = viewService;
 
         ItemClickedCommand = ReactiveCommand.Create<Anime>(OnItemClicked);
         ChangeCurrentViewCommand = ReactiveCommand.Create<AnimeStatus>(x => CurrentView = x);
         RefreshCommand = ReactiveCommand.CreateFromTask(SetInitialState);
-        UpdateStatusCommand = ReactiveCommand.Create<Anime>(async x => await _viewService.UpdateAnimeStatus(x));
+        SetDisplayMode = ReactiveCommand.Create<DisplayMode>(x => Mode = x);
 
         var filter = this.WhenAnyValue(x => x.CurrentView)
                          .Select(FilterByStatusPredicate);
@@ -52,12 +50,13 @@ public class UserListViewModel : ViewModel, IHaveState
 
     [Reactive] public AnimeStatus CurrentView { get; set; } = AnimeStatus.Watching;
     [Reactive] public bool IsLoading { get; set; }
+    [Reactive] public DisplayMode Mode { get; set; } = DisplayMode.Grid;
 
     public ReadOnlyObservableCollection<Anime> Anime => _anime;
     public ICommand ItemClickedCommand { get; }
     public ICommand ChangeCurrentViewCommand { get; }
     public ICommand RefreshCommand { get; }
-    public ICommand UpdateStatusCommand { get; }
+    public ICommand SetDisplayMode { get; }
 
     private void OnItemClicked(Anime anime)
     {
@@ -74,6 +73,7 @@ public class UserListViewModel : ViewModel, IHaveState
                                         .OfUser()
                                         .WithField(x => x.UserStatus)
                                         .WithField(x => x.TotalEpisodes)
+                                        .WithField(x => x.Broadcast)
                                         .Find();
         
         _animeCache.AddOrUpdate(userAnime.Data);

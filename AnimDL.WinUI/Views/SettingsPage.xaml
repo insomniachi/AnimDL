@@ -17,15 +17,14 @@
         </Grid.RowDefinitions>
 
         <TextBlock
-            Padding="20"
+            Margin="0,0,0,20"
             FontSize="30"
             FontWeight="SemiBold"
             Text="Settings" />
 
         <StackPanel
             Grid.Row="1"
-            Width="1200"
-            Padding="20"
+            Width="700"
             HorizontalAlignment="Left"
             Spacing="10">
             <labs:SettingsCard

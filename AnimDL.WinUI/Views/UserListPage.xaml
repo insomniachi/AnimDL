@@ -5,10 +5,13 @@
     xmlns:animations="using:CommunityToolkit.WinUI.UI.Animations"
     xmlns:ctk="using:CommunityToolkit.WinUI.UI.Controls"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:help="using:AnimDL.WinUI.Helpers"
     xmlns:mal="using:MalApi"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:uc="using:AnimDL.WinUI.UserControls"
     xmlns:v="using:AnimDL.WinUI.Views"
     xmlns:viewmodels="using:AnimDL.WinUI.ViewModels"
+    xmlns:views="using:AnimDL.WinUI.Views"
     Name="Page"
     d:DataContext="{d:DesignInstance Type=viewmodels:UserListViewModel}"
     mc:Ignorable="d">
@@ -48,64 +51,77 @@
             </ListBox.ItemsPanel>
         </ListBox>
 
-        <GridView
-            x:Name="AnimeListView"
-            Grid.Row="1"
-            animations:ItemsReorderAnimation.Duration="00:00:00.4000000"
-            IsItemClickEnabled="True"
-            ItemsSource="{x:Bind ViewModel.Anime}">
-            <GridView.ItemTemplate>
-                <DataTemplate x:DataType="mal:Anime">
-                    <Grid Width="240" Height="400">
-                        <Grid.RowDefinitions>
-                            <RowDefinition />
-                            <RowDefinition Height="Auto" />
-                        </Grid.RowDefinitions>
-                        <ctk:ImageEx
-                            Grid.Row="0"
-                            CacheMode="BitmapCache"
-                            IsCacheEnabled="True"
-                            Source="{x:Bind MainPicture.Large}"
-                            Stretch="UniformToFill" />
-
-                        <Border
-                            Grid.Row="1"
-                            Height="60"
-                            Padding="3"
-                            Background="{ThemeResource SystemControlBackgroundChromeMediumBrush}"
-                            BorderBrush="{ThemeResource SystemControlBackgroundAccentBrush}"
-                            BorderThickness="0,3,0,0">
-                            <TextBlock
-                                Margin="0,3,0,0"
-                                Padding="3"
-                                FontSize="15"
-                                Text="{x:Bind Title}"
-                                TextAlignment="Center"
-                                TextTrimming="WordEllipsis"
-                                TextWrapping="Wrap" />
-                        </Border>
-
-                        <Grid.ContextFlyout>
-                            <MenuFlyout>
-                                <MenuFlyoutItem
-                                    Command="{Binding ElementName=Page, Path=ViewModel.UpdateStatusCommand}"
-                                    CommandParameter="{x:Bind}"
-                                    Text="Update">
-                                    <MenuFlyoutItem.Icon>
-                                        <SymbolIcon Symbol="PostUpdate" />
-                                    </MenuFlyoutItem.Icon>
-                                </MenuFlyoutItem>
-                            </MenuFlyout>
-                        </Grid.ContextFlyout>
-                    </Grid>
-                </DataTemplate>
-            </GridView.ItemTemplate>
-            <GridView.ItemContainerStyle>
-                <Style TargetType="GridViewItem">
-                    <Setter Property="Margin" Value="10" />
-                </Style>
-            </GridView.ItemContainerStyle>
-        </GridView>
+        <ctk:SwitchPresenter Grid.Row="1" Value="{x:Bind ViewModel.Mode, Mode=OneWay}">
+            <ctk:Case Value="{x:Bind views:DisplayMode.Grid}">
+                <GridView
+                    x:Name="AnimeListView"
+                    animations:ItemsReorderAnimation.Duration="00:00:00.4000000"
+                    IsItemClickEnabled="True"
+                    ItemsSource="{x:Bind ViewModel.Anime}">
+                    <GridView.ItemTemplate>
+                        <DataTemplate x:DataType="mal:Anime">
+                            <uc:AnimeCard x:Name="Card" Anime="{x:Bind}">
+                                <uc:AnimeCard.Flyout>
+                                    <MenuFlyout>
+                                        <MenuFlyoutItem
+                                            Command="{Binding ElementName=Card, Path=UpdateStatusCommand}"
+                                            CommandParameter="{x:Bind}"
+                                            Text="Update">
+                                            <MenuFlyoutItem.Icon>
+                                                <SymbolIcon Symbol="PostUpdate" />
+                                            </MenuFlyoutItem.Icon>
+                                        </MenuFlyoutItem>
+                                    </MenuFlyout>
+                                </uc:AnimeCard.Flyout>
+                            </uc:AnimeCard>
+                        </DataTemplate>
+                    </GridView.ItemTemplate>
+                    <GridView.ItemContainerStyle>
+                        <Style TargetType="GridViewItem">
+                            <Setter Property="Margin" Value="10" />
+                        </Style>
+                    </GridView.ItemContainerStyle>
+                </GridView>
+            </ctk:Case>
+            <ctk:Case Value="{x:Bind views:DisplayMode.List}">
+                <ctk:DataGrid
+                    AutoGenerateColumns="False"
+                    IsReadOnly="True"
+                    ItemsSource="{x:Bind ViewModel.Anime}"
+                    SelectionMode="Single">
+                    <ctk:DataGrid.Columns>
+                        <ctk:DataGridTextColumn
+                            Width="*"
+                            Binding="{Binding Title}"
+                            Header="Title" />
+                        <ctk:DataGridTemplateColumn Width="150" Header="Rating">
+                            <ctk:DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate x:DataType="mal:Anime">
+                                    <RatingControl
+                                        IsReadOnly="True"
+                                        ToolTipService.ToolTip="{x:Bind UserStatus.Score}"
+                                        Value="{x:Bind help:AnimeHelpers.ScoreToRating(UserStatus.Score)}" />
+                                </DataTemplate>
+                            </ctk:DataGridTemplateColumn.CellTemplate>
+                        </ctk:DataGridTemplateColumn>
+                        <ctk:DataGridTemplateColumn Width="100" Header="Ep">
+                            <ctk:DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate x:DataType="mal:Anime">
+                                    <TextBlock HorizontalAlignment="Center" Text="{x:Bind help:AnimeHelpers.Eps((mal:Anime))}" />
+                                </DataTemplate>
+                            </ctk:DataGridTemplateColumn.CellTemplate>
+                        </ctk:DataGridTemplateColumn>
+                        <ctk:DataGridTemplateColumn Width="150" Header="Day">
+                            <ctk:DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate x:DataType="mal:Anime">
+                                    <TextBlock HorizontalAlignment="Center" Text="{x:Bind Broadcast.DayOfWeek}" />
+                                </DataTemplate>
+                            </ctk:DataGridTemplateColumn.CellTemplate>
+                        </ctk:DataGridTemplateColumn>
+                    </ctk:DataGrid.Columns>
+                </ctk:DataGrid>
+            </ctk:Case>
+        </ctk:SwitchPresenter>
 
         <ctk:Loading
             x:Name="LoadingControl"
@@ -129,12 +145,18 @@
             <AppBarButton Icon="View" Label="Display mode">
                 <AppBarButton.Flyout>
                     <MenuFlyout>
-                        <MenuFlyoutItem Text="Grid view">
+                        <MenuFlyoutItem
+                            Command="{x:Bind ViewModel.SetDisplayMode}"
+                            CommandParameter="{x:Bind views:DisplayMode.Grid}"
+                            Text="Grid view">
                             <MenuFlyoutItem.Icon>
                                 <FontIcon Glyph="&#xf0e2;" />
                             </MenuFlyoutItem.Icon>
                         </MenuFlyoutItem>
-                        <MenuFlyoutItem Text="List view">
+                        <MenuFlyoutItem
+                            Command="{x:Bind ViewModel.SetDisplayMode}"
+                            CommandParameter="{x:Bind views:DisplayMode.List}"
+                            Text="List view">
                             <MenuFlyoutItem.Icon>
                                 <FontIcon Glyph="&#xf0e4;" />
                             </MenuFlyoutItem.Icon>

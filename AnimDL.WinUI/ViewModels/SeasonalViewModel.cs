@@ -68,6 +68,7 @@ public class SeasonalViewModel : ViewModel, IHaveState
         var currAnime = await _client.Anime().OfSeason(Current.SeasonName, Current.Year)
                                              .WithField(x => x.UserStatus)
                                              .WithField(x => x.StartSeason)
+                                             .WithField(x => x.TotalEpisodes)
                                              .Find();
         _animeCache.Edit(x =>
         {
@@ -77,11 +78,13 @@ public class SeasonalViewModel : ViewModel, IHaveState
         var prevAnime = await _client.Anime().OfSeason(Prev.SeasonName, Prev.Year)
                                              .WithField(x => x.UserStatus)
                                              .WithField(x => x.StartSeason)
+                                             .WithField(x => x.TotalEpisodes)
                                              .Find();
 
         var nextAnime = await _client.Anime().OfSeason(Next.SeasonName, Next.Year)
                                              .WithField(x => x.UserStatus)
                                              .WithField(x => x.StartSeason)
+                                             .WithField(x => x.TotalEpisodes)
                                              .Find();
 
         _animeCache.Edit(x =>
