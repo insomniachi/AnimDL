@@ -11,6 +11,8 @@
 		<PublishProfile>Properties\PublishProfiles\win10-$(Platform).pubxml</PublishProfile>
 		<WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
 		<EnableMsixTooling>true</EnableMsixTooling>
+		<ApplicationIcon>Assets\WindowIcon.ico</ApplicationIcon>
+		<Version>0.0.1.0</Version>
 	</PropertyGroup>
 	<ItemGroup>
 		<None Remove="Assets\LockScreenLogo.scale-200.png" />
