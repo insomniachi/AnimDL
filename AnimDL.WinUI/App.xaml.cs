@@ -38,6 +38,8 @@ public partial class App : Application
         })
         .ConfigureServices((context, services) =>
         {
+
+
             // Default Activation Handler
             services.AddTransient<ActivationHandler<LaunchActivatedEventArgs>, DefaultActivationHandler>();
 

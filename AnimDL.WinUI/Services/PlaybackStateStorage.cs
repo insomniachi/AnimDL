@@ -1,19 +1,18 @@
-﻿using System.Text.Json;
+﻿using System.Collections.Generic;
+using AnimDL.WinUI.Contracts.Services;
 using AnimDL.WinUI.Core.Contracts;
 
 namespace AnimDL.WinUI.Core.Services;
 
 public class PlaybackStateStorage : IPlaybackStateStorage
 {
-    private readonly string _file = "recents.json";
-
     private readonly Dictionary<long, Dictionary<int, double>> _recents;
+    private readonly ILocalSettingsService _localSettingsService;
 
-    public PlaybackStateStorage()
+    public PlaybackStateStorage(ILocalSettingsService localSettingsService)
     {
-        _recents = File.Exists(_file)
-            ? JsonSerializer.Deserialize<Dictionary<long, Dictionary<int, double>>>(File.ReadAllText(_file)) ?? new()
-            : new();
+        _localSettingsService = localSettingsService;
+        _recents = _localSettingsService.ReadSetting<Dictionary<long, Dictionary<int, double>>>("Recents", new());
     }
 
     public double GetTime(long id, int episode)
@@ -53,7 +52,7 @@ public class PlaybackStateStorage : IPlaybackStateStorage
 
     public void StoreState()
     {
-        File.WriteAllText(_file, JsonSerializer.Serialize(_recents));
+        _localSettingsService.SaveSetting("Recents", _recents);
     }
 
     public void Update(long id, int episode, double time)
