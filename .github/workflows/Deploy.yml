@@ -7,6 +7,7 @@ on:
 
 env:
   PROJECT_PATH: 'AnimDL/AnimDL.csproj'
+  CORE_PROJECT_PATH: 'AnimDL.Core/AnimDL.Core.csproj'
   PROJECT_NAME: 'AnimDL'
   PACKAGE_OUTPUT_DIRECTORY : ${{ github.workspace }}\output
   NUGET_SOURCE_URL: 'https://api.nuget.org/v3/index.json'
@@ -34,8 +35,14 @@ jobs:
             id: version
             uses: battila7/get-version-action@v2    
 
-        -   name: 'Pack'
+        -   name: 'Pack tool'
             run: dotnet pack ${{ env.PROJECT_PATH }} --no-restore --no-build -c Release --include-symbols -p:PackageVersion=${{ steps.version.outputs.version-without-v}} --output ${{ env.PACKAGE_OUTPUT_DIRECTORY }}
 
-        -   name: 'Push package'
+        -   name: 'Push tool package'
             run: dotnet nuget push ${{ env.PACKAGE_OUTPUT_DIRECTORY }}\${{ env.PROJECT_NAME }}.${{ steps.version.outputs.version-without-v }}.nupkg -s ${{ env.NUGET_SOURCE_URL }} -k ${{ secrets.NUGET_AUTH_TOKEN }}
+
+        -   name: 'Pack core'
+            run: dotnet pack ${{ env.CORE_PROJECT_PATH }} --no-restore --no-build -c Release --include-symbols -p:PackageVersion=${{ steps.version.outputs.version-without-v}} --output ${{ env.PACKAGE_OUTPUT_DIRECTORY }}
+        
+        -   name: 'Push core package'
+            run: dotnet nuget push ${{ env.PACKAGE_OUTPUT_DIRECTORY }}\${{ env.PROJECT_NAME }}.Core.${{ steps.version.outputs.version-without-v }}.nupkg -s ${{ env.NUGET_SOURCE_URL }} -k ${{ secrets.NUGET_AUTH_TOKEN }}

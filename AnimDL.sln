@@ -15,6 +15,16 @@ Project("{930C7802-8A8C-48F9-8165-68863BCCD9DD}") = "AnimDL.Installer", "AnimDL.
 EndProject
 Project("{930C7802-8A8C-48F9-8165-68863BCCD9DD}") = "AnimDL.Bootstrapper", "AnimDL.Installer\AnimDL.Bootstrapper.wixproj", "{0B78252D-1C5D-446A-84DE-D0B17418218A}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{9BC9AB6B-CFA0-477E-ABC5-8DF3C611C9F9}"
+	ProjectSection(SolutionItems) = preProject
+		.gitattributes = .gitattributes
+		.gitignore = .gitignore
+		.vsconfig = .vsconfig
+		.github\workflows\Deploy.yml = .github\workflows\Deploy.yml
+		LICENSE.txt = LICENSE.txt
+		README.md = README.md
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
