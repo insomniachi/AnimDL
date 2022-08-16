@@ -1,5 +1,5 @@
-﻿using System.Text.RegularExpressions;
-using AnimDL.Core.Extractors;
+﻿using System.Text.Json.Nodes;
+using System.Text.RegularExpressions;
 using AnimDL.Core.Helpers;
 using AnimDL.Core.Models;
 using HtmlAgilityPack.CssSelectors.NetCore;
@@ -9,6 +9,7 @@ namespace AnimDL.Core.StreamProviders;
 internal class YugenAnimeStreamProvider : BaseStreamProvider
 {
     const string BASE_URL = "https://yugen.to/";
+    const string EMBED_URL = "https://yugen.to/api/embed/";
     public YugenAnimeStreamProvider(HttpClient client) : base(client)
     {
     }
@@ -38,9 +39,8 @@ internal class YugenAnimeStreamProvider : BaseStreamProvider
         var (start, end) = range.Extract(totalEpisodes);
 
         var uri = new UriBuilder(url).Uri;
-        var length = uri.Segments.Length;
-        var slug = uri.Segments[length - 1].TrimEnd('/');
-        var number = uri.Segments[length - 2].TrimEnd('/');
+        var slug = uri.Segments[^1].TrimEnd('/');
+        var number = uri.Segments[^2].TrimEnd('/');
 
         for (int i = start; i <= end; i++)
         {
@@ -49,7 +49,32 @@ internal class YugenAnimeStreamProvider : BaseStreamProvider
             var text = doc.Text;
             var iframeUrl = doc.QuerySelector("iframe").Attributes["src"].Value;
 
-            var iframPage = await _client.GetStringAsync(iframeUrl);
+            uri = new UriBuilder(iframeUrl).Uri;
+            var key = uri.Segments[^1].TrimEnd('/');
+
+            var json = await _client.PostFormUrlEncoded(EMBED_URL, new() 
+            {
+                ["id"] = key,
+                ["ac"] = "0" 
+            }, new Dictionary<string, string>()
+            {
+                ["referer"] = iframeUrl,
+                ["X-Requested-With"] = "XMLHttpRequest",
+            });
+            var jObject = JsonNode.Parse(json);
+
+            yield return new VideoStreamsForEpisode
+            {
+                Episode = i,
+                Qualities = new Dictionary<string, VideoStream>
+                {
+                    ["default"] = new VideoStream
+                    {
+                        Quality = "default",
+                        Url = jObject!["hls"]!.ToString()
+                    }
+                }
+            };
         }
 
         yield break;
