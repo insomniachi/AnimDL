@@ -3,7 +3,6 @@ using AnimDL.Core.Helpers;
 using AnimDL.Core.Models;
 using HtmlAgilityPack;
 using HtmlAgilityPack.CssSelectors.NetCore;
-using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Logging;
 
 namespace AnimDL.Core.Catalog;

@@ -40,13 +40,13 @@ internal class AnimeOutStreamProvider : BaseStreamProvider
             var contents = ParseFromContent(item.InnerText);
             var epStream = new VideoStreamsForEpisode();
 
-            if(contents.ContainsKey("ep"))
+            if (contents.ContainsKey("ep"))
             {
                 epStream.Episode = int.Parse(contents["ep"]);
             }
 
             var quality = "default";
-            if(contents.ContainsKey("quality"))
+            if (contents.ContainsKey("quality"))
             {
                 quality = contents["quality"];
             }
@@ -77,17 +77,17 @@ internal class AnimeOutStreamProvider : BaseStreamProvider
         return uri.ToString();
     }
 
-    private Dictionary<string,string> ParseFromContent(string content)
+    private Dictionary<string, string> ParseFromContent(string content)
     {
         var result = new Dictionary<string, string>();
         var anitomyResult = AnitomySharp.AnitomySharp.Parse(content);
 
         var res = anitomyResult.FirstOrDefault(x => x.Category == AnitomySharp.Element.ElementCategory.ElementVideoResolution)?.Value;
 
-        if(!string.IsNullOrEmpty(res))
+        if (!string.IsNullOrEmpty(res))
         {
             var quality = res.TrimEnd('p');
-            if(int.TryParse(quality, out _))
+            if (int.TryParse(quality, out _))
             {
                 result.Add("quality", quality);
             }
@@ -95,7 +95,7 @@ internal class AnimeOutStreamProvider : BaseStreamProvider
 
         var ep = anitomyResult.FirstOrDefault(x => x.Category == AnitomySharp.Element.ElementCategory.ElementEpisodeNumber)?.Value;
 
-        if(!string.IsNullOrEmpty(ep))
+        if (!string.IsNullOrEmpty(ep))
         {
             result.Add("ep", ep);
         }
