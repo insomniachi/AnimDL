@@ -1,8 +1,9 @@
-﻿using AnimDL.Core.Models;
+﻿using AnimDL.Api;
+using AnimDL.Core.Models;
 
 namespace AnimDL.Core.Api;
 
 public interface IMalCatalog
 {
-    Task<SearchResult> SearchByMalId(long id);
+    Task<(SearchResult Sub, SearchResult? Dub)> SearchByMalId(long id);
 }

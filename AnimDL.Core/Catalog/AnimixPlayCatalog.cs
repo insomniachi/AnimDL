@@ -1,9 +1,9 @@
-﻿using AnimDL.Core.Api;
+﻿using System.Text.Json.Nodes;
+using AnimDL.Core.Api;
 using AnimDL.Core.Helpers;
 using AnimDL.Core.Models;
 using HtmlAgilityPack;
 using Microsoft.Extensions.Logging;
-using System.Text.Json.Nodes;
 
 namespace AnimDL.Core.Catalog;
 
@@ -61,20 +61,32 @@ public class AnimixPlayCatalog : ICatalog, IMalCatalog
         }
     }
 
-    public async Task<SearchResult> SearchByMalId(long id)
+    public async Task<(SearchResult Sub, SearchResult? Dub)> SearchByMalId(long id)
     {
         var json = await _client.PostFormUrlEncoded("https://animixplay.to/api/search", new() { ["recomended"] = $"{id}" });
-
         var jObject = JsonNode.Parse(json);
-
-        var stream = jObject!["data"]![0]!["items"]![0];
-
-        return new AnimixPlaySearchResult
+        var streams = jObject!["data"]![0]!["items"]!.AsArray();
+        
+        SearchResult? dub = null;
+        
+        var sub = new AnimixPlaySearchResult
         {
-            Title = stream!["title"]!.ToString(),
-            Url = BASE_URL + stream!["url"]!.ToString(),
-            Image = stream!["img"]!.ToString(),
+            Title = streams[0]!["title"]!.ToString(),
+            Url = BASE_URL + streams[0]!["url"]!.ToString(),
+            Image = streams[0]!["img"]!.ToString(),
         };
+
+        if (streams.Count == 2)
+        {
+            dub = new AnimePaheSearchResult
+            {
+                Title = streams[1]!["title"]!.ToString(),
+                Url = BASE_URL + streams[1]!["url"]!.ToString(),
+                Image = streams[1]!["img"]!.ToString(),
+            };
+        }
+
+        return (sub, dub);
     }
 }
 
