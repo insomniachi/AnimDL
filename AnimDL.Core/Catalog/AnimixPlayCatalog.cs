@@ -2,15 +2,13 @@
 using AnimDL.Core.Helpers;
 using AnimDL.Core.Models;
 using HtmlAgilityPack;
-using HtmlAgilityPack.CssSelectors.NetCore;
 using Microsoft.Extensions.Logging;
 using System.Text.Json.Nodes;
 
 namespace AnimDL.Core.Catalog;
 
-public class AnimixPlayCatalog : ICatalog
+public class AnimixPlayCatalog : ICatalog, IMalCatalog
 {
-    const string WORKER = "https://v1.bgmvcle5cq9kjycjokrtwii9e.workers.dev/";
     const string BASE_URL = "https://animixplay.to";
     private readonly HttpClient _client;
     private readonly ILogger<AnimixPlayCatalog> _logger;
@@ -25,14 +23,6 @@ public class AnimixPlayCatalog : ICatalog
     {
         var result = await _client.PostFormUrlEncoded("https://cachecow.eu/api/search", new() { ["qfast"] = query });
 
-        //result = await _client.PostFormUrlEncoded(WORKER, new()
-        //{
-        //    ["q2"] = query,
-        //    ["origin"] = "1",
-        //    ["root"] = "animixplay.to",
-        //    ["d"] = "gogoanime.gg"
-        //});
-        
         var resultData = JsonNode.Parse(result);
 
         if (resultData is null)
@@ -62,10 +52,6 @@ public class AnimixPlayCatalog : ICatalog
             var title = item.Attributes["title"].Value;
             var image = item.SelectSingleNode("li/div/img").Attributes["src"].Value;
 
-            //var url = item.SelectSingleNode("div/a").Attributes["href"].Value;
-            //var title = item.SelectSingleNode("div/a").Attributes["title"].Value;
-            //var image = item.SelectSingleNode("div/a/img").Attributes["src"].Value;
-
             yield return new AnimixPlaySearchResult()
             {
                 Title = title,
@@ -73,6 +59,22 @@ public class AnimixPlayCatalog : ICatalog
                 Url = BASE_URL + url
             };
         }
+    }
+
+    public async Task<SearchResult> SearchByMalId(long id)
+    {
+        var json = await _client.PostFormUrlEncoded("https://animixplay.to/api/search", new() { ["recomended"] = $"{id}" });
+
+        var jObject = JsonNode.Parse(json);
+
+        var stream = jObject!["data"]![0]!["items"]![0];
+
+        return new AnimixPlaySearchResult
+        {
+            Title = stream!["title"]!.ToString(),
+            Url = BASE_URL + stream!["url"]!.ToString(),
+            Image = stream!["img"]!.ToString(),
+        };
     }
 }
 
