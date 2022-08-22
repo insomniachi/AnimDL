@@ -66,27 +66,32 @@ public class AnimixPlayCatalog : ICatalog, IMalCatalog
         var json = await _client.PostFormUrlEncoded("https://animixplay.to/api/search", new() { ["recomended"] = $"{id}" });
         var jObject = JsonNode.Parse(json);
         var streams = jObject!["data"]![0]!["items"]!.AsArray();
-        
-        SearchResult? dub = null;
-        
-        var sub = new AnimixPlaySearchResult
+
+        var first = new AnimixPlaySearchResult
         {
             Title = streams[0]!["title"]!.ToString(),
             Url = BASE_URL + streams[0]!["url"]!.ToString(),
             Image = streams[0]!["img"]!.ToString(),
         };
 
-        if (streams.Count == 2)
+        if (streams.Count == 1)
         {
-            dub = new AnimePaheSearchResult
+            return (first, null);
+        }
+        else
+        {
+            var second = new AnimixPlaySearchResult
             {
                 Title = streams[1]!["title"]!.ToString(),
                 Url = BASE_URL + streams[1]!["url"]!.ToString(),
                 Image = streams[1]!["img"]!.ToString(),
             };
-        }
 
-        return (sub, dub);
+            var dub = first.Url.EndsWith("-dub") ? first : second;
+            var sub = dub == first ? second : first;
+
+            return (sub, dub);
+        }
     }
 }
 
