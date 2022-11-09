@@ -15,7 +15,7 @@ public class VlcMediaPlayer : IMediaPlayer
 
     public VlcMediaPlayer(IConfiguration configuration)
     {
-        Executable = Environment.ExpandEnvironmentVariables(configuration["MediaPlayers:VLC:Executable"]);
+        Executable = Environment.ExpandEnvironmentVariables(configuration["MediaPlayers:VLC:Executable"]!);
         IsAvailable = File.Exists(Executable);
     }
 
