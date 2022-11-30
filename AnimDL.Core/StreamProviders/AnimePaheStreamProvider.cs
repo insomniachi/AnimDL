@@ -8,11 +8,15 @@ using System.Text.RegularExpressions;
 
 namespace AnimDL.Core.StreamProviders;
 
-internal class AnimePaheStreamProvider : BaseStreamProvider
+internal partial class AnimePaheStreamProvider : BaseStreamProvider
 {
-    private readonly Regex _idRegex = new("let id = \"(.+?)\"", RegexOptions.Compiled);
-    private readonly Regex _kwikRegex = new("Plyr\\|(.+?)'", RegexOptions.Compiled);
-    readonly string API = Constants.AnimePahe + "api";
+    [GeneratedRegex("let id = \"(.+?)\"", RegexOptions.Compiled)]
+    private static partial Regex IdRegex();
+
+    [GeneratedRegex("Plyr\\|(.+?)'", RegexOptions.Compiled)]
+    private static partial Regex KwiwRegex();
+
+    public readonly string API = Constants.AnimePahe + "api";
     private readonly ILogger<AnimePaheStreamProvider> _logger;
 
     public AnimePaheStreamProvider(ILogger<AnimePaheStreamProvider> logger, HttpClient client) : base(client)
@@ -23,7 +27,7 @@ internal class AnimePaheStreamProvider : BaseStreamProvider
     public override async IAsyncEnumerable<VideoStreamsForEpisode> GetStreams(string url, Range range)
     {
         var doc = await Load(url);
-        var releaseId = _idRegex.Match(doc.Text).Groups[1].Value;
+        var releaseId = IdRegex().Match(doc.Text).Groups[1].Value;
 
         var fpd = GetSessionPage("1", releaseId).Result;
         if (fpd.last_page == 1)
@@ -93,7 +97,7 @@ internal class AnimePaheStreamProvider : BaseStreamProvider
         };
 
         var doc = web.Load(kwik);
-        var match = _kwikRegex.Match(doc.Text);
+        var match = KwiwRegex().Match(doc.Text);
 
         if (!match.Success)
         {

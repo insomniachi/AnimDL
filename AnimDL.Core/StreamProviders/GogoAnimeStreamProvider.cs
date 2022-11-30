@@ -8,13 +8,15 @@ using System.Text.RegularExpressions;
 
 namespace AnimDL.Core.StreamProviders;
 
-internal class GogoAnimeStreamProvider : BaseStreamProvider
+internal partial class GogoAnimeStreamProvider : BaseStreamProvider
 {
-    const string BASE_URL_STRIPPED = "https://gogoanime.lu";
-    const string EPISODE_LOAD_AJAX = "https://ajax.gogo-load.com/ajax/load-list-episode";
-    private readonly Regex _animeIdRegex = new("<input.*?value=\"([0-9]+)\".*?id=\"movie_id\"", RegexOptions.Compiled);
+    public const string BASE_URL_STRIPPED = "https://gogoanime.lu";
+    public const string EPISODE_LOAD_AJAX = "https://ajax.gogo-load.com/ajax/load-list-episode";
     private readonly GogoPlayExtractor _extractor;
     private readonly ILogger<GogoAnimeStreamProvider> _logger;
+
+    [GeneratedRegex("<input.*?value=\"([0-9]+)\".*?id=\"movie_id\"", RegexOptions.Compiled)]
+    private static partial Regex AnimeIdRegex();
 
     public GogoAnimeStreamProvider(GogoPlayExtractor extractor, ILogger<GogoAnimeStreamProvider> logger, HttpClient client) : base(client)
     {
@@ -26,7 +28,7 @@ internal class GogoAnimeStreamProvider : BaseStreamProvider
     {
         var html = await _client.GetStringAsync(url);
 
-        var match = _animeIdRegex.Match(html);
+        var match = AnimeIdRegex().Match(html);
 
         if (!match.Success)
         {
@@ -43,7 +45,7 @@ internal class GogoAnimeStreamProvider : BaseStreamProvider
             ["id"] = contentId
         });
 
-        var epMatch = Regex.Match(html, "EP.*?(\\d+)");
+        var epMatch = EpisodeRegex().Match(html);
 
         if(!epMatch.Success)
         {
@@ -57,7 +59,7 @@ internal class GogoAnimeStreamProvider : BaseStreamProvider
     {
         var html = await _client.GetStringAsync(url);
 
-        var match = _animeIdRegex.Match(html);
+        var match = AnimeIdRegex().Match(html);
 
         if(!match.Success)
         {
@@ -74,7 +76,7 @@ internal class GogoAnimeStreamProvider : BaseStreamProvider
             ["id"] = contentId
         });
 
-        var epMatch = Regex.Match(html, "EP.*?(\\d+)");
+        var epMatch = EpisodeRegex().Match(html);
 
         int start = 0;
         int end = 100000;
@@ -119,7 +121,7 @@ internal class GogoAnimeStreamProvider : BaseStreamProvider
         foreach (var item in doc.QuerySelectorAll("a[class=\"\"] , a[class=\"\"]").Reverse())
         {
             var embedUrl = BASE_URL_STRIPPED + item.Attributes["href"].Value.Trim();
-            var epMatch = Regex.Match(item.InnerHtml, "EP.*?(\\d+)");
+            var epMatch = EpisodeRegex().Match(item.InnerHtml);
             int ep = -1;
             
             if(epMatch.Success)
@@ -142,4 +144,7 @@ internal class GogoAnimeStreamProvider : BaseStreamProvider
         doc.Load(html);
         return $"https:{doc.QuerySelector("iframe").Attributes["src"].Value}";
     }
+
+    [GeneratedRegex("EP.*?(\\d+)")]
+    private static partial Regex EpisodeRegex();
 }

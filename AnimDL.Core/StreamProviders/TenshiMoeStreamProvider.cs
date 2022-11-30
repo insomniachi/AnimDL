@@ -7,10 +7,9 @@ using System.Text.RegularExpressions;
 
 namespace AnimDL.Core.StreamProviders;
 
-internal class TenshiMoeStreamProvider : BaseStreamProvider
+internal partial class TenshiMoeStreamProvider : BaseStreamProvider
 {
-    readonly string BASE_URL = Constants.Tenshi;
-    private readonly Regex _streamRegex = new("src: '(.*)',[\x00-\x7F]*?size: (\\d+)", RegexOptions.Compiled);
+    public readonly string BASE_URL = Constants.Tenshi;
     private readonly ILogger<TenshiMoeStreamProvider> _logger;
 
     public TenshiMoeStreamProvider(ILogger<TenshiMoeStreamProvider> logger, HttpClient client) : base(client)
@@ -67,7 +66,7 @@ internal class TenshiMoeStreamProvider : BaseStreamProvider
         var html = await client.GetStringAsync(embedStream);
 
         var streamsForEp = new VideoStreamsForEpisode();
-        foreach (Match match in _streamRegex.Matches(html))
+        foreach (Match match in StreamRegex().Matches(html))
         {
             var quality = match.Groups[2].Value;
 
@@ -80,4 +79,7 @@ internal class TenshiMoeStreamProvider : BaseStreamProvider
 
         return streamsForEp;
     }
+
+    [GeneratedRegex("src: '(.*)',[\0-\u007f]*?size: (\\d+)", RegexOptions.Compiled)]
+    private static partial Regex StreamRegex();
 }

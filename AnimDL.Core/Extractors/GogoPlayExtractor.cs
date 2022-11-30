@@ -4,15 +4,17 @@ using Microsoft.AspNetCore.WebUtilities;
 using System.Text.RegularExpressions;
 using System.Security.Cryptography;
 using System.Text;
-using AnimDL.Core.Helpers;
 using System.Text.Json.Nodes;
 
 namespace AnimDL.Core.Extractors;
 
-public class GogoPlayExtractor : IStreamExtractor
+public partial class GogoPlayExtractor : IStreamExtractor
 {
-    private readonly Regex _encryptionRegex = new("data-value=\"(.+?)\"", RegexOptions.Compiled);
-    private readonly Regex _keysRegex = new("(?:container|videocontent)-(\\d+)", RegexOptions.Compiled);
+    [GeneratedRegex("(?:container|videocontent)-(\\d+)", RegexOptions.Compiled)]
+    private static partial Regex KeysRegex();
+
+    [GeneratedRegex("data-value=\"(.+?)\"", RegexOptions.Compiled)]
+    private static partial Regex EncryptionRegex();
 
     public async Task<VideoStreamsForEpisode?> Extract(string url)
     {
@@ -22,11 +24,11 @@ public class GogoPlayExtractor : IStreamExtractor
         var nextHost = $"https://{uri.Host}/";
         var content = await client.GetStringAsync(url);
 
-        var matches = _keysRegex.Matches(content);
+        var matches = KeysRegex().Matches(content);
         var encryptionKey = matches[0].Groups[1].Value;
         var iv = matches[1].Groups[1].Value;
         var decryptionKey = matches[2].Groups[1].Value;
-        var encryptedData = _encryptionRegex.Match(content).Groups[1].Value;
+        var encryptedData = EncryptionRegex().Match(content).Groups[1].Value;
         
         var decrypted = Decrypt(encryptedData, encryptionKey, iv);
         var newUrl = $"{decrypted}&id={Encrypt(id, encryptionKey, iv)}&alias={id}";
@@ -44,7 +46,7 @@ public class GogoPlayExtractor : IStreamExtractor
 
         foreach (var item in jsonData["source"]!.AsArray())
         {
-            var quality = Regex.Match(item!["label"]!.ToString(), "(\\d+) P").Groups[1].Value;
+            var quality = QualityRegex().Match(item!["label"]!.ToString()).Groups[1].Value;
             quality = string.IsNullOrEmpty(quality) ? "default" : quality;
 
             streamForEp.Qualities.Add(quality, new VideoStream
@@ -82,4 +84,7 @@ public class GogoPlayExtractor : IStreamExtractor
         var result = decryptor.TransformFinalBlock(input, 0, input.Length);
         return Encoding.UTF8.GetString(result);
     }
+
+    [GeneratedRegex("(\\d+) P")]
+    private static partial Regex QualityRegex();
 }

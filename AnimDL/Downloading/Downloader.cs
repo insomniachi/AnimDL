@@ -23,7 +23,7 @@ public class Downloader : IDownloader
     public async Task Download(string url, string folder, string filenameWithExt, IDictionary<string,string>? headers = null)
     {
         var downloadFolder = _config["DownloadFolder"];
-        var specificDownloadFolder = Path.Combine(downloadFolder, folder);
+        var specificDownloadFolder = Path.Combine(downloadFolder!, folder);
         Directory.CreateDirectory(specificDownloadFolder);
         var filePath = Path.Combine(specificDownloadFolder, filenameWithExt);
 

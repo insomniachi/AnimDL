@@ -3,14 +3,32 @@ using System.Text.RegularExpressions;
 
 namespace AnimDL.Core.Helpers;
 
-public static class Bypass
+public static partial class Bypass
 {
-    const string RECAPTCHA_API_JS = "https://www.google.com/recaptcha/api.js";
+    public const string RECAPTCHA_API_JS = "https://www.google.com/recaptcha/api.js";
+
+    [GeneratedRegex("'(.*?)'")]
+    private static partial Regex BypassRegex();
+
+    [GeneratedRegex("recaptchaSiteKey = '(.+?)'")]
+    private static partial Regex RecaptchaSiteKeyRegex();
+
+    [GeneratedRegex("recaptchaNumber = '(\\d+?)'")]
+    private static partial Regex RecaptchaNumberRegex();
+
+    [GeneratedRegex("releases/([^/&?#]+)")]
+    private static partial Regex RecaptchaVersionRegex();
+
+    [GeneratedRegex("recaptcha-token.+?=\"(.+?)\"")]
+    private static partial Regex RecaptchaTokenRegex();
+
+    [GeneratedRegex("rresp\",\"(.+?)\"")]
+    private static partial Regex RecaptchaResponseTokenRegex();
 
     public static async Task BypassDDoS(this HttpClient client, string uri)
     {
         var text = await client.GetStringAsync("https://check.ddos-guard.net/check.js");
-        var match = Regex.Match(text, "'(.*?)'");
+        var match = BypassRegex().Match(text);
         await client.GetAsync(uri + match.Groups[1].Value);
     }
 
@@ -21,7 +39,7 @@ public static class Bypass
         var domain = EncodingHelper.ToBase64String(referer).TrimEnd('=') + ".";
 
         var initialPage = await client.GetStringAsync(url);
-        var match = Regex.Match(initialPage, "recaptchaSiteKey = '(.+?)'");
+        var match = RecaptchaSiteKeyRegex().Match(initialPage);
 
         if (!match.Success)
         {
@@ -29,7 +47,7 @@ public static class Bypass
         }
 
         var token = await GetTokenRecaptcha(client, domain, match.Groups[1].Value, referer);
-        match = Regex.Match(initialPage, "recaptchaNumber = '(\\d+?)'");
+        match = RecaptchaNumberRegex().Match(initialPage);
 
         if(!match.Success)
         {
@@ -45,14 +63,14 @@ public static class Bypass
             parameters: new() { ["render"] = "key" },
             headers: new() { ["referer"] = referer });
 
-        var match = Regex.Match(recaptchaOut, "releases/([^/&?#]+)");
+        var match = RecaptchaVersionRegex().Match(recaptchaOut);
 
         if (!match.Success)
         {
             return "";
         }
 
-        var token = match.Groups[1].Value;
+        var version = match.Groups[1].Value;
 
         var anchorOut = await client.GetStringAsync("https://www.google.com/recaptcha/api2/anchor", parameters: new()
         {
@@ -60,12 +78,12 @@ public static class Bypass
             ["k"] = key,
             ["co"] = domain,
             ["hl"] = "en",
-            ["v"] = token,
+            ["v"] = version,
             ["size"] = "invisible",
             ["cb"] = "kr42069kr"
         });
 
-        match = Regex.Match(anchorOut, "recaptcha-token.+?=\"(.+?)\"");
+        match = RecaptchaTokenRegex().Match(anchorOut);
 
         if(!match.Success)
         {
@@ -79,7 +97,7 @@ public static class Bypass
 
         var tokenOut = await client.PostFormUrlEncoded(reloadUrl, new Dictionary<string, string>
         {
-            ["v"] = token,
+            ["v"] = version,
             ["reason"] = "q",
             ["k"] = key,
             ["c"] = recaptchaToken,
@@ -87,7 +105,7 @@ public static class Bypass
             ["co"] = domain
         });
 
-        match = Regex.Match(tokenOut, "rresp\",\"(.+?)\"");
+        match = RecaptchaResponseTokenRegex().Match(tokenOut);
 
         if(!match.Success)
         {

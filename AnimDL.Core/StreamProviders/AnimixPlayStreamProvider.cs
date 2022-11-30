@@ -9,14 +9,20 @@ using System.Text.RegularExpressions;
 
 namespace AnimDL.Core.StreamProviders;
 
-internal class AnimixPlayStreamProvider : BaseStreamProvider
+internal partial class AnimixPlayStreamProvider : BaseStreamProvider
 {
-    static readonly string API = Constants.AnimixPlay + "api/cW9";
+    public static readonly string API = Constants.AnimixPlay + "api/cW9";
     private readonly ILogger<AnimixPlayStreamProvider> _logger;
+
+    [GeneratedRegex("iframesrc=\"(.+?)\"", RegexOptions.Compiled)]
+    private static partial Regex VideoMatcherRegex();
     
-    private static readonly Regex _videoMatcherRegex = new("iframesrc=\"(.+?)\"", RegexOptions.Compiled);
-    private static readonly Regex _m3u8MatcherRegex = new("player\\.html[?#](.+?)#", RegexOptions.Compiled);
-    private static readonly Regex _embedB64MatcherRegex = new("#(aHR0[^#]+)", RegexOptions.Compiled);
+    [GeneratedRegex("player\\.html[?#](.+?)#", RegexOptions.Compiled)]
+    private static partial Regex M3U8MatcherRegex();
+
+    [GeneratedRegex("#(aHR0[^#]+)", RegexOptions.Compiled)]
+    private static partial Regex EmbedB64MatcherRegex();
+    
     private static readonly IReadOnlyDictionary<string, string> _urlAliases = new Dictionary<string, string>()
     {
         ["bestanimescdn"] = "omega.kawaiifucdn.xyz/anime3",
@@ -132,7 +138,7 @@ internal class AnimixPlayStreamProvider : BaseStreamProvider
             _logger.LogError("unable to extract from embed, Status - {Status}", HttpStatusCode.Forbidden);
         }
 
-        var match = _videoMatcherRegex.Match(doc.Text);
+        var match = VideoMatcherRegex().Match(doc.Text);
 
         return match.Success
             ? ExtractFromUrl(match.Groups[1].Value.ToString())
@@ -141,10 +147,10 @@ internal class AnimixPlayStreamProvider : BaseStreamProvider
 
     private string ExtractFromUrl(string url)
     {
-        var match = _m3u8MatcherRegex.Match(url);
+        var match = M3U8MatcherRegex().Match(url);
         if (!match.Success)
         {
-            match = _embedB64MatcherRegex.Match(url);
+            match = EmbedB64MatcherRegex().Match(url);
         }
         if (!match.Success)
         {

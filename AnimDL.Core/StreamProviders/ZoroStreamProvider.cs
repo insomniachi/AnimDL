@@ -9,7 +9,7 @@ using System.Text.RegularExpressions;
 
 namespace AnimDL.Core.StreamProviders;
 
-internal class ZoroStreamProvider : BaseStreamProvider
+internal partial class ZoroStreamProvider : BaseStreamProvider
 {
     private readonly ILogger<ZoroStreamProvider> _logger;
     private readonly RapidVideoExtractor _extractor;
@@ -36,7 +36,7 @@ internal class ZoroStreamProvider : BaseStreamProvider
 
     public override async IAsyncEnumerable<VideoStreamsForEpisode> GetStreams(string url, Range range)
     {
-        var match = Regex.Match(url, "(/watch)?/[\\w-]+-(\\d+)");
+        var match = SlugRegex().Match(url);
 
         if (!match.Success)
         {
@@ -164,4 +164,7 @@ internal class ZoroStreamProvider : BaseStreamProvider
         }
 
     }
+
+    [GeneratedRegex("(/watch)?/[\\w-]+-(\\d+)")]
+    private static partial Regex SlugRegex();
 }

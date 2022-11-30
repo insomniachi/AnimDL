@@ -6,7 +6,7 @@ using HtmlAgilityPack.CssSelectors.NetCore;
 
 namespace AnimDL.Core.StreamProviders;
 
-internal class YugenAnimeStreamProvider : BaseStreamProvider
+internal partial class YugenAnimeStreamProvider : BaseStreamProvider
 {
     const string BASE_URL = "https://yugen.to/";
     const string EMBED_URL = "https://yugen.to/api/embed/";
@@ -28,7 +28,7 @@ internal class YugenAnimeStreamProvider : BaseStreamProvider
                            .Where(x => x?.Contains("Episodes") == true)
                            .First();
 
-        var match = Regex.Match(epSection, @"(\d+)");
+        var match = EpisodeRegex().Match(epSection);
 
         if(!match.Success)
         {
@@ -79,4 +79,7 @@ internal class YugenAnimeStreamProvider : BaseStreamProvider
 
         yield break;
     }
+
+    [GeneratedRegex("(\\d+)")]
+    private static partial Regex EpisodeRegex();
 }

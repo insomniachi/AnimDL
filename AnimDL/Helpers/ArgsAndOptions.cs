@@ -9,14 +9,14 @@ public class AppArguments
     public static readonly Argument<string> Title = new("Title", "Title of anime to search");
 }
 
-public static class AppOptions
+public static partial class AppOptions
 {
     public static readonly Option<ProviderType> ProviderType = new(new[] { "-p", "--provider" }, "provider name");
     public static readonly Option<MediaPlayerType> MediaPlayer = new(new[] { "--player" }, () => MediaPlayerType.Vlc, "media player to stream.");
     public static readonly Option<Range> Range = new(aliases: new[] { "-r", "--range" }, description: "range of episodes", parseArgument: x =>
     {
         var str = x.Tokens[0].Value;
-        var match = Regex.Match(str, @"(?'startFromEnd'\^)?(?'start'\d+)(?'isRange'..)?(?'endFromEnd'\^)?(?'end'\d+)?");
+        var match = RangeRegex().Match(str);
 
         if (!match.Success)
         {
@@ -48,4 +48,7 @@ public static class AppOptions
         Range.Arity = ArgumentArity.ZeroOrOne;
         ProviderType.AddCompletions(Enum.GetNames<ProviderType>());
     }
+
+    [GeneratedRegex("(?'startFromEnd'\\^)?(?'start'\\d+)(?'isRange'..)?(?'endFromEnd'\\^)?(?'end'\\d+)?")]
+    private static partial Regex RangeRegex();
 }

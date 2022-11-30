@@ -8,7 +8,7 @@ using System.Text.RegularExpressions;
 
 namespace AnimDL.Core.Extractors
 {
-    internal class RapidVideoExtractor : IStreamExtractor
+    internal partial class RapidVideoExtractor : IStreamExtractor
     {
         const string POLLING_URL = "https://ws1.rapid-cloud.ru/socket.io/";
         private readonly Dictionary<string, string> _pollingParameters = new()
@@ -19,6 +19,13 @@ namespace AnimDL.Core.Extractors
         private readonly ILogger<RapidVideoExtractor> _logger;
         private readonly HttpClient _client;
         private string _sid = "";
+
+
+        [GeneratedRegex("embed-6/([^?#&/.]+)")]
+        private static partial Regex ContentIdRegex();
+
+        [GeneratedRegex("(\\d+)(.+)")]
+        private static partial Regex ClientCheckRegex();
 
         public RapidVideoExtractor(ILogger<RapidVideoExtractor> logger)
         {
@@ -48,7 +55,7 @@ namespace AnimDL.Core.Extractors
 
             cts.Cancel();
 
-            var match = Regex.Match(url, "embed-6/([^?#&/.]+)");
+            var match = ContentIdRegex().Match(url);
 
             if (!match.Success)
             {
@@ -159,7 +166,7 @@ namespace AnimDL.Core.Extractors
 
         private static (int id, string json) ParseResponse(string text)
         {
-            var match = Regex.Match(text, "(\\d+)(.+)");
+            var match = ClientCheckRegex().Match(text);
 
             if (match.Success)
             {
