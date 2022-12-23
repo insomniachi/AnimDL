@@ -12,9 +12,23 @@ internal partial class YugenAnimeStreamProvider : BaseStreamProvider
     {
     }
 
-    public override Task<int> GetNumberOfStreams(string url)
+    public override async Task<int> GetNumberOfStreams(string url)
     {
-        return base.GetNumberOfStreams(url);
+        var doc = await Load(url + "watch");
+
+        var epSection = doc.QuerySelectorAll(".data")
+                           .Select(x => x.InnerText)
+                           .Where(x => x?.Contains("Episodes") == true)
+                           .First();
+
+        var match = EpisodeRegex().Match(epSection);
+
+        if (!match.Success)
+        {
+            return 0;
+        }
+
+        return int.Parse(match.Groups[1].Value);
     }
 
     public override async IAsyncEnumerable<VideoStreamsForEpisode> GetStreams(string url, Range range)

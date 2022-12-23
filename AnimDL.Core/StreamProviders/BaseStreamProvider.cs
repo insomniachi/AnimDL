@@ -1,14 +1,12 @@
-﻿using AnimDL.Core.Api;
+﻿using System.Net;
+using AnimDL.Core.Api;
 using AnimDL.Core.Models;
 using HtmlAgilityPack;
 using Microsoft.Extensions.Caching.Memory;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
 
 namespace AnimDL.Core.StreamProviders;
 
-internal abstract class BaseStreamProvider : IStreamProvider
+public abstract class BaseStreamProvider : IStreamProvider
 {
     protected readonly HtmlWeb _session = new();
     protected HttpStatusCode _statusCode = HttpStatusCode.OK;

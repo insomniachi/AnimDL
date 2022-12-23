@@ -8,7 +8,7 @@ using System.Text.RegularExpressions;
 
 namespace AnimDL.Core.StreamProviders;
 
-internal partial class GogoAnimeStreamProvider : BaseStreamProvider
+public partial class GogoAnimeStreamProvider : BaseStreamProvider
 {
     private readonly string _baseUrlStripped;
     public const string EPISODE_LOAD_AJAX = "https://ajax.gogo-load.com/ajax/load-list-episode";
@@ -28,7 +28,7 @@ internal partial class GogoAnimeStreamProvider : BaseStreamProvider
 
     public override async Task<int> GetNumberOfStreams(string url)
     {
-        var html = await _client.GetStringAsync(url);
+        var html = await _client.GetStringAsync(ConvertHost(url));
 
         var match = AnimeIdRegex().Match(html);
 
@@ -59,7 +59,7 @@ internal partial class GogoAnimeStreamProvider : BaseStreamProvider
 
     public override async IAsyncEnumerable<VideoStreamsForEpisode> GetStreams(string url, Range range)
     {
-        var html = await _client.GetStringAsync(url);
+        var html = await _client.GetStringAsync(ConvertHost(url));
 
         var match = AnimeIdRegex().Match(html);
 
@@ -147,6 +147,15 @@ internal partial class GogoAnimeStreamProvider : BaseStreamProvider
         return $"https:{doc.QuerySelector("iframe").Attributes["src"].Value}";
     }
 
+    private static string ConvertHost(string url)
+    {
+        var converted = UrlRegex().Replace(url, DefaultUrl.GogoAnime);
+        return converted;
+    }
+
     [GeneratedRegex("EP.*?(\\d+)")]
     private static partial Regex EpisodeRegex();
+   
+    [GeneratedRegex("https?://gogoanime.\\w*/")]
+    private static partial Regex UrlRegex();
 }
