@@ -8,8 +8,6 @@ namespace AnimDL.Core.StreamProviders;
 
 internal partial class YugenAnimeStreamProvider : BaseStreamProvider
 {
-    const string BASE_URL = "https://yugen.to/";
-    const string EMBED_URL = "https://yugen.to/api/embed/";
     public YugenAnimeStreamProvider(HttpClient client) : base(client)
     {
     }
@@ -44,7 +42,7 @@ internal partial class YugenAnimeStreamProvider : BaseStreamProvider
 
         for (int i = start; i <= end; i++)
         {
-            var epUrl = $"{BASE_URL}watch/{number}/{slug}/{i}/";
+            var epUrl = $"{DefaultUrl.Yugen}watch/{number}/{slug}/{i}/";
             doc = await Load(epUrl);
             var text = doc.Text;
             var iframeUrl = doc.QuerySelector("iframe").Attributes["src"].Value;
@@ -52,7 +50,7 @@ internal partial class YugenAnimeStreamProvider : BaseStreamProvider
             uri = new UriBuilder(iframeUrl).Uri;
             var key = uri.Segments[^1].TrimEnd('/');
 
-            var json = await _client.PostFormUrlEncoded(EMBED_URL, new() 
+            var json = await _client.PostFormUrlEncoded($"{DefaultUrl.Yugen}api/embed/", new() 
             {
                 ["id"] = key,
                 ["ac"] = "0" 
