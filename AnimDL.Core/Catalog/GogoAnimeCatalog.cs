@@ -2,14 +2,12 @@
 using AnimDL.Core.Helpers;
 using AnimDL.Core.Models;
 using HtmlAgilityPack;
-using Microsoft.Extensions.Logging;
 
 namespace AnimDL.Core.Catalog;
 
 public class GogoAnimeCatalog : ICatalog
 {
-    const string SEARCH_URL = "https://gogoanime.lu/search.html";
-    const string BASE_URL = "https://gogoanime.lu/";
+    readonly string SEARCH_URL = $"{DefaultUrl.GogoAnime}search.html";
     private readonly HttpClient _client;
 
     public GogoAnimeCatalog(HttpClient client)
@@ -29,7 +27,7 @@ public class GogoAnimeCatalog : ICatalog
             yield return new SearchResult
             {
                 Title = item.Attributes["title"].Value,
-                Url = BASE_URL + item.Attributes["href"].Value,
+                Url = DefaultUrl.GogoAnime + item.Attributes["href"].Value,
             };
         }
     }

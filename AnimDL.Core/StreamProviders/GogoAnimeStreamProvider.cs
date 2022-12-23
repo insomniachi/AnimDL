@@ -10,7 +10,7 @@ namespace AnimDL.Core.StreamProviders;
 
 internal partial class GogoAnimeStreamProvider : BaseStreamProvider
 {
-    public const string BASE_URL_STRIPPED = "https://gogoanime.lu";
+    private readonly string _baseUrlStripped;
     public const string EPISODE_LOAD_AJAX = "https://ajax.gogo-load.com/ajax/load-list-episode";
     private readonly GogoPlayExtractor _extractor;
     private readonly ILogger<GogoAnimeStreamProvider> _logger;
@@ -22,6 +22,8 @@ internal partial class GogoAnimeStreamProvider : BaseStreamProvider
     {
         _extractor = extractor;
         _logger = logger;
+
+        _baseUrlStripped = DefaultUrl.GogoAnime.EndsWith("/") || DefaultUrl.GogoAnime.EndsWith("\\") ? DefaultUrl.GogoAnime[..^1] : DefaultUrl.GogoAnime;
     }
 
     public override async Task<int> GetNumberOfStreams(string url)
@@ -120,7 +122,7 @@ internal partial class GogoAnimeStreamProvider : BaseStreamProvider
 
         foreach (var item in doc.QuerySelectorAll("a[class=\"\"] , a[class=\"\"]").Reverse())
         {
-            var embedUrl = BASE_URL_STRIPPED + item.Attributes["href"].Value.Trim();
+            var embedUrl = _baseUrlStripped + item.Attributes["href"].Value.Trim();
             var epMatch = EpisodeRegex().Match(item.InnerHtml);
             int ep = -1;
             

@@ -9,7 +9,7 @@ namespace AnimDL.Core.StreamProviders;
 
 internal partial class TenshiMoeStreamProvider : BaseStreamProvider
 {
-    public readonly string BASE_URL = Constants.Tenshi;
+    public readonly string BASE_URL = DefaultUrl.Tenshi;
     private readonly ILogger<TenshiMoeStreamProvider> _logger;
 
     public TenshiMoeStreamProvider(ILogger<TenshiMoeStreamProvider> logger, HttpClient client) : base(client)

@@ -45,11 +45,11 @@ internal partial class ZoroStreamProvider : BaseStreamProvider
         }
 
         var slug = match.Groups[2].Value;
-        var ajax = $"{Constants.Zoro}ajax/v2/episode/list/{slug}";
+        var ajax = $"{DefaultUrl.Zoro}ajax/v2/episode/list/{slug}";
         var jsonString = await _client.GetStringAsync(ajax, headers: new()
         {
             ["X-Requested-With"] = "XMLHttpRequest",
-            ["Referer"] = Constants.Zoro
+            ["Referer"] = DefaultUrl.Zoro
         });
 
         if (JsonNode.Parse(jsonString) is not { } responseNode)
@@ -106,7 +106,7 @@ internal partial class ZoroStreamProvider : BaseStreamProvider
 
     private async IAsyncEnumerable<VideoStreamsForEpisode?> ExtractEpisodes(string dataId, string title)
     {
-        var jsonString = await _client.GetStringAsync(Constants.Zoro + "ajax/v2/episode/servers", parameters: new() { ["episodeId"] = dataId });
+        var jsonString = await _client.GetStringAsync(DefaultUrl.Zoro + "ajax/v2/episode/servers", parameters: new() { ["episodeId"] = dataId });
 
         if (JsonNode.Parse(jsonString) is not { } responseNode)
         {
@@ -125,7 +125,7 @@ internal partial class ZoroStreamProvider : BaseStreamProvider
 
         foreach (var item in doc.QuerySelectorAll("div.server-item"))
         {
-            jsonString = await _client.GetStringAsync(Constants.Zoro + "ajax/v2/episode/sources", parameters: new()
+            jsonString = await _client.GetStringAsync(DefaultUrl.Zoro + "ajax/v2/episode/sources", parameters: new()
             {
                 ["id"] = item.Attributes["data-id"].Value
             });

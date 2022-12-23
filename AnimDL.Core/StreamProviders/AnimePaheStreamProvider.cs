@@ -16,7 +16,7 @@ internal partial class AnimePaheStreamProvider : BaseStreamProvider
     [GeneratedRegex("Plyr\\|(.+?)'", RegexOptions.Compiled)]
     private static partial Regex KwiwRegex();
 
-    public readonly string API = Constants.AnimePahe + "api";
+    public readonly string API = DefaultUrl.AnimePahe + "api";
     private readonly ILogger<AnimePaheStreamProvider> _logger;
 
     public AnimePaheStreamProvider(ILogger<AnimePaheStreamProvider> logger, HttpClient client) : base(client)

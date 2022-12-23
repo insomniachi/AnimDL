@@ -11,7 +11,7 @@ namespace AnimDL.Core.StreamProviders;
 
 internal partial class AnimixPlayStreamProvider : BaseStreamProvider
 {
-    public static readonly string API = Constants.AnimixPlay + "api/cW9";
+    public static readonly string API = DefaultUrl.AnimixPlay + "api/cW9";
     private readonly ILogger<AnimixPlayStreamProvider> _logger;
 
     [GeneratedRegex("iframesrc=\"(.+?)\"", RegexOptions.Compiled)]

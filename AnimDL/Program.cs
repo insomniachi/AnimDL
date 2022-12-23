@@ -52,6 +52,12 @@ public class Program
 
     static void Initialize(IConfiguration config)
     {
+        DefaultUrl.AnimixPlay = config["ProviderUrls:AnimixPlay"] ?? DefaultUrl.AnimixPlay;
+        DefaultUrl.AnimePahe = config["ProviderUrls:AnimePahe"] ?? DefaultUrl.AnimePahe;
+        DefaultUrl.GogoAnime = config["ProviderUrls:GogoAnime"] ?? DefaultUrl.GogoAnime;
+        DefaultUrl.Tenshi = config["ProviderUrls:Tenshi"] ?? DefaultUrl.Tenshi;
+        DefaultUrl.Zoro = config["ProviderUrls:Zoro"] ?? DefaultUrl.Zoro;
+
         AppOptions.ProviderType.SetDefaultValue(config.GetValue<ProviderType>("DefaultProvider"));
         if (config.GetValue<bool>("UseRichPresense"))
         {

@@ -8,7 +8,7 @@ namespace AnimDL.Core.Catalog;
 
 internal class ZoroCatalog : ICatalog
 {
-    readonly string SEARCH_URL = Constants.Zoro + "search";
+    readonly string SEARCH_URL = DefaultUrl.Zoro + "search";
 
     public async IAsyncEnumerable<SearchResult> Search(string query)
     {
@@ -22,7 +22,7 @@ internal class ZoroCatalog : ICatalog
             yield return new SearchResult
             {
                 Title = item.Attributes["title"].Value,
-                Url = string.Concat(Constants.Zoro.TrimEnd('/'), animePageUrl.AsSpan(0, animePageUrl.Length - 11))
+                Url = string.Concat(DefaultUrl.Zoro.TrimEnd('/'), animePageUrl.AsSpan(0, animePageUrl.Length - 11))
             };
         }
     }

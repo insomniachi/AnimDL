@@ -32,7 +32,7 @@ namespace AnimDL.Core.Extractors
             _logger = logger;
             _client = new HttpClient();
             _client.DefaultRequestHeaders.Add("X-Requested-With", "XMLHttpRequest");
-            _client.DefaultRequestHeaders.Referrer = new(Constants.Zoro);
+            _client.DefaultRequestHeaders.Referrer = new(DefaultUrl.Zoro);
         }
 
         public async Task<VideoStreamsForEpisode?> Extract(string url)
