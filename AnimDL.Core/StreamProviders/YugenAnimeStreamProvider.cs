@@ -83,7 +83,7 @@ internal partial class YugenAnimeStreamProvider : BaseStreamProvider
                     ["default"] = new VideoStream
                     {
                         Quality = "default",
-                        Url = jObject!["hls"]!.ToString()
+                        Url = jObject!["hls"]!.AsArray()!.FirstOrDefault()!.ToString(),
                     }
                 }
             };

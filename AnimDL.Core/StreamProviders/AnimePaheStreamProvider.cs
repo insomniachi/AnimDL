@@ -8,7 +8,7 @@ using System.Text.RegularExpressions;
 
 namespace AnimDL.Core.StreamProviders;
 
-internal partial class AnimePaheStreamProvider : BaseStreamProvider
+public partial class AnimePaheStreamProvider : BaseStreamProvider
 {
     [GeneratedRegex("let id = \"(.+?)\"", RegexOptions.Compiled)]
     private static partial Regex IdRegex();
@@ -30,9 +30,10 @@ internal partial class AnimePaheStreamProvider : BaseStreamProvider
         var releaseId = IdRegex().Match(doc.Text).Groups[1].Value;
 
         var fpd = GetSessionPage("1", releaseId).Result;
+        var (start, end) = range.Extract(fpd.total);
         if (fpd.last_page == 1)
         {
-            foreach (var item in fpd.data)
+            foreach (var item in fpd.data.Where(x => x.episode >= start && x.episode <= end))
             {
                 var streams = new VideoStreamsForEpisode
                 {
@@ -43,12 +44,19 @@ internal partial class AnimePaheStreamProvider : BaseStreamProvider
                 
                 foreach (var kv in stringUrls)
                 {
-                    streams.Qualities.Add(kv.Key, new VideoStream
+                    try
                     {
-                        Quality = kv.Key,
-                        Headers = new Dictionary<string, string> { [Headers.Referer] = kv.Value.kwik },
-                        Url = GetStreamFromEmbedUrl(kv.Value.kwik)
-                    });
+                        streams.Qualities.Add(kv.Key, new VideoStream
+                        {
+                            Quality = kv.Key,
+                            Headers = new Dictionary<string, string> { [Headers.Referer] = kv.Value.kwik },
+                            Url = GetStreamFromEmbedUrl(kv.Value.kwik)
+                        });
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex, ex.Message);
+                    }
                 }
 
                 yield return streams;

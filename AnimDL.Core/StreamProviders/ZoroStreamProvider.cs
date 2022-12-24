@@ -9,7 +9,7 @@ using System.Text.RegularExpressions;
 
 namespace AnimDL.Core.StreamProviders;
 
-internal partial class ZoroStreamProvider : BaseStreamProvider
+public partial class ZoroStreamProvider : BaseStreamProvider
 {
     private readonly ILogger<ZoroStreamProvider> _logger;
     private readonly RapidVideoExtractor _extractor;

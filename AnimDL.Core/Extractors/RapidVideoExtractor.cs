@@ -8,7 +8,7 @@ using System.Text.RegularExpressions;
 
 namespace AnimDL.Core.Extractors
 {
-    internal partial class RapidVideoExtractor : IStreamExtractor
+    public partial class RapidVideoExtractor : IStreamExtractor
     {
         const string POLLING_URL = "https://ws1.rapid-cloud.ru/socket.io/";
         private readonly Dictionary<string, string> _pollingParameters = new()

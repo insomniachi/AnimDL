@@ -23,9 +23,9 @@ public class VlcMediaPlayer : IMediaPlayer
     {
         var args = $"{stream.Url} --meta-title \"{title}\" --play-and-exit";
 
-        if(stream.Headers.ContainsKey(Headers.Referer))
+        if(stream.Headers.TryGetValue(Headers.Referer, out string? value))
         {
-            args += $" --http-referrer={stream.Headers[Headers.Referer]}";
+            args += $" --http-referrer={value}";
         }
         
         _ = await Cli.Wrap(Executable)
