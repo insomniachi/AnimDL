@@ -9,7 +9,7 @@ internal class YugenAnimeAiredEpisodesProvider : IAiredEpisodeProvider
 {
     private readonly HtmlWeb _web = new();
 
-    class YugenAnimeAiredEpisode : AiredEpisode 
+    class YugenAnimeAiredEpisode : AiredEpisode
     {
         public DateTime TimeOfAiring { get; set; }
     }

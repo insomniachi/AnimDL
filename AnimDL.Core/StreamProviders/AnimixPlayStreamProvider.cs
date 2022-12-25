@@ -1,12 +1,11 @@
-﻿using AnimDL.Core.Helpers;
-using AnimDL.Core.Models;
-using Microsoft.AspNetCore.WebUtilities;
-using Microsoft.Extensions.Logging;
-using Splat;
-using System.Net;
+﻿using System.Net;
 using System.Text;
 using System.Text.Json.Nodes;
 using System.Text.RegularExpressions;
+using AnimDL.Core.Helpers;
+using AnimDL.Core.Models;
+using Microsoft.AspNetCore.WebUtilities;
+using Splat;
 
 namespace AnimDL.Core.StreamProviders;
 
@@ -17,13 +16,13 @@ internal partial class AnimixPlayStreamProvider : BaseStreamProvider
 
     [GeneratedRegex("iframesrc=\"(.+?)\"", RegexOptions.Compiled)]
     private static partial Regex VideoMatcherRegex();
-    
+
     [GeneratedRegex("player\\.html[?#](.+?)#", RegexOptions.Compiled)]
     private static partial Regex M3U8MatcherRegex();
 
     [GeneratedRegex("#(aHR0[^#]+)", RegexOptions.Compiled)]
     private static partial Regex EmbedB64MatcherRegex();
-    
+
     private static readonly IReadOnlyDictionary<string, string> _urlAliases = new Dictionary<string, string>()
     {
         ["bestanimescdn"] = "omega.kawaiifucdn.xyz/anime3",
@@ -59,8 +58,8 @@ internal partial class AnimixPlayStreamProvider : BaseStreamProvider
             this.Log().Error("unable to find element \"epslistplace\"");
             yield break;
         }
-        
-        if(JsonNode.Parse(eps) is not { } node)
+
+        if (JsonNode.Parse(eps) is not { } node)
         {
             this.Log().Error("unable to parse {Json}", eps);
             yield break;
@@ -86,11 +85,11 @@ internal partial class AnimixPlayStreamProvider : BaseStreamProvider
 
             var epUrl = GetStreamUrl(epNode.ToString());
 
-            if(string.IsNullOrEmpty(epUrl))
+            if (string.IsNullOrEmpty(epUrl))
             {
                 continue;
             }
-            
+
             if (!string.IsNullOrEmpty(epUrl))
             {
                 yield return new()

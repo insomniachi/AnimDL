@@ -3,7 +3,7 @@
 public class VideoStream
 {
     public string Quality { get; set; } = string.Empty;
-    public Dictionary<string,string> Headers { get; set; } = new();
+    public Dictionary<string, string> Headers { get; set; } = new();
     public string Url { get; set; } = string.Empty;
 }
 

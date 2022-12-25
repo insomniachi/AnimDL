@@ -56,9 +56,12 @@ internal class Qualities
 
     public (string, Quality) GetActive()
     {
-        if (QHD is not null) return ("360", QHD);
-        if (HD is not null) return ("720", HD);
-        if (FHD is not null) return ("1080", FHD);
+        if (QHD is not null)
+            return ("360", QHD);
+        if (HD is not null)
+            return ("720", HD);
+        if (FHD is not null)
+            return ("1080", FHD);
         return ("", new());
     }
 }

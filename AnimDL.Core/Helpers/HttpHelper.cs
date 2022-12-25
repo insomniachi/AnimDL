@@ -23,7 +23,7 @@ internal static class HttpHelper
         content.Headers.Clear();
         content.Headers.Add("Content-Type", "application/x-www-form-urlencoded");
 
-        if(headers is not null)
+        if (headers is not null)
         {
             using var request = new HttpRequestMessage(HttpMethod.Post, url);
             foreach (var header in headers)

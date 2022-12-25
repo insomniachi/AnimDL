@@ -1,10 +1,10 @@
-﻿using AnimDL.Core.Api;
-using AnimDL.Core.Models;
-using Microsoft.AspNetCore.WebUtilities;
-using System.Text.RegularExpressions;
-using System.Security.Cryptography;
+﻿using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json.Nodes;
+using System.Text.RegularExpressions;
+using AnimDL.Core.Api;
+using AnimDL.Core.Models;
+using Microsoft.AspNetCore.WebUtilities;
 
 namespace AnimDL.Core.Extractors;
 
@@ -29,7 +29,7 @@ public partial class GogoPlayExtractor : IStreamExtractor
         var iv = matches[1].Groups[1].Value;
         var decryptionKey = matches[2].Groups[1].Value;
         var encryptedData = EncryptionRegex().Match(content).Groups[1].Value;
-        
+
         var decrypted = Decrypt(encryptedData, encryptionKey, iv);
         var newUrl = $"{decrypted}&id={Encrypt(id, encryptionKey, iv)}&alias={id}";
         var component = newUrl.Split("&", 2)[1];
@@ -73,7 +73,7 @@ public partial class GogoPlayExtractor : IStreamExtractor
         return Convert.ToBase64String(result);
     }
 
-    private static string Decrypt(string data,string key, string iv)
+    private static string Decrypt(string data, string key, string iv)
     {
         using var aes = Aes.Create();
         aes.Key = Encoding.UTF8.GetBytes(key);

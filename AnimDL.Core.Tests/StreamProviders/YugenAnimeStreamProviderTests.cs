@@ -1,4 +1,5 @@
 ﻿using AnimDL.Core.AiredEpisodesProvider;
+using AnimDL.Core.Catalog;
 using AnimDL.Core.StreamProviders;
 
 namespace AnimDL.Core.Tests.StreamProviders
@@ -20,6 +21,13 @@ namespace AnimDL.Core.Tests.StreamProviders
         {
             var provider = new YugenAnimeAiredEpisodesProvider();
             var result = await provider.GetRecentlyAiredEpisodes();
+        }
+
+        [Fact]
+        public async Task AllAnime()
+        {
+            var catalog = new AllAnimeCatalog();
+            var result = await catalog.Search("hyouka").ToListAsync();
         }
     }
 }

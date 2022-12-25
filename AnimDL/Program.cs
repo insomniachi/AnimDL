@@ -1,6 +1,7 @@
 ﻿using AnimDL.Api;
 using AnimDL.Commands;
 using AnimDL.Core;
+using AnimDL.Core.Api;
 using AnimDL.Downloading;
 using AnimDL.Helpers;
 using Microsoft.Extensions.Configuration;

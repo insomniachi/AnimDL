@@ -36,7 +36,7 @@ public class AnimixPlayCatalog : ICatalog, IMalCatalog, IEnableLogger
             yield break;
         }
 
-        if(string.IsNullOrEmpty(html))
+        if (string.IsNullOrEmpty(html))
         {
             this.Log().Error("result does not contain data.");
             yield break;

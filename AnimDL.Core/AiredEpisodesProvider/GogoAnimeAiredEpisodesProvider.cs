@@ -1,5 +1,4 @@
-﻿using System.Text.RegularExpressions;
-using AnimDL.Core.Api;
+﻿using AnimDL.Core.Api;
 using AnimDL.Core.Models;
 using HtmlAgilityPack;
 using HtmlAgilityPack.CssSelectors.NetCore;
@@ -9,15 +8,9 @@ namespace AnimDL.Core.AiredEpisodesProvider;
 public partial class GogoAnimeEpisodesProvider : IAiredEpisodeProvider
 {
     public const string AJAX_URL = "https://ajax.gogo-load.com/ajax/page-recent-release.html?page=1&type=1";
-    private readonly string _urlStripped;
     private readonly HtmlWeb _web = new();
 
     class GogoAnimeAiredEpisode : AiredEpisode { }
-
-    public GogoAnimeEpisodesProvider()
-    {
-        _urlStripped = DefaultUrl.GogoAnime.EndsWith("/") || DefaultUrl.GogoAnime.EndsWith("\\") ? DefaultUrl.GogoAnime[..^1] : DefaultUrl.GogoAnime;
-    }
 
     public async Task<IEnumerable<AiredEpisode>> GetRecentlyAiredEpisodes()
     {
@@ -26,10 +19,12 @@ public partial class GogoAnimeEpisodesProvider : IAiredEpisodeProvider
         var nodes = doc.QuerySelectorAll(".items li");
         var list = new List<AiredEpisode>();
 
+        var uriBuilder = new UriBuilder(DefaultUrl.GogoAnime);
         foreach (var item in nodes)
         {
             var title = item.SelectSingleNode("div/a").Attributes["title"].Value;
-            var url = _urlStripped + item.SelectSingleNode("div/a").Attributes["href"].Value;
+            uriBuilder.Path = item.SelectSingleNode("div/a").Attributes["href"].Value;
+            var url = uriBuilder.Uri.AbsoluteUri;
             var img = item.SelectSingleNode("div/a/img").Attributes["src"].Value;
             var ep = item.QuerySelector(".episode").InnerText.Trim();
             list.Add(new GogoAnimeAiredEpisode

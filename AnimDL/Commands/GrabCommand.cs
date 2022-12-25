@@ -1,4 +1,4 @@
-﻿using AnimDL.Api;
+﻿using AnimDL.Core.Api;
 using AnimDL.Helpers;
 using Microsoft.Extensions.Logging;
 using Sharprompt;

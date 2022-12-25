@@ -1,5 +1,5 @@
-﻿using Microsoft.AspNetCore.WebUtilities;
-using System.Text.RegularExpressions;
+﻿using System.Text.RegularExpressions;
+using Microsoft.AspNetCore.WebUtilities;
 
 namespace AnimDL.Core.Helpers;
 
@@ -49,7 +49,7 @@ public static partial class Bypass
         var token = await GetTokenRecaptcha(client, domain, match.Groups[1].Value, referer);
         match = RecaptchaNumberRegex().Match(initialPage);
 
-        if(!match.Success)
+        if (!match.Success)
         {
             return null;
         }
@@ -85,7 +85,7 @@ public static partial class Bypass
 
         match = RecaptchaTokenRegex().Match(anchorOut);
 
-        if(!match.Success)
+        if (!match.Success)
         {
             return "";
         }
@@ -107,10 +107,10 @@ public static partial class Bypass
 
         match = RecaptchaResponseTokenRegex().Match(tokenOut);
 
-        if(!match.Success)
+        if (!match.Success)
         {
             return "";
-        }    
+        }
 
         return match.Groups[1].Value;
     }

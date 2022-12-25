@@ -5,7 +5,6 @@ using AnimDL.Core.Helpers;
 using AnimDL.Core.Models;
 using HtmlAgilityPack;
 using HtmlAgilityPack.CssSelectors.NetCore;
-using Microsoft.Extensions.Logging;
 using Splat;
 
 namespace AnimDL.Core.StreamProviders;
@@ -80,7 +79,7 @@ public partial class ZoroStreamProvider : BaseStreamProvider
                 ep = int.Parse(epAttr.Value);
             }
 
-            if(ep < start && ep > end)
+            if (ep < start && ep > end)
             {
                 continue;
             }
@@ -90,7 +89,7 @@ public partial class ZoroStreamProvider : BaseStreamProvider
 
             await foreach (var stream in ExtractEpisodes(dataId, title))
             {
-                if(stream is null)
+                if (stream is null)
                 {
                     this.Log().Warn("unable to extract episode {EP}", ep);
                     continue;

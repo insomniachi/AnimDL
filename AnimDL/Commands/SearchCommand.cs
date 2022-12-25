@@ -1,10 +1,10 @@
-﻿using AnimDL.Api;
-using AnimDL.Core.Models;
+﻿using AnimDL.Core.Models;
 using AnimDL.Helpers;
 using Microsoft.Extensions.Logging;
 using System.CommandLine;
 using System.Reactive.Linq;
 using AnimDL.Core.Helpers;
+using AnimDL.Core.Api;
 
 namespace AnimDL.Commands;
 

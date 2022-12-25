@@ -1,4 +1,4 @@
-﻿namespace AnimDL.Api;
+﻿namespace AnimDL.Core.Api;
 
 public enum ProviderType
 {

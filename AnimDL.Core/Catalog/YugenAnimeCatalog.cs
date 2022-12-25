@@ -4,7 +4,6 @@ using AnimDL.Core.Helpers;
 using AnimDL.Core.Models;
 using HtmlAgilityPack;
 using HtmlAgilityPack.CssSelectors.NetCore;
-using Microsoft.Extensions.Logging;
 using Splat;
 
 namespace AnimDL.Core.Catalog;
@@ -42,7 +41,7 @@ internal partial class YugenAnimeCatalog : ICatalog, ICanParseMalId, IEnableLogg
 
         var nodes = doc.QuerySelectorAll(".anime-meta");
 
-        if(nodes is null)
+        if (nodes is null)
         {
             this.Log().Error("no results found");
             yield break;

@@ -12,7 +12,7 @@ public class AnimeOutCatalog : ICatalog
 
     public async IAsyncEnumerable<SearchResult> Search(string query)
     {
-        var url = QueryHelpers.AddQueryString(BASE_URL, new Dictionary<string, string> { ["s"] = query});
+        var url = QueryHelpers.AddQueryString(BASE_URL, new Dictionary<string, string> { ["s"] = query });
         url = CORS_PROXY + "?" + url;
 
         var web = new HtmlWeb();

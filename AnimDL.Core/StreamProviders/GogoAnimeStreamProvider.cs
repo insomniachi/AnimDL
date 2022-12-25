@@ -1,17 +1,15 @@
-﻿using AnimDL.Core.Extractors;
+﻿using System.Text.RegularExpressions;
+using AnimDL.Core.Extractors;
 using AnimDL.Core.Helpers;
 using AnimDL.Core.Models;
 using HtmlAgilityPack;
 using HtmlAgilityPack.CssSelectors.NetCore;
-using Microsoft.Extensions.Logging;
 using Splat;
-using System.Text.RegularExpressions;
 
 namespace AnimDL.Core.StreamProviders;
 
 public partial class GogoAnimeStreamProvider : BaseStreamProvider
 {
-    private readonly string _baseUrlStripped;
     public const string EPISODE_LOAD_AJAX = "https://ajax.gogo-load.com/ajax/load-list-episode";
     private readonly GogoPlayExtractor _extractor;
 
@@ -21,7 +19,6 @@ public partial class GogoAnimeStreamProvider : BaseStreamProvider
     public GogoAnimeStreamProvider(GogoPlayExtractor extractor, HttpClient client) : base(client)
     {
         _extractor = extractor;
-        _baseUrlStripped = DefaultUrl.GogoAnime.EndsWith("/") || DefaultUrl.GogoAnime.EndsWith("\\") ? DefaultUrl.GogoAnime[..^1] : DefaultUrl.GogoAnime;
     }
 
     public override async Task<int> GetNumberOfStreams(string url)
@@ -47,7 +44,7 @@ public partial class GogoAnimeStreamProvider : BaseStreamProvider
 
         var epMatch = EpisodeRegex().Match(html);
 
-        if(!epMatch.Success)
+        if (!epMatch.Success)
         {
             return 0;
         }
@@ -61,7 +58,7 @@ public partial class GogoAnimeStreamProvider : BaseStreamProvider
 
         var match = AnimeIdRegex().Match(html);
 
-        if(!match.Success)
+        if (!match.Success)
         {
             this.Log().Error("unable to match id regex");
             yield break;
@@ -80,7 +77,7 @@ public partial class GogoAnimeStreamProvider : BaseStreamProvider
 
         int start = 0;
         int end = 100000;
-        if(!epMatch.Success)
+        if (!epMatch.Success)
         {
             this.Log().Error("did not find any episode number");
         }
@@ -92,10 +89,10 @@ public partial class GogoAnimeStreamProvider : BaseStreamProvider
 
         await foreach (var (ep, embedUrl) in GetEpisodeList(_client, contentId, start, end))
         {
-            var embedPageUrl = await GetEmbedPage(_client,embedUrl);
+            var embedPageUrl = await GetEmbedPage(_client, embedUrl);
             var stream = await _extractor.Extract(embedPageUrl);
 
-            if(stream is null)
+            if (stream is null)
             {
                 this.Log().Error("unable to find stream {Url}", embedUrl);
                 continue;
@@ -118,13 +115,15 @@ public partial class GogoAnimeStreamProvider : BaseStreamProvider
         var doc = new HtmlDocument();
         doc.Load(html);
 
+        var uriBuilder = new UriBuilder(DefaultUrl.GogoAnime);
         foreach (var item in doc.QuerySelectorAll("a[class=\"\"] , a[class=\"\"]").Reverse())
         {
-            var embedUrl = _baseUrlStripped + item.Attributes["href"].Value.Trim();
+            uriBuilder.Path = item.Attributes["href"].Value.Trim();
+            var embedUrl = uriBuilder.Uri.AbsoluteUri;
             var epMatch = EpisodeRegex().Match(item.InnerHtml);
             int ep = -1;
-            
-            if(epMatch.Success)
+
+            if (epMatch.Success)
             {
                 ep = int.Parse(epMatch.Groups[1].Value);
             }
@@ -153,7 +152,7 @@ public partial class GogoAnimeStreamProvider : BaseStreamProvider
 
     [GeneratedRegex("EP.*?(\\d+)")]
     private static partial Regex EpisodeRegex();
-   
+
     [GeneratedRegex("https?://gogoanime.\\w*/")]
     private static partial Regex UrlRegex();
 }

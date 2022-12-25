@@ -4,23 +4,23 @@
     {
         public static (int Start, int End) Extract(this Range range, int count)
         {
-            if(range.Equals(Range.All))
+            if (range.Equals(Range.All))
             {
                 return (1, count);
             }
 
             int start = range.Start.IsFromEnd ? count - range.Start.Value + 1 : range.Start.Value;
 
-            if(range.Start.Equals(range.End))
+            if (range.Start.Equals(range.End))
             {
                 return (start, start);
             }
 
             int end;
 
-            if(range.End.IsFromEnd)
+            if (range.End.IsFromEnd)
             {
-                if(range.End.Value == 0)
+                if (range.End.Value == 0)
                 {
                     end = count;
                 }

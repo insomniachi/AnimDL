@@ -1,6 +1,4 @@
-﻿using AnimDL.Core.Api;
-
-namespace AnimDL.Api;
+﻿namespace AnimDL.Core.Api;
 
 public interface IProvider
 {

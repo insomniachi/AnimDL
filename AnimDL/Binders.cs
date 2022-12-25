@@ -1,4 +1,5 @@
 ﻿using AnimDL.Api;
+using AnimDL.Core.Api;
 using System.CommandLine;
 using System.CommandLine.Binding;
 

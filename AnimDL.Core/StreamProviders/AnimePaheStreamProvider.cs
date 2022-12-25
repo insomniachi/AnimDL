@@ -1,11 +1,10 @@
-﻿using AnimDL.Core.Helpers;
+﻿using System.Text.Json;
+using System.Text.RegularExpressions;
+using AnimDL.Core.Helpers;
 using AnimDL.Core.Models;
 using AnimDL.Core.Models.Internal;
 using HtmlAgilityPack;
-using Microsoft.Extensions.Logging;
 using Splat;
-using System.Text.Json;
-using System.Text.RegularExpressions;
 
 namespace AnimDL.Core.StreamProviders;
 
@@ -40,7 +39,7 @@ public partial class AnimePaheStreamProvider : BaseStreamProvider
                 };
 
                 var stringUrls = await GetStreamUrl(releaseId, item.session);
-                
+
                 foreach (var kv in stringUrls)
                 {
                     try
@@ -69,7 +68,7 @@ public partial class AnimePaheStreamProvider : BaseStreamProvider
 
     private async Task<AnimePaheEpisodePage> GetSessionPage(string page, string releaseId)
     {
-        var content = await _client.GetStreamAsync(API, parameters: new() 
+        var content = await _client.GetStreamAsync(API, parameters: new()
         {
             ["m"] = "release",
             ["id"] = releaseId,

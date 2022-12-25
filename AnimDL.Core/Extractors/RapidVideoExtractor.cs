@@ -4,7 +4,6 @@ using AnimDL.Core.Api;
 using AnimDL.Core.Helpers;
 using AnimDL.Core.Models;
 using Microsoft.AspNetCore.WebUtilities;
-using Microsoft.Extensions.Logging;
 using Splat;
 
 namespace AnimDL.Core.Extractors

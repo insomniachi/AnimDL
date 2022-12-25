@@ -1,9 +1,8 @@
-﻿using AnimDL.Core.Api;
+﻿using System.Text.Json.Nodes;
+using AnimDL.Core.Api;
 using AnimDL.Core.Helpers;
 using AnimDL.Core.Models;
-using Microsoft.Extensions.Logging;
 using Splat;
-using System.Text.Json.Nodes;
 
 namespace AnimDL.Core.Catalog
 {
@@ -24,7 +23,8 @@ namespace AnimDL.Core.Catalog
             {
                 ["m"] = "search",
                 ["q"] = query,
-                ["l"] = "8" }
+                ["l"] = "8"
+            }
             );
 
             if (string.IsNullOrEmpty(json))

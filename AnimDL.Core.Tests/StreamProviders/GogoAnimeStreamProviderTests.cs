@@ -1,6 +1,4 @@
 ﻿using AnimDL.Core.StreamProviders;
-using Microsoft.Extensions.Logging;
-using Moq;
 
 namespace AnimDL.Core.Tests.StreamProviders
 {

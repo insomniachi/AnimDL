@@ -42,7 +42,7 @@ internal partial class YugenAnimeStreamProvider : BaseStreamProvider
 
         var match = EpisodeRegex().Match(epSection);
 
-        if(!match.Success)
+        if (!match.Success)
         {
             yield break;
         }
@@ -64,10 +64,10 @@ internal partial class YugenAnimeStreamProvider : BaseStreamProvider
             uri = new UriBuilder(iframeUrl).Uri;
             var key = uri.Segments[^1].TrimEnd('/');
 
-            var json = await _client.PostFormUrlEncoded($"{DefaultUrl.Yugen}api/embed/", new() 
+            var json = await _client.PostFormUrlEncoded($"{DefaultUrl.Yugen}api/embed/", new()
             {
                 ["id"] = key,
-                ["ac"] = "0" 
+                ["ac"] = "0"
             }, new Dictionary<string, string>()
             {
                 ["referer"] = iframeUrl,

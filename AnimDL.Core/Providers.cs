@@ -1,5 +1,4 @@
-﻿using AnimDL.Api;
-using AnimDL.Core.AiredEpisodesProvider;
+﻿using AnimDL.Core.AiredEpisodesProvider;
 using AnimDL.Core.Api;
 using AnimDL.Core.Catalog;
 using AnimDL.Core.Extractors;

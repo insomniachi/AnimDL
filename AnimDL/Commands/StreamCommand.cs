@@ -1,5 +1,6 @@
 ﻿using System.CommandLine;
 using AnimDL.Api;
+using AnimDL.Core.Api;
 using AnimDL.Core.Models;
 using AnimDL.Helpers;
 using Microsoft.Extensions.Logging;
