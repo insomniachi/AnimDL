@@ -3,20 +3,19 @@ using AnimDL.Core.Api;
 using AnimDL.Core.Helpers;
 using AnimDL.Core.Models;
 using HtmlAgilityPack;
-using Microsoft.Extensions.Logging;
+using Splat;
 
 namespace AnimDL.Core.Catalog;
 
-public class AnimixPlayCatalog : ICatalog, IMalCatalog
+[Obsolete("RIP")]
+public class AnimixPlayCatalog : ICatalog, IMalCatalog, IEnableLogger
 {
     const string BASE_URL = "https://animixplay.to";
     private readonly HttpClient _client;
-    private readonly ILogger<AnimixPlayCatalog> _logger;
 
-    public AnimixPlayCatalog(HttpClient client, ILogger<AnimixPlayCatalog> logger)
+    public AnimixPlayCatalog(HttpClient client)
     {
         _client = client;
-        _logger = logger;
     }
 
     public async IAsyncEnumerable<SearchResult> Search(string query)
@@ -27,19 +26,19 @@ public class AnimixPlayCatalog : ICatalog, IMalCatalog
 
         if (resultData is null)
         {
-            _logger.LogError("unable to parse {Json}", resultData);
+            this.Log().Error("unable to parse {Json}", result);
             yield break;
         }
 
         if (resultData.AsObject()["result"]?.ToString() is not string html)
         {
-            _logger.LogError("Json does not contain \"result\" property");
+            this.Log().Error("Json does not contain \"result\" property");
             yield break;
         }
 
         if(string.IsNullOrEmpty(html))
         {
-            _logger.LogError("result does not contain data.");
+            this.Log().Error("result does not contain data.");
             yield break;
         }
 

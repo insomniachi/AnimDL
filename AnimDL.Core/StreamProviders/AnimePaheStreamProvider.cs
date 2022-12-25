@@ -3,6 +3,7 @@ using AnimDL.Core.Models;
 using AnimDL.Core.Models.Internal;
 using HtmlAgilityPack;
 using Microsoft.Extensions.Logging;
+using Splat;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 
@@ -17,11 +18,9 @@ public partial class AnimePaheStreamProvider : BaseStreamProvider
     private static partial Regex KwiwRegex();
 
     public readonly string API = DefaultUrl.AnimePahe + "api";
-    private readonly ILogger<AnimePaheStreamProvider> _logger;
 
-    public AnimePaheStreamProvider(ILogger<AnimePaheStreamProvider> logger, HttpClient client) : base(client)
+    public AnimePaheStreamProvider(HttpClient client) : base(client)
     {
-        _logger = logger;
     }
 
     public override async IAsyncEnumerable<VideoStreamsForEpisode> GetStreams(string url, Range range)
@@ -55,7 +54,7 @@ public partial class AnimePaheStreamProvider : BaseStreamProvider
                     }
                     catch (Exception ex)
                     {
-                        _logger.LogError(ex, ex.Message);
+                        this.Log().Error(ex, ex.Message);
                     }
                 }
 
@@ -95,7 +94,7 @@ public partial class AnimePaheStreamProvider : BaseStreamProvider
         return result.GetQualities();
     }
 
-    private string GetStreamFromEmbedUrl(string kwik)
+    private static string GetStreamFromEmbedUrl(string kwik)
     {
         var web = new HtmlWeb();
         web.PreRequest += (request) =>

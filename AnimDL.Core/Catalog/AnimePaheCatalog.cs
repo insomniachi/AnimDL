@@ -2,21 +2,20 @@
 using AnimDL.Core.Helpers;
 using AnimDL.Core.Models;
 using Microsoft.Extensions.Logging;
+using Splat;
 using System.Text.Json.Nodes;
 
 namespace AnimDL.Core.Catalog
 {
-    public class AnimePaheCatalog : ICatalog
+    public class AnimePaheCatalog : ICatalog, IEnableLogger
     {
         const string BASE_URL = "https://animepahe.com/anime/";
         const string API = "https://animepahe.com/api";
         private readonly HttpClient _client;
-        private readonly ILogger<AnimeOutCatalog> _logger;
 
-        public AnimePaheCatalog(HttpClient client, ILogger<AnimeOutCatalog> logger)
+        public AnimePaheCatalog(HttpClient client)
         {
             _client = client;
-            _logger = logger;
         }
 
         public async IAsyncEnumerable<SearchResult> Search(string query)
@@ -30,7 +29,7 @@ namespace AnimDL.Core.Catalog
 
             if (string.IsNullOrEmpty(json))
             {
-                _logger.LogError("did not get a response");
+                this.Log().Error("did not get a response");
                 yield break;
             }
 
@@ -38,13 +37,13 @@ namespace AnimDL.Core.Catalog
 
             if (jObject is null)
             {
-                _logger.LogError("unable to parse {Json}", json);
+                this.Log().Error("unable to parse {Json}", json);
                 yield break;
             }
 
             if (jObject["data"]?.AsArray() is not { } results)
             {
-                _logger.LogError("there is not data");
+                this.Log().Error("there is not data");
                 yield break;
             }
 

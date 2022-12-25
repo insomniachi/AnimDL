@@ -27,6 +27,7 @@
 		<PackageReference Include="DiscordRichPresence" Version="1.1.1.14" />
 		<PackageReference Include="Microsoft.Extensions.Hosting" Version="7.0.0" />
 		<PackageReference Include="Sharprompt" Version="2.4.5" />
+		<PackageReference Include="Splat.Microsoft.Extensions.Logging" Version="14.6.1" />
 		<PackageReference Include="System.CommandLine" Version="2.0.0-beta4.22272.1" />
 		<PackageReference Include="System.Linq.Async" Version="6.0.1" />
 		<PackageReference Include="Xabe.FFmpeg" Version="5.2.0" />

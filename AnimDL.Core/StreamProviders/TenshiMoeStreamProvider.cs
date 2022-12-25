@@ -1,20 +1,19 @@
-﻿using AnimDL.Core.Helpers;
+﻿using System.Text.RegularExpressions;
+using AnimDL.Core.Helpers;
 using AnimDL.Core.Models;
 using HtmlAgilityPack;
 using HtmlAgilityPack.CssSelectors.NetCore;
 using Microsoft.Extensions.Logging;
-using System.Text.RegularExpressions;
+using Splat;
 
 namespace AnimDL.Core.StreamProviders;
 
 internal partial class TenshiMoeStreamProvider : BaseStreamProvider
 {
     public readonly string BASE_URL = DefaultUrl.Tenshi;
-    private readonly ILogger<TenshiMoeStreamProvider> _logger;
 
-    public TenshiMoeStreamProvider(ILogger<TenshiMoeStreamProvider> logger, HttpClient client) : base(client)
+    public TenshiMoeStreamProvider(HttpClient client) : base(client)
     {
-        _logger = logger;
     }
 
     public override async Task<int> GetNumberOfStreams(string url)
@@ -59,14 +58,14 @@ internal partial class TenshiMoeStreamProvider : BaseStreamProvider
 
         if (string.IsNullOrEmpty(embedStream))
         {
-            _logger.LogError("unable to find embed stream");
+            this.Log().Error("unable to find embed stream");
             return null;
         }
 
         var html = await client.GetStringAsync(embedStream);
 
         var streamsForEp = new VideoStreamsForEpisode();
-        foreach (Match match in StreamRegex().Matches(html))
+        foreach (var match in StreamRegex().Matches(html).Cast<Match>())
         {
             var quality = match.Groups[2].Value;
 

@@ -4,6 +4,7 @@ using AnimDL.Core.Models;
 using HtmlAgilityPack;
 using HtmlAgilityPack.CssSelectors.NetCore;
 using Microsoft.Extensions.Logging;
+using Splat;
 using System.Text.RegularExpressions;
 
 namespace AnimDL.Core.StreamProviders;
@@ -13,16 +14,13 @@ public partial class GogoAnimeStreamProvider : BaseStreamProvider
     private readonly string _baseUrlStripped;
     public const string EPISODE_LOAD_AJAX = "https://ajax.gogo-load.com/ajax/load-list-episode";
     private readonly GogoPlayExtractor _extractor;
-    private readonly ILogger<GogoAnimeStreamProvider> _logger;
 
     [GeneratedRegex("<input.*?value=\"([0-9]+)\".*?id=\"movie_id\"", RegexOptions.Compiled)]
     private static partial Regex AnimeIdRegex();
 
-    public GogoAnimeStreamProvider(GogoPlayExtractor extractor, ILogger<GogoAnimeStreamProvider> logger, HttpClient client) : base(client)
+    public GogoAnimeStreamProvider(GogoPlayExtractor extractor, HttpClient client) : base(client)
     {
         _extractor = extractor;
-        _logger = logger;
-
         _baseUrlStripped = DefaultUrl.GogoAnime.EndsWith("/") || DefaultUrl.GogoAnime.EndsWith("\\") ? DefaultUrl.GogoAnime[..^1] : DefaultUrl.GogoAnime;
     }
 
@@ -34,7 +32,7 @@ public partial class GogoAnimeStreamProvider : BaseStreamProvider
 
         if (!match.Success)
         {
-            _logger.LogError("unable to match id regex");
+            this.Log().Error("unable to match id regex");
             return 0;
         }
 
@@ -65,7 +63,7 @@ public partial class GogoAnimeStreamProvider : BaseStreamProvider
 
         if(!match.Success)
         {
-            _logger.LogError("unable to match id regex");
+            this.Log().Error("unable to match id regex");
             yield break;
         }
 
@@ -84,7 +82,7 @@ public partial class GogoAnimeStreamProvider : BaseStreamProvider
         int end = 100000;
         if(!epMatch.Success)
         {
-            _logger.LogWarning("did not find any episode number");
+            this.Log().Error("did not find any episode number");
         }
         else
         {
@@ -99,7 +97,7 @@ public partial class GogoAnimeStreamProvider : BaseStreamProvider
 
             if(stream is null)
             {
-                _logger.LogWarning("unable to find stream {Url}", embedUrl);
+                this.Log().Error("unable to find stream {Url}", embedUrl);
                 continue;
             }
 
@@ -132,7 +130,7 @@ public partial class GogoAnimeStreamProvider : BaseStreamProvider
             }
             else
             {
-                _logger.LogWarning("unable to match episode number");
+                this.Log().Error("unable to match episode number");
             }
 
             yield return (ep, embedUrl);

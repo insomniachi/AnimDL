@@ -1,22 +1,37 @@
-﻿using AnimDL.Core.Api;
+﻿using System.Text.RegularExpressions;
+using AnimDL.Core.Api;
 using AnimDL.Core.Helpers;
 using AnimDL.Core.Models;
 using HtmlAgilityPack;
 using HtmlAgilityPack.CssSelectors.NetCore;
 using Microsoft.Extensions.Logging;
+using Splat;
 
 namespace AnimDL.Core.Catalog;
 
-internal class YugenAnimeCatalog : ICatalog
+internal partial class YugenAnimeCatalog : ICatalog, ICanParseMalId, IEnableLogger
 {
     const string BASE_URL = "https://yugen.to/";
     private readonly HttpClient _client;
-    private readonly ILogger<YugenAnimeCatalog> _logger;
 
-    public YugenAnimeCatalog(HttpClient client, ILogger<YugenAnimeCatalog> logger)
+    public YugenAnimeCatalog(HttpClient client)
     {
         _client = client;
-        _logger = logger;
+    }
+
+    public async Task<long> GetMalId(string url)
+    {
+        try
+        {
+            var html = await _client.GetStringAsync(url);
+            var match = YugenMalIdRegex().Match(html);
+            return match.Success ? long.Parse(match.Groups[1].Value) : 0;
+        }
+        catch (Exception ex)
+        {
+            this.Log().Error(ex);
+            return 0;
+        }
     }
 
     public async IAsyncEnumerable<SearchResult> Search(string query)
@@ -29,7 +44,7 @@ internal class YugenAnimeCatalog : ICatalog
 
         if(nodes is null)
         {
-            _logger.LogError("no results found");
+            this.Log().Error("no results found");
             yield break;
         }
 
@@ -42,4 +57,7 @@ internal class YugenAnimeCatalog : ICatalog
             };
         }
     }
+
+    [GeneratedRegex("\"mal_id\":(\\d+)")]
+    private static partial Regex YugenMalIdRegex();
 }

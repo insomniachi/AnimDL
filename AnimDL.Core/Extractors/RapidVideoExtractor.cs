@@ -1,14 +1,15 @@
-﻿using AnimDL.Core.Api;
+﻿using System.Text.Json.Nodes;
+using System.Text.RegularExpressions;
+using AnimDL.Core.Api;
 using AnimDL.Core.Helpers;
 using AnimDL.Core.Models;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Logging;
-using System.Text.Json.Nodes;
-using System.Text.RegularExpressions;
+using Splat;
 
 namespace AnimDL.Core.Extractors
 {
-    public partial class RapidVideoExtractor : IStreamExtractor
+    public partial class RapidVideoExtractor : IStreamExtractor, IEnableLogger
     {
         const string POLLING_URL = "https://ws1.rapid-cloud.ru/socket.io/";
         private readonly Dictionary<string, string> _pollingParameters = new()
@@ -16,7 +17,6 @@ namespace AnimDL.Core.Extractors
             ["EIO"] = "4",
             ["transport"] = "polling"
         };
-        private readonly ILogger<RapidVideoExtractor> _logger;
         private readonly HttpClient _client;
         private string _sid = "";
 
@@ -27,9 +27,8 @@ namespace AnimDL.Core.Extractors
         [GeneratedRegex("(\\d+)(.+)")]
         private static partial Regex ClientCheckRegex();
 
-        public RapidVideoExtractor(ILogger<RapidVideoExtractor> logger)
+        public RapidVideoExtractor()
         {
-            _logger = logger;
             _client = new HttpClient();
             _client.DefaultRequestHeaders.Add("X-Requested-With", "XMLHttpRequest");
             _client.DefaultRequestHeaders.Referrer = new(DefaultUrl.Zoro);
@@ -124,7 +123,7 @@ namespace AnimDL.Core.Extractors
 
                 if (result != "2")
                 {
-                    _logger.LogWarning("Websocket server has returned a faulty value: {Result}", result);
+                    this.Log().Warn("Websocket server has returned a faulty value: {Result}", result);
                     continue;
                 }
 
@@ -132,7 +131,7 @@ namespace AnimDL.Core.Extractors
 
                 if (result != "3")
                 {
-                    _logger.LogWarning("Websocket server has returned a faulty value: {Result}", result);
+                    this.Log().Warn("Websocket server has returned a faulty value: {Result}", result);
                 }
             }
         }

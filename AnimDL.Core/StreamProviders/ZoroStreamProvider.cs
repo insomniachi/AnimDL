@@ -1,17 +1,17 @@
-﻿using AnimDL.Core.Extractors;
+﻿using System.Text.Json.Nodes;
+using System.Text.RegularExpressions;
+using AnimDL.Core.Extractors;
 using AnimDL.Core.Helpers;
 using AnimDL.Core.Models;
 using HtmlAgilityPack;
 using HtmlAgilityPack.CssSelectors.NetCore;
 using Microsoft.Extensions.Logging;
-using System.Text.Json.Nodes;
-using System.Text.RegularExpressions;
+using Splat;
 
 namespace AnimDL.Core.StreamProviders;
 
 public partial class ZoroStreamProvider : BaseStreamProvider
 {
-    private readonly ILogger<ZoroStreamProvider> _logger;
     private readonly RapidVideoExtractor _extractor;
     private readonly Dictionary<int, string> _serverIds = new()
     {
@@ -26,11 +26,9 @@ public partial class ZoroStreamProvider : BaseStreamProvider
         "streamtape"
     };
 
-    public ZoroStreamProvider(ILogger<ZoroStreamProvider> logger,
-                              HttpClient client,
+    public ZoroStreamProvider(HttpClient client,
                               RapidVideoExtractor extractor) : base(client)
     {
-        _logger = logger;
         _extractor = extractor;
     }
 
@@ -40,7 +38,7 @@ public partial class ZoroStreamProvider : BaseStreamProvider
 
         if (!match.Success)
         {
-            _logger.LogError("unable to find anime slug");
+            this.Log().Error("unable to find anime slug");
             yield break;
         }
 
@@ -54,13 +52,13 @@ public partial class ZoroStreamProvider : BaseStreamProvider
 
         if (JsonNode.Parse(jsonString) is not { } responseNode)
         {
-            _logger.LogError("unable to parse json {Json}", jsonString);
+            this.Log().Error("unable to parse json {Json}", jsonString);
             yield break;
         }
 
         if (responseNode["html"] is not { } htmlNode)
         {
-            _logger.LogError("reponse doesn't contain html property");
+            this.Log().Error("reponse doesn't contain html property");
             yield break;
         }
 
@@ -75,7 +73,7 @@ public partial class ZoroStreamProvider : BaseStreamProvider
             var ep = -1;
             if (item.Attributes["data-number"] is not { } epAttr)
             {
-                _logger.LogWarning("episode number not found");
+                this.Log().Error("episode number not found");
             }
             else
             {
@@ -94,7 +92,7 @@ public partial class ZoroStreamProvider : BaseStreamProvider
             {
                 if(stream is null)
                 {
-                    _logger.LogWarning("unable to extract episode {EP}", ep);
+                    this.Log().Warn("unable to extract episode {EP}", ep);
                     continue;
                 }
 
@@ -110,13 +108,13 @@ public partial class ZoroStreamProvider : BaseStreamProvider
 
         if (JsonNode.Parse(jsonString) is not { } responseNode)
         {
-            _logger.LogError("ExtractEpisodes:: unable to parse json {Json}", jsonString);
+            this.Log().Error("ExtractEpisodes:: unable to parse json {Json}", jsonString);
             yield break;
         }
 
         if (responseNode["html"] is not { } htmlNode)
         {
-            _logger.LogError("ExtractEpisodes:: reponse doesn't contain html property");
+            this.Log().Error("ExtractEpisodes:: reponse doesn't contain html property");
             yield break;
         }
 
@@ -132,7 +130,7 @@ public partial class ZoroStreamProvider : BaseStreamProvider
 
             if (JsonNode.Parse(jsonString) is not { } sourceNode)
             {
-                _logger.LogError("ExtractEpisodes:: unable to parse json {Json}", jsonString);
+                this.Log().Error("ExtractEpisodes:: unable to parse json {Json}", jsonString);
                 yield break;
             }
 
@@ -148,7 +146,7 @@ public partial class ZoroStreamProvider : BaseStreamProvider
 
             if (sourceNode["server"] is not { } serverNode)
             {
-                _logger.LogWarning("server not found");
+                this.Log().Warn("server not found");
                 continue;
             }
 

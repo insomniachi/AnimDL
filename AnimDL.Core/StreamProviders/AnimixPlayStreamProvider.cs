@@ -2,6 +2,7 @@
 using AnimDL.Core.Models;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Logging;
+using Splat;
 using System.Net;
 using System.Text;
 using System.Text.Json.Nodes;
@@ -9,10 +10,10 @@ using System.Text.RegularExpressions;
 
 namespace AnimDL.Core.StreamProviders;
 
+[Obsolete("RIP")]
 internal partial class AnimixPlayStreamProvider : BaseStreamProvider
 {
     public static readonly string API = DefaultUrl.AnimixPlay + "api/cW9";
-    private readonly ILogger<AnimixPlayStreamProvider> _logger;
 
     [GeneratedRegex("iframesrc=\"(.+?)\"", RegexOptions.Compiled)]
     private static partial Regex VideoMatcherRegex();
@@ -30,9 +31,8 @@ internal partial class AnimixPlayStreamProvider : BaseStreamProvider
         ["ssload.info"] = "gogocdn.club",
     };
 
-    public AnimixPlayStreamProvider(ILogger<AnimixPlayStreamProvider> logger, HttpClient client) : base(client)
+    public AnimixPlayStreamProvider(HttpClient client) : base(client)
     {
-        _logger = logger;
     }
 
     public override async Task<int> GetNumberOfStreams(string url)
@@ -56,20 +56,20 @@ internal partial class AnimixPlayStreamProvider : BaseStreamProvider
 
         if (string.IsNullOrEmpty(eps))
         {
-            _logger.LogError("unable to find element \"epslistplace\"");
+            this.Log().Error("unable to find element \"epslistplace\"");
             yield break;
         }
         
         if(JsonNode.Parse(eps) is not { } node)
         {
-            _logger.LogError("unable to parse {Json}", eps);
+            this.Log().Error("unable to parse {Json}", eps);
             yield break;
         }
 
         JsonObject jobject = node.AsObject();
         if (jobject["eptotal"] is not JsonNode epTotalNode)
         {
-            _logger.LogError("unable to find total number of episdes");
+            this.Log().Error("unable to find total number of episdes");
             yield break;
         }
 
@@ -80,7 +80,7 @@ internal partial class AnimixPlayStreamProvider : BaseStreamProvider
         {
             if (jobject[ep] is not JsonNode epNode)
             {
-                _logger.LogError("unable to find data for episode {EP}", ep);
+                this.Log().Error("unable to find data for episode {EP}", ep);
                 continue;
             }
 
@@ -135,7 +135,7 @@ internal partial class AnimixPlayStreamProvider : BaseStreamProvider
 
         if (_statusCode == HttpStatusCode.Forbidden)
         {
-            _logger.LogError("unable to extract from embed, Status - {Status}", HttpStatusCode.Forbidden);
+            this.Log().Error("unable to extract from embed, Status - {Status}", HttpStatusCode.Forbidden);
         }
 
         var match = VideoMatcherRegex().Match(doc.Text);
@@ -154,7 +154,7 @@ internal partial class AnimixPlayStreamProvider : BaseStreamProvider
         }
         if (!match.Success)
         {
-            _logger.LogError("unable to match m3u8 or b64 regex");
+            this.Log().Error("unable to match m3u8 or b64 regex");
             return string.Empty;
         }
 

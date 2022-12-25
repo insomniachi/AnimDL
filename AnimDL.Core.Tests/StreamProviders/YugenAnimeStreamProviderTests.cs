@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using AnimDL.Core.AiredEpisodesProvider;
 using AnimDL.Core.StreamProviders;
 
 namespace AnimDL.Core.Tests.StreamProviders
@@ -17,6 +13,13 @@ namespace AnimDL.Core.Tests.StreamProviders
         {
             var provider = new YugenAnimeStreamProvider(_httpClient);
             var result = await provider.GetStreams(url, 1..1).ToListAsync();
+        }
+
+        [Fact]
+        public async Task YugenAnimeEpisodes()
+        {
+            var provider = new YugenAnimeAiredEpisodesProvider();
+            var result = await provider.GetRecentlyAiredEpisodes();
         }
     }
 }

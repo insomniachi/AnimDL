@@ -2,13 +2,11 @@
 using AnimDL.Core.Models;
 using HtmlAgilityPack;
 using HtmlAgilityPack.CssSelectors.NetCore;
-using Microsoft.Extensions.Logging;
 
 namespace AnimDL.Core.StreamProviders;
 
 internal class AnimeOutStreamProvider : BaseStreamProvider
 {
-    private readonly ILogger<AnimeOutStreamProvider> logger;
     private readonly Dictionary<string, string> _publicDomains = new()
     {
         ["nimbus"] = "pub9",
@@ -23,9 +21,8 @@ internal class AnimeOutStreamProvider : BaseStreamProvider
         ["download"] = "pub1"
     };
 
-    public AnimeOutStreamProvider(ILogger<AnimeOutStreamProvider> logger, HttpClient client) : base(client)
+    public AnimeOutStreamProvider(HttpClient client) : base(client)
     {
-        this.logger = logger;
     }
 
     public async override IAsyncEnumerable<VideoStreamsForEpisode> GetStreams(string url, Range stream)
@@ -40,9 +37,9 @@ internal class AnimeOutStreamProvider : BaseStreamProvider
             var contents = ParseFromContent(item.InnerText);
             var epStream = new VideoStreamsForEpisode();
 
-            if (contents.ContainsKey("ep"))
+            if (contents.TryGetValue("ep", out string? value))
             {
-                epStream.Episode = int.Parse(contents["ep"]);
+                epStream.Episode = int.Parse(value);
             }
 
             var quality = "default";
@@ -65,11 +62,11 @@ internal class AnimeOutStreamProvider : BaseStreamProvider
     {
         var host_prefix = uri.Host.Split(".", 2);
 
-        if (_publicDomains.ContainsKey(host_prefix[0]))
+        if (_publicDomains.TryGetValue(host_prefix[0], out string? value))
         {
             var uriBuilder = new UriBuilder(uri)
             {
-                Host = $"{_publicDomains[host_prefix[0]]}.{host_prefix[1]}"
+                Host = $"{value}.{host_prefix[1]}"
             };
             uri = uriBuilder.Uri;
         }
