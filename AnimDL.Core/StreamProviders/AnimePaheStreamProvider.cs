@@ -1,4 +1,6 @@
-﻿using System.Text.Json;
+﻿using System.Text;
+using System.Text.Json;
+using System.Text.Json.Nodes;
 using System.Text.RegularExpressions;
 using AnimDL.Core.Helpers;
 using AnimDL.Core.Models;
@@ -35,6 +37,14 @@ public partial class AnimePaheStreamProvider : BaseStreamProvider
 
     public AnimePaheStreamProvider(HttpClient client) : base(client)
     {
+    }
+
+    public override async Task<int> GetNumberOfStreams(string url)
+    {
+        var doc = await Load(url);
+        var releaseId = IdRegex().Match(doc.Text).Groups[1].Value;
+
+        return (await GetSessionPage("1", releaseId)).total;
     }
 
     public override async IAsyncEnumerable<VideoStreamsForEpisode> GetStreams(string url, Range range)
@@ -94,9 +104,9 @@ public partial class AnimePaheStreamProvider : BaseStreamProvider
         return await JsonSerializer.DeserializeAsync<AnimePaheEpisodePage>(content) ?? new();
     }
 
-    private async Task<Dictionary<string, Quality>> GetStreamUrl(string releaseId, string streamSession)
+    private async Task<Dictionary<string, AnimePaheEpisodeStream>> GetStreamUrl(string releaseId, string streamSession)
     {
-        var content = await _client.GetStreamAsync(API, parameters: new()
+        var json = await _client.GetStreamAsync(API, parameters: new()
         {
             ["m"] = "links",
             ["id"] = releaseId,
@@ -104,8 +114,11 @@ public partial class AnimePaheStreamProvider : BaseStreamProvider
             ["p"] = "kwik"
         });
 
-        var result = await JsonSerializer.DeserializeAsync<AnimePaheQualityModel>(content) ?? new();
-        return result.GetQualities();
+        var jObject = JsonNode.Parse(json);
+        var data = jObject!["data"]!.AsArray();
+
+        var result = data.ToDictionary(x => x!.AsObject().ElementAt(0).Key, x => x!.AsObject().ElementAt(0).Value.Deserialize<AnimePaheEpisodeStream>());
+        return result!;
     }
 
     private async Task<string> GetStreamFromEmbedUrlMp4(string kwikPahewin)
@@ -163,17 +176,14 @@ public partial class AnimePaheStreamProvider : BaseStreamProvider
         var count = int.Parse(match.Groups[3].Value);
         var items = match.Groups[4].Value.Split("|").ToArray();
         count--;
+        var sb = new StringBuilder();
         while(count > 0)
         {
             var value = items[count];
             if (!string.IsNullOrEmpty(value))
             {
-                format = Regex.Replace(format, GetToken(count, a), value, RegexOptions.IgnoreCase);
-            }
-
-            if(string.Compare("m3u8", value, true) == 0)
-            {
-                break;
+                var token = GetToken(count, a);
+                format = Regex.Replace(format, $@"\b{token}\b", value);
             }
             count--;
         }

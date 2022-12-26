@@ -35,7 +35,7 @@ internal class AnimePaheQualityModel
 {
     public List<Qualities> data { get; set; } = new();
 
-    public Dictionary<string, Quality> GetQualities(string audio = "jpn")
+    public Dictionary<string, AnimePaheEpisodeStream> GetQualities(string audio = "jpn")
     {
         return data.Where(x => x.GetActive().Item2.audio == audio)
             .Select(x => x.GetActive())
@@ -46,15 +46,15 @@ internal class AnimePaheQualityModel
 internal class Qualities
 {
     [JsonPropertyName("360")]
-    public Quality? QHD { get; set; }
+    public AnimePaheEpisodeStream? QHD { get; set; }
 
     [JsonPropertyName("720")]
-    public Quality? HD { get; set; }
+    public AnimePaheEpisodeStream? HD { get; set; }
 
     [JsonPropertyName("1080")]
-    public Quality? FHD { get; set; }
+    public AnimePaheEpisodeStream? FHD { get; set; }
 
-    public (string, Quality) GetActive()
+    public (string, AnimePaheEpisodeStream) GetActive()
     {
         if (QHD is not null)
             return ("360", QHD);
@@ -66,7 +66,7 @@ internal class Qualities
     }
 }
 
-internal class Quality
+internal class AnimePaheEpisodeStream
 {
     public int id { get; set; }
     public int filesize { get; set; }
