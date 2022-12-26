@@ -1,6 +1,6 @@
-﻿using System.Text.Json.Serialization;
+﻿namespace AnimDL.Core.Models.Internal;
 
-namespace AnimDL.Core.Models.Internal;
+#pragma warning disable IDE1006 // Naming Styles, interal models, not used anywhere, naming not important.
 
 internal class AnimePaheEpisodePage
 {
@@ -29,41 +29,6 @@ internal class AnimePaheEpisodeInfo
     public string session { get; set; } = string.Empty;
     public int filler { get; set; }
     public string created_at { get; set; } = string.Empty;
-}
-
-internal class AnimePaheQualityModel
-{
-    public List<Qualities> data { get; set; } = new();
-
-    public Dictionary<string, AnimePaheEpisodeStream> GetQualities(string audio = "jpn")
-    {
-        return data.Where(x => x.GetActive().Item2.audio == audio)
-            .Select(x => x.GetActive())
-            .ToDictionary(x => x.Item1, x => x.Item2);
-    }
-}
-
-internal class Qualities
-{
-    [JsonPropertyName("360")]
-    public AnimePaheEpisodeStream? QHD { get; set; }
-
-    [JsonPropertyName("720")]
-    public AnimePaheEpisodeStream? HD { get; set; }
-
-    [JsonPropertyName("1080")]
-    public AnimePaheEpisodeStream? FHD { get; set; }
-
-    public (string, AnimePaheEpisodeStream) GetActive()
-    {
-        if (QHD is not null)
-            return ("360", QHD);
-        if (HD is not null)
-            return ("720", HD);
-        if (FHD is not null)
-            return ("1080", FHD);
-        return ("", new());
-    }
 }
 
 internal class AnimePaheEpisodeStream

@@ -12,11 +12,9 @@ internal class AnimePaheAiredEpisodesProvider : IAiredEpisodeProvider
     private readonly string _api;
     private readonly string _baseAnimeUrl;
 
-    class AnimePaheAiredEpisode : AiredEpisode 
+    class AnimePaheAiredEpisode : AiredEpisode , IHaveCreatedTime
     {
-        public int Episode { get; set; }
         public DateTime CreatedAt { get; set; }
-        public override int GetEpisode() => Episode;
     }
 
     public AnimePaheAiredEpisodesProvider(HttpClient httpClient)

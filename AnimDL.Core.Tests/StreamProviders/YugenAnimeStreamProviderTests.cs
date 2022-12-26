@@ -1,34 +1,33 @@
 ﻿using AnimDL.Core.AiredEpisodesProvider;
-using AnimDL.Core.Catalog;
+using AnimDL.Core.Helpers;
 using AnimDL.Core.StreamProviders;
 
-namespace AnimDL.Core.Tests.StreamProviders
+namespace AnimDL.Core.Tests.StreamProviders;
+
+public class YugenAnimeStreamProviderTests
 {
-    public class YugenAnimeStreamProviderTests
+    private readonly HttpClient _httpClient = new();
+
+    [Theory]
+    [InlineData("https://yugen.to/anime/568/91-days/")]
+    public async Task GetStreams_GivesResultFromCategoryPage(string url)
     {
-        private readonly HttpClient _httpClient = new();
+        var provider = new YugenAnimeStreamProvider(_httpClient);
+        var result = await provider.GetStreams(url, 1..1).ToListAsync();
+    }
 
-        [Theory]
-        [InlineData("https://yugen.to/anime/568/91-days/")]
-        public async Task GetStreams_GivesResultFromCategoryPage(string url)
-        {
-            var provider = new YugenAnimeStreamProvider(_httpClient);
-            var result = await provider.GetStreams(url, 1..1).ToListAsync();
-        }
-
-        [Fact]
-        public async Task YugenAnimeEpisodes()
-        {
-            var provider = new YugenAnimeAiredEpisodesProvider();
-            var result = (await provider.GetRecentlyAiredEpisodes()).ToList();
-        }
+    [Fact]
+    public async Task YugenAnimeEpisodes()
+    {
+        var provider = new YugenAnimeAiredEpisodesProvider();
+        var result = (await provider.GetRecentlyAiredEpisodes()).ToList();
+    }
 
 
-        [Fact]
-        public async Task Pahe()
-        {
-            var provider = new AnimePaheAiredEpisodesProvider(_httpClient);
-            var result = (await provider.GetRecentlyAiredEpisodes()).ToList();
-        }
+    [Fact]
+    public async Task Pahe()
+    {
+        var provider = new AnimePaheAiredEpisodesProvider(_httpClient);
+        var result = (await provider.GetRecentlyAiredEpisodes()).ToList();
     }
 }

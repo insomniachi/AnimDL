@@ -26,13 +26,12 @@ public partial class GogoAnimeEpisodesProvider : IAiredEpisodeProvider
             uriBuilder.Path = item.SelectSingleNode("div/a").Attributes["href"].Value;
             var url = uriBuilder.Uri.AbsoluteUri;
             var img = item.SelectSingleNode("div/a/img").Attributes["src"].Value;
-            var ep = item.QuerySelector(".episode").InnerText.Trim();
             list.Add(new GogoAnimeAiredEpisode
             {
                 Title = title,
                 Url = url,
                 Image = img,
-                AdditionalInfo = ep
+                Episode = int.Parse(AiredEpisode.EpisodeRegex().Match(url).Groups[1].Value),
             });
         }
 

@@ -12,7 +12,7 @@ internal class YugenAnimeAiredEpisodesProvider : IAiredEpisodeProvider
 
     class YugenAnimeAiredEpisode : AiredEpisode, IHaveCreatedTime
     {
-        public DateTime CreatedTime { get; set; }
+        public DateTime CreatedAt { get; set; }
     }
 
     public async Task<IEnumerable<AiredEpisode>> GetRecentlyAiredEpisodes(int page = 1)
@@ -39,7 +39,8 @@ internal class YugenAnimeAiredEpisodesProvider : IAiredEpisodeProvider
                 Title = title,
                 Url = url,
                 Image = img,
-                CreatedTime = DateTime.Parse(time).ToLocalTime()
+                CreatedAt = DateTime.Parse(time).ToLocalTime(),
+                Episode = int.Parse(AiredEpisode.EpisodeRegex().Match(url).Groups[1].Value),
             });
         }
 
