@@ -2,6 +2,7 @@
 using AnimDL.Core.Models;
 using HtmlAgilityPack;
 using HtmlAgilityPack.CssSelectors.NetCore;
+using Microsoft.AspNetCore.WebUtilities;
 
 namespace AnimDL.Core.AiredEpisodesProvider;
 
@@ -9,19 +10,19 @@ internal class YugenAnimeAiredEpisodesProvider : IAiredEpisodeProvider
 {
     private readonly HtmlWeb _web = new();
 
-    class YugenAnimeAiredEpisode : AiredEpisode
+    class YugenAnimeAiredEpisode : AiredEpisode, IHaveCreatedTime
     {
-        public DateTime TimeOfAiring { get; set; }
+        public DateTime CreatedTime { get; set; }
     }
 
-    public async Task<IEnumerable<AiredEpisode>> GetRecentlyAiredEpisodes()
+    public async Task<IEnumerable<AiredEpisode>> GetRecentlyAiredEpisodes(int page = 1)
     {
         var urlBuilder = new UriBuilder(DefaultUrl.Yugen)
         {
-            Path = "/latest"
+            Path = $"/latest",
         };
 
-        var doc = await _web.LoadFromWebAsync(urlBuilder.Uri.AbsoluteUri);
+        var doc = await _web.LoadFromWebAsync(QueryHelpers.AddQueryString(urlBuilder.Uri.AbsoluteUri, new Dictionary<string,string>() { ["page"] = page.ToString() }));
 
         var nodes = doc.QuerySelectorAll(".ep-card");
         var list = new List<AiredEpisode>();
@@ -38,7 +39,7 @@ internal class YugenAnimeAiredEpisodesProvider : IAiredEpisodeProvider
                 Title = title,
                 Url = url,
                 Image = img,
-                TimeOfAiring = DateTime.Parse(time).ToLocalTime()
+                CreatedTime = DateTime.Parse(time).ToLocalTime()
             });
         }
 

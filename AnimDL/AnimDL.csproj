@@ -6,7 +6,7 @@
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
 		<PackAsTool>true</PackAsTool>
-		<ToolCommandName>animdl</ToolCommandName>
+		<ToolCommandName>adl</ToolCommandName>
 		<PackageOutputPath>./nupkg</PackageOutputPath>
 		<Platforms>x64</Platforms>
 		<RepositoryUrl>https://github.com/athulrajts/AnimDL</RepositoryUrl>

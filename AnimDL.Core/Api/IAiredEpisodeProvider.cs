@@ -4,5 +4,5 @@ namespace AnimDL.Core.Api;
 
 public interface IAiredEpisodeProvider
 {
-    Task<IEnumerable<AiredEpisode>> GetRecentlyAiredEpisodes();
+    Task<IEnumerable<AiredEpisode>> GetRecentlyAiredEpisodes(int page = 1);
 }

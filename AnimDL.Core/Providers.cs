@@ -43,7 +43,7 @@ internal class AnimixPlayProvider : BaseProvider
 
 internal class AnimePaheProvider : BaseProvider
 {
-    public AnimePaheProvider(AnimePaheStreamProvider provider, AnimePaheCatalog catalog) : base(provider, catalog) { }
+    public AnimePaheProvider(AnimePaheStreamProvider provider, AnimePaheCatalog catalog, AnimePaheAiredEpisodesProvider episodesProvider) : base(provider, catalog, episodesProvider) { }
     public override ProviderType ProviderType => ProviderType.AnimePahe;
 }
 
@@ -114,6 +114,7 @@ public static class ServiceCollectionExtensions
         //recent episodes
         services.AddTransient<GogoAnimeEpisodesProvider>();
         services.AddTransient<YugenAnimeAiredEpisodesProvider>();
+        services.AddTransient<AnimePaheAiredEpisodesProvider>();
 
         //providers
         services.AddTransient<IProvider, AnimixPlayProvider>();

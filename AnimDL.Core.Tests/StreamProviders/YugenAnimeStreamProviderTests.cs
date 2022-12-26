@@ -20,14 +20,15 @@ namespace AnimDL.Core.Tests.StreamProviders
         public async Task YugenAnimeEpisodes()
         {
             var provider = new YugenAnimeAiredEpisodesProvider();
-            var result = await provider.GetRecentlyAiredEpisodes();
+            var result = (await provider.GetRecentlyAiredEpisodes()).ToList();
         }
 
+
         [Fact]
-        public async Task AllAnime()
+        public async Task Pahe()
         {
-            var catalog = new AllAnimeCatalog();
-            var result = await catalog.Search("hyouka").ToListAsync();
+            var provider = new AnimePaheAiredEpisodesProvider(_httpClient);
+            var result = (await provider.GetRecentlyAiredEpisodes()).ToList();
         }
     }
 }

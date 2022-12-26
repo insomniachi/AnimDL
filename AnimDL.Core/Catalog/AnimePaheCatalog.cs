@@ -8,18 +8,24 @@ namespace AnimDL.Core.Catalog
 {
     public class AnimePaheCatalog : ICatalog, IEnableLogger
     {
-        const string BASE_URL = "https://animepahe.com/anime/";
-        const string API = "https://animepahe.com/api";
+        private readonly string _baseAnimeUrl;
+        private readonly string _api;
         private readonly HttpClient _client;
 
         public AnimePaheCatalog(HttpClient client)
         {
+            var urlBuilder = new UriBuilder(DefaultUrl.AnimePahe);
+            urlBuilder.Path = "/anime";
+            _baseAnimeUrl = urlBuilder.Uri.AbsoluteUri;
+            urlBuilder.Path = "/api";
+            _api = urlBuilder.Uri.AbsoluteUri;
+
             _client = client;
         }
 
         public async IAsyncEnumerable<SearchResult> Search(string query)
         {
-            var json = await _client.GetStringAsync(API, parameters: new()
+            var json = await _client.GetStringAsync(_api, parameters: new()
             {
                 ["m"] = "search",
                 ["q"] = query,
@@ -54,7 +60,7 @@ namespace AnimDL.Core.Catalog
                     Title = item!["title"]!.ToString(),
                     Image = item!["poster"]!.ToString(),
                     Year = int.Parse(item!["year"]!.ToString()),
-                    Url = BASE_URL + item!["session"]!.ToString(),
+                    Url = _baseAnimeUrl + "/" + item!["session"]!.ToString(),
                     Status = item!["status"]!.ToString(),
                     Season = item!["season"]!.ToString()
                 };

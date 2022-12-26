@@ -17,3 +17,8 @@ public abstract partial class AiredEpisode
     [GeneratedRegex("(\\d+)", RegexOptions.RightToLeft)]
     private static partial Regex EpisodeRegex();
 }
+
+public interface IHaveCreatedTime
+{
+    DateTime CreatedTime { get; set; }
+}
