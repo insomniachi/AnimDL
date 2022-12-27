@@ -41,6 +41,7 @@ internal class AnimePaheEpisodeStream
     public string audio { get; set; } = string.Empty;
     public string disc { get; set; } = string.Empty;
     public int hq { get; set; }
+    public int av1 { get; set; }
     public string kwik { get; set; } = string.Empty;
     public string kwik_pahewin { get; set; } = string.Empty;
 }

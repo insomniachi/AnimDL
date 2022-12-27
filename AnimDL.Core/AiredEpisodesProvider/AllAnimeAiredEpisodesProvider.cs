@@ -58,7 +58,7 @@ internal class AllAnimeAiredEpisodesProvider : IAiredEpisodeProvider
             var title = $"{item?["name"]}";
             var image = $"{item?["thumbnail"]}";
             var year = int.Parse($"{item?["lastEpisodeDate"]?["sub"]?["year"]}");
-            var month = int.Parse($"{item?["lastEpisodeDate"]?["sub"]?["month"]}");
+            var month = int.Parse($"{item?["lastEpisodeDate"]?["sub"]?["month"]}") + 1; // months are from 0-11
             var day = int.Parse($"{item?["lastEpisodeDate"]?["sub"]?["date"]}");
             var hour = int.Parse($"{item?["lastEpisodeDate"]?["sub"]?["hour"]}");
             var min = int.Parse($"{item?["lastEpisodeDate"]?["sub"]?["minute"]}");

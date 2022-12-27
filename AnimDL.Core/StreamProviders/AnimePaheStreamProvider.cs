@@ -1,13 +1,10 @@
-﻿using System.Text;
-using System.Text.Json;
+﻿using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Text.RegularExpressions;
 using AnimDL.Core.Helpers;
 using AnimDL.Core.Models;
 using AnimDL.Core.Models.Internal;
 using HtmlAgilityPack;
-using Microsoft.AspNetCore.WebUtilities;
-using Newtonsoft.Json.Linq;
 using ReactiveUI;
 using Splat;
 
@@ -92,11 +89,17 @@ public partial class AnimePaheStreamProvider : BaseStreamProvider
             {
                 try
                 {
+                    var url = await GetDirectLink(kv.Value.kwik_pahewin);
+                    if(string.IsNullOrEmpty(url))
+                    {
+                        continue;
+                    }
+
                     streams.Qualities.Add(kv.Key, new VideoStream
                     {
                         Quality = kv.Key,
                         Headers = new Dictionary<string, string> { [Headers.Referer] = kv.Value.kwik },
-                        Url = GetStreamFromEmbedUrl(kv.Value.kwik)
+                        Url = url
                     });
                 }
                 catch (Exception ex)
@@ -124,7 +127,7 @@ public partial class AnimePaheStreamProvider : BaseStreamProvider
 
     private async Task<Dictionary<string, AnimePaheEpisodeStream>> GetStreamUrl(string releaseId, string streamSession)
     {
-        var json = await _client.GetStreamAsync(API, parameters: new()
+        var stream = await _client.GetStreamAsync(API, parameters: new()
         {
             ["m"] = "links",
             ["id"] = releaseId,
@@ -132,10 +135,19 @@ public partial class AnimePaheStreamProvider : BaseStreamProvider
             ["p"] = "kwik"
         });
 
-        var jObject = JsonNode.Parse(json);
+        var jObject = JsonNode.Parse(stream);
         var data = jObject!["data"]!.AsArray();
 
-        var result = data.ToDictionary(x => x!.AsObject().ElementAt(0).Key, x => x!.AsObject().ElementAt(0).Value.Deserialize<AnimePaheEpisodeStream>());
+        var result = new Dictionary<string, AnimePaheEpisodeStream>();
+        foreach (var item in data)
+        {
+            var key = item!.AsObject()!.ElementAt(0)!.Key;
+            var value = item!.AsObject()!.ElementAt(0)!.Value.Deserialize<AnimePaheEpisodeStream>();
+            var symbol = (value!.av1 == 0) ? "p" : "a";
+            var actualKey = key + symbol;
+            result.TryAdd(actualKey, value);
+        }
+        
         return result!;
     }
     
@@ -191,81 +203,87 @@ public partial class AnimePaheStreamProvider : BaseStreamProvider
     }
 
 
-    //private async Task<string> GetStreamFromEmbedUrlMp4(string kwikPahewin)
-    //{
-    //    var response = await _clientInternal.GetStringAsync(kwikPahewin);
-    //    var url = KwikRedirectionRegex().Match(response).Groups[1].Value;
-    //    var downloadPage = await _clientInternal.GetStringAsync(url);
-    //    var match = KwikParamsRegex().Match(downloadPage);
+    private async Task<string> GetDirectLink(string kwikPahewin)
+    {
+        var response = await _clientInternal.GetStringAsync(kwikPahewin);
+        var url = KwikRedirectionRegex().Match(response).Groups[1].Value;
+        var downloadPage = await _clientInternal.GetStringAsync(url);
+        var match = KwikParamsRegex().Match(downloadPage);
 
-    //    if(!match.Success)
-    //    {
-    //        this.Log().Error("unable to find decryption paramters");
-    //    }
+        if (!match.Success)
+        {
+            this.Log().Error("unable to find decryption paramters");
+        }
 
-    //    var fullKey = match.Groups[1].Value;
-    //    var key = match.Groups[2].Value;
-    //    var v1 = match.Groups[3].Value;
-    //    var v2 = match.Groups[4].Value;
+        var fullKey = match.Groups[1].Value;
+        var key = match.Groups[2].Value;
+        var v1 = match.Groups[3].Value;
+        var v2 = match.Groups[4].Value;
 
-    //    var decrypted = Decrypt(fullKey, key, int.Parse(v1), int.Parse(v2));
+        var decrypted = Decrypt(fullKey, key, int.Parse(v1), int.Parse(v2));
 
-    //    var postUrl = KwikDecryptUrlRegex().Match(decrypted).Groups[1].Value;
-    //    var token = KwikDecryptTokenRegex().Match(decrypted).Groups[1].Value;
+        var postUrl = KwikDecryptUrlRegex().Match(decrypted).Groups[1].Value;
+        var token = KwikDecryptTokenRegex().Match(decrypted).Groups[1].Value;
 
-    //    using var content = new FormUrlEncodedContent(new Dictionary<string, string>
-    //    {
-    //        ["_token"] = token
-    //    });
-    //    _clientInternal.DefaultRequestHeaders.Add("referer", "https://kwik.cx/");
-    //    var httpResponse = await _clientInternal.PostAsync(postUrl, content);
+        using var content = new FormUrlEncodedContent(new Dictionary<string, string>
+        {
+            ["_token"] = token
+        });
+        _clientInternal.DefaultRequestHeaders.Referrer = new("https://kwik.cx/");
+        _clientInternal.DefaultRequestHeaders.UserAgent.ParseAdd(ServiceCollectionExtensions.USER_AGENT);
+        var httpResponse = await _clientInternal.PostAsync(postUrl, content);
 
-    //    return string.Empty;
-    //}
+        if(httpResponse.StatusCode == System.Net.HttpStatusCode.Found)
+        {
+            return httpResponse!.Headers!.Location!.AbsoluteUri;
+        }
 
-    //private static string Decrypt(string fullString, string key, int v1, int v2)
-    //{
-    //    var r = "";
-    //    var i = 0;
-    //    while (i < fullString.Length)
-    //    {
-    //        var s = "";
-    //        while (fullString[i] != key[v2])
-    //        {
-    //            s+= fullString[i];
-    //            i++;
-    //        }
-    //        var j = 0;
-    //        while(j < key.Length)
-    //        {
-    //            s = s.Replace(key[j].ToString(), j.ToString());
-    //            j++;
-    //        }
-    //        r += (char)(int.Parse(GetString(s, v2, 10)) - v1);
-    //        i++;
-    //    }
+        return string.Empty;
+    }
 
-    //    return r;
-    //}
+    private static string Decrypt(string fullString, string key, int v1, int v2)
+    {
+        var r = "";
+        var i = 0;
+        while (i < fullString.Length)
+        {
+            var s = "";
+            while (fullString[i] != key[v2])
+            {
+                s += fullString[i];
+                i++;
+            }
+            var j = 0;
+            while (j < key.Length)
+            {
+                s = s.Replace(key[j].ToString(), j.ToString());
+                j++;
+            }
+            r += (char)(int.Parse(GetString(s, v2, 10)) - v1);
+            i++;
+        }
 
-    //private static string GetString(string content, int s1, int s2)
-    //{
-    //    var slice = CHARACTER_MAP[0..s2];
-    //    var acc = 0;
-    //    var index = 0;
-    //    foreach (var item in content.Reverse())
-    //    {
-    //        acc += (char.IsDigit(item) ? int.Parse(item.ToString()) : 0) * (int)Math.Pow(s1, index);
-    //        index++;
-    //    }
+        return r;
+    }
 
-    //    var k = "";
-    //    while(acc > 0)
-    //    {
-    //        k = slice[acc % s2] + k;
-    //        acc = (acc - (acc % s2)) / s2;
-    //    }
+    private static string GetString(string content, int s1, int s2)
+    {
+        var slice = CHARACTER_MAP[0..s2];
+        var acc = 0;
+        var index = 0;
+        foreach (var item in content.Reverse())
+        {
+            acc += (char.IsDigit(item) ? int.Parse(item.ToString()) : 0) * (int)Math.Pow(s1, index);
+            index++;
+        }
 
-    //    return string.IsNullOrEmpty(k) ? "0" : k;
-    //}
+        var k = "";
+        while (acc > 0)
+        {
+            k = slice[acc % s2] + k;
+            acc = (acc - (acc % s2)) / s2;
+        }
+
+        return string.IsNullOrEmpty(k) ? "0" : k;
+    }
 }
