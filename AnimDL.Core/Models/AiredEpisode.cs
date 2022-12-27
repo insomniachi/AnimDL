@@ -1,13 +1,16 @@
-﻿using System.Text.RegularExpressions;
+﻿using System.Diagnostics;
+using System.Text.RegularExpressions;
 
 namespace AnimDL.Core.Models;
 
+[DebuggerDisplay("{Title} - {Episode}")]
 public abstract partial class AiredEpisode
 {
     public string Title { get; set; } = string.Empty;
     public string Url { get; set; } = string.Empty;
     public string Image { get; set; } = string.Empty;
     public int Episode { get; set; }
+    public string EpisodeString { get; set; } = string.Empty;
 
     [GeneratedRegex("(\\d+)", RegexOptions.RightToLeft)]
     internal static partial Regex EpisodeRegex();

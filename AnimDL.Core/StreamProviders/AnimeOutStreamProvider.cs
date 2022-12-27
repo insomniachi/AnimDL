@@ -25,6 +25,11 @@ internal class AnimeOutStreamProvider : BaseStreamProvider
     {
     }
 
+    public override Task<int> GetNumberOfStreams(string url)
+    {
+        throw new NotImplementedException();
+    }
+
     public async override IAsyncEnumerable<VideoStreamsForEpisode> GetStreams(string url, Range stream)
     {
         var doc = new HtmlDocument();

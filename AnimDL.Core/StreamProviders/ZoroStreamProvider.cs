@@ -164,4 +164,9 @@ public partial class ZoroStreamProvider : BaseStreamProvider
 
     [GeneratedRegex("(/watch)?/[\\w-]+-(\\d+)")]
     private static partial Regex SlugRegex();
+
+    public override Task<int> GetNumberOfStreams(string url)
+    {
+        throw new NotImplementedException();
+    }
 }

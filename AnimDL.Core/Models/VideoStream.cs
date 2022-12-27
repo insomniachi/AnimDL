@@ -9,6 +9,19 @@ public class VideoStream
 
 public class VideoStreamsForEpisode
 {
-    public int Episode { get; set; }
+    private int _episode;
+    public int Episode
+    {
+        get => _episode;
+        set
+        {
+            if(value > 0)
+            {
+                _episode = value;
+                EpisodeString = value.ToString();
+            }
+        }
+    }
+    public string EpisodeString { get; set; } = string.Empty;
     public Dictionary<string, VideoStream> Qualities { get; set; } = new();
 }

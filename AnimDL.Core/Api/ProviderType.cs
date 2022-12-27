@@ -8,5 +8,6 @@ public enum ProviderType
     AnimeOut,
     GogoAnime,
     Zoro,
-    Yugen
+    Yugen,
+    AllAnime,
 }

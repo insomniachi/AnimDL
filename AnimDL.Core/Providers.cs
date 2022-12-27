@@ -77,11 +77,40 @@ internal class YugenAnimeProvider : BaseProvider
     public override ProviderType ProviderType => ProviderType.Yugen;
 }
 
+internal class AllAnimeProvider : BaseProvider
+{
+    public AllAnimeProvider(AllAnimeStreamProvider provider, AllAnimeCatalog catalog, AllAnimeAiredEpisodesProvider episodesProvider) : base(provider, catalog, episodesProvider) { }
+    public override ProviderType ProviderType => ProviderType.AllAnime;
+}
+
 public static class ServiceCollectionExtensions
 {
-    const string USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.5112.81 Safari/537.36 Edg/104.0.1293.54";
+    public const string USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.5112.81 Safari/537.36 Edg/104.0.1293.54";
 
 #pragma warning disable CS0618 // Type or member is obsolete
+
+    private static IServiceCollection AddProvider<TProvider, TCatalog, TStreamProvider, TAiredEpisodesProvider>(this IServiceCollection services)
+        where TProvider : class, IProvider
+        where TStreamProvider: class, IStreamProvider
+        where TCatalog : class, ICatalog
+        where TAiredEpisodesProvider : class, IAiredEpisodeProvider
+    {
+        return services.AddTransient<IProvider, TProvider>()
+                       .AddTransient<TCatalog>()
+                       .AddTransient<TStreamProvider>()
+                       .AddTransient<TAiredEpisodesProvider>();
+    }
+
+    private static IServiceCollection AddProvider<TProvider, TCatalog, TStreamProvider>(this IServiceCollection services)
+        where TProvider : class, IProvider
+        where TStreamProvider : class, IStreamProvider
+        where TCatalog : class, ICatalog
+    {
+        return services.AddTransient<IProvider, TProvider>()
+                       .AddTransient<TCatalog>()
+                       .AddTransient<TStreamProvider>();
+    }
+
     public static IServiceCollection AddAnimDL(this IServiceCollection services)
     {
         var client = new HttpClient();
@@ -89,41 +118,19 @@ public static class ServiceCollectionExtensions
         services.AddSingleton(client);
         services.AddTransient<IProviderFactory, ProviderFactory>();
 
-        // streams
-        services.AddTransient<AnimixPlayStreamProvider>();
-        services.AddTransient<AnimePaheStreamProvider>();
-        services.AddTransient<TenshiMoeStreamProvider>();
-        services.AddTransient<AnimeOutStreamProvider>();
-        services.AddTransient<GogoAnimeStreamProvider>();
-        services.AddTransient<ZoroStreamProvider>();
-        services.AddTransient<YugenAnimeStreamProvider>();
-
-        //catalog
-        services.AddTransient<AnimixPlayCatalog>();
-        services.AddTransient<AnimePaheCatalog>();
-        services.AddTransient<TenshiCatalog>();
-        services.AddTransient<AnimeOutCatalog>();
-        services.AddTransient<GogoAnimeCatalog>();
-        services.AddTransient<ZoroCatalog>();
-        services.AddTransient<YugenAnimeCatalog>();
-
         //extractors
         services.AddTransient<GogoPlayExtractor>();
         services.AddTransient<RapidVideoExtractor>();
 
-        //recent episodes
-        services.AddTransient<GogoAnimeEpisodesProvider>();
-        services.AddTransient<YugenAnimeAiredEpisodesProvider>();
-        services.AddTransient<AnimePaheAiredEpisodesProvider>();
-
         //providers
-        services.AddTransient<IProvider, AnimixPlayProvider>();
-        services.AddTransient<IProvider, AnimePaheProvider>();
-        services.AddTransient<IProvider, TenshiMoeProvider>();
-        services.AddTransient<IProvider, AnimeOutProvider>();
-        services.AddTransient<IProvider, GogoAnimeProvider>();
-        services.AddTransient<IProvider, ZoroProvider>();
-        services.AddTransient<IProvider, YugenAnimeProvider>();
+        services.AddProvider<GogoAnimeProvider, GogoAnimeCatalog, GogoAnimeStreamProvider, GogoAnimeEpisodesProvider>();
+        services.AddProvider<YugenAnimeProvider, YugenAnimeCatalog, YugenAnimeStreamProvider, YugenAnimeAiredEpisodesProvider>();
+        services.AddProvider<AllAnimeProvider, AllAnimeCatalog, AllAnimeStreamProvider, AllAnimeAiredEpisodesProvider>();
+        services.AddProvider<AnimePaheProvider, AnimePaheCatalog, AnimePaheStreamProvider, AnimePaheAiredEpisodesProvider>();
+        services.AddProvider<AnimixPlayProvider, AnimixPlayCatalog, AnimixPlayStreamProvider>();
+        services.AddProvider<TenshiMoeProvider, TenshiCatalog, TenshiMoeStreamProvider>();
+        services.AddProvider<AnimeOutProvider, AnimeOutCatalog, AnimeOutStreamProvider>();
+        services.AddProvider<ZoroProvider, ZoroCatalog, ZoroStreamProvider>();
 
         return services;
     }

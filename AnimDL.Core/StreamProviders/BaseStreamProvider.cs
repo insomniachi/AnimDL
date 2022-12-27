@@ -29,6 +29,6 @@ public abstract class BaseStreamProvider : IStreamProvider, IEnableLogger
         return _session.LoadFromWebAsync(url);
     }
 
-    public virtual IAsyncEnumerable<VideoStreamsForEpisode> GetStreams(string url, Range stream) => AsyncEnumerable.Empty<VideoStreamsForEpisode>();
-    public virtual Task<int> GetNumberOfStreams(string url) => Task.FromResult(1);
+    public abstract IAsyncEnumerable<VideoStreamsForEpisode> GetStreams(string url, Range stream);
+    public abstract Task<int> GetNumberOfStreams(string url);
 }
