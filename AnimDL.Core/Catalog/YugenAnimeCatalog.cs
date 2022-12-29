@@ -2,20 +2,27 @@
 using AnimDL.Core.Api;
 using AnimDL.Core.Helpers;
 using AnimDL.Core.Models;
+using AnimDL.Core.Models.SearchResults;
 using HtmlAgilityPack;
 using HtmlAgilityPack.CssSelectors.NetCore;
 using Splat;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace AnimDL.Core.Catalog;
 
 internal partial class YugenAnimeCatalog : ICatalog, ICanParseMalId, IEnableLogger
 {
-    const string BASE_URL = "https://yugen.to/";
     private readonly HttpClient _client;
+    private readonly string _searchApi;
+    private readonly string _baseUrl;
+    private readonly UriBuilder _uriBuilder = new(DefaultUrl.Yugen);
 
     public YugenAnimeCatalog(HttpClient client)
     {
         _client = client;
+        _uriBuilder.Path = "/search";
+        _searchApi = _uriBuilder.Uri.AbsoluteUri;
+        _baseUrl = DefaultUrl.Yugen;
     }
 
     public async Task<long> GetMalId(string url)
@@ -35,7 +42,7 @@ internal partial class YugenAnimeCatalog : ICatalog, ICanParseMalId, IEnableLogg
 
     public async IAsyncEnumerable<SearchResult> Search(string query)
     {
-        var stream = await _client.GetStreamAsync(BASE_URL + "search/", parameters: new() { ["q"] = query });
+        var stream = await _client.GetStreamAsync(_searchApi, parameters: new() { ["q"] = query });
         var doc = new HtmlDocument();
         doc.Load(stream);
 
@@ -49,10 +56,20 @@ internal partial class YugenAnimeCatalog : ICatalog, ICanParseMalId, IEnableLogg
 
         foreach (var node in nodes)
         {
-            yield return new SearchResult
+            var title = node.Attributes["title"].Value;
+            var url = _baseUrl.TrimEnd('/') + node.Attributes["href"].Value;
+            var image = node.QuerySelector("img").Attributes["data-src"].Value;
+            var season = node.QuerySelector(".anime-details span").InnerText.Split(" ");
+            var rating = node.QuerySelector(".option")?.ChildNodes[1]?.InnerText?.Trim() ?? string.Empty;
+            
+            yield return new YugenAnimeSearchResult
             {
-                Url = BASE_URL.TrimEnd('/') + node.Attributes["href"].Value,
-                Title = node.Attributes["title"].Value
+                Url = url,
+                Title = title,
+                Image = image,
+                Season = season[0],
+                Rating = rating,
+                Year = season.Length >= 2 ? season[1] : string.Empty,
             };
         }
     }

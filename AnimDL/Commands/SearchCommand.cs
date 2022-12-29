@@ -25,14 +25,14 @@ public class SearchCommand
     }
 
 
-    public static void Execute(string query, IProvider provider, ILogger<SearchCommand> logger)
+    public static async Task Execute(string query, IProvider provider, ILogger<SearchCommand> logger)
     {
         logger.LogInformation("Searching in {Type}", provider.ProviderType);
 
         var count = 1;
         var searchResult = provider.Catalog.Search(query).ToObservable();
         searchResult.Subscribe(OnNextSearchResult, OnError);
-        searchResult.TryWait();
+        await searchResult;
 
 
         void OnNextSearchResult(SearchResult result)

@@ -1,7 +1,9 @@
 ﻿using AnimDL.Core.Api;
 using AnimDL.Core.Helpers;
 using AnimDL.Core.Models;
+using AnimDL.Core.Models.SearchResults;
 using HtmlAgilityPack;
+using HtmlAgilityPack.CssSelectors.NetCore;
 
 namespace AnimDL.Core.Catalog;
 
@@ -22,12 +24,19 @@ public class GogoAnimeCatalog : ICatalog
         var doc = new HtmlDocument();
         doc.Load(html);
 
-        foreach (var item in doc.DocumentNode.SelectNodes("//p[@class=\"name\"]/a"))
+        foreach (var item in doc.DocumentNode.QuerySelectorAll("ul.items li"))
         {
-            yield return new SearchResult
+            var title = item.QuerySelector(".name a").Attributes["title"].Value;
+            var image = item.QuerySelector("img").Attributes["src"].Value;
+            var url = item.QuerySelector(".name a").Attributes["href"].Value;
+            var year = item.QuerySelector(".released")?.InnerText?.Split(':')?.LastOrDefault()?.Trim() ?? string.Empty;
+
+            yield return new GogoAnimeSearchResult
             {
-                Title = item.Attributes["title"].Value,
-                Url = DefaultUrl.GogoAnime + item.Attributes["href"].Value,
+                Title = title,
+                Url = DefaultUrl.GogoAnime.TrimEnd('/') + url,
+                Image = image,
+                Year = year
             };
         }
     }

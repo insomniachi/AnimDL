@@ -2,6 +2,7 @@
 using System.Text.Json.Nodes;
 using AnimDL.Core.Api;
 using AnimDL.Core.Models;
+using AnimDL.Core.Models.SearchResults;
 using HtmlAgilityPack;
 using Microsoft.AspNetCore.WebUtilities;
 
@@ -52,14 +53,16 @@ internal class AllAnimeCatalog : ICatalog
         var url = QueryHelpers.AddQueryString(_api, queryParams);
         var response = await _web.LoadFromWebAsync(url);
         var jObject = JsonNode.Parse(response.Text);
-        var uriBuilder = new UriBuilder(DefaultUrl.AllAnime);
         foreach (var item in jObject?["data"]?["shows"]?["edges"]?.AsArray() ?? new JsonArray())
         {
-            uriBuilder.Path = $"/anime/{item?["_id"]}";
-            yield return new SearchResult
+            yield return new AllAnimeSearchResult
             {
                 Title = $"{item?["name"]}",
-                Url = uriBuilder.Uri.AbsoluteUri,
+                Url = DefaultUrl.AllAnime.TrimEnd('/') + $"/anime/{item?["_id"]}",
+                Season = $"{item?["season"]?["quarter"]}",
+                Year = $"{item?["season"]?["year"]}",
+                Rating = $"{item?["score"]}",
+                Image = $"{item?["thumbnail"]}"
             };
         }
 

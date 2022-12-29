@@ -2,6 +2,7 @@
 using AnimDL.Core.Api;
 using AnimDL.Core.Helpers;
 using AnimDL.Core.Models;
+using AnimDL.Core.Models.SearchResults;
 using Splat;
 
 namespace AnimDL.Core.Catalog
@@ -14,8 +15,7 @@ namespace AnimDL.Core.Catalog
 
         public AnimePaheCatalog(HttpClient client)
         {
-            var urlBuilder = new UriBuilder(DefaultUrl.AnimePahe);
-            urlBuilder.Path = "/anime";
+            var urlBuilder = new UriBuilder(DefaultUrl.AnimePahe) { Path = "/anime" };
             _baseAnimeUrl = urlBuilder.Uri.AbsoluteUri;
             urlBuilder.Path = "/api";
             _api = urlBuilder.Uri.AbsoluteUri;
@@ -57,12 +57,12 @@ namespace AnimDL.Core.Catalog
             {
                 yield return new AnimePaheSearchResult
                 {
-                    Title = item!["title"]!.ToString(),
-                    Image = item!["poster"]!.ToString(),
-                    Year = int.Parse(item!["year"]!.ToString()),
-                    Url = _baseAnimeUrl + "/" + item!["session"]!.ToString(),
-                    Status = item!["status"]!.ToString(),
-                    Season = item!["season"]!.ToString()
+                    Title = $"{item?["title"]}",
+                    Image = $"{item?["poster"]}",
+                    Url = _baseAnimeUrl.TrimEnd('/') + "/" + $"{item?["session"]}",
+                    Status = $"{item?["status"]}",
+                    Season = $"{item?["season"]}",
+                    Year = $"{item?["year"]}"
                 };
             }
 
