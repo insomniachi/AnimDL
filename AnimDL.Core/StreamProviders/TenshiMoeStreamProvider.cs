@@ -1,4 +1,5 @@
-﻿using System.Text.RegularExpressions;
+﻿using System.Net;
+using System.Text.RegularExpressions;
 using AnimDL.Core.Helpers;
 using AnimDL.Core.Models;
 using HtmlAgilityPack;
@@ -10,15 +11,22 @@ namespace AnimDL.Core.StreamProviders;
 internal partial class TenshiMoeStreamProvider : BaseStreamProvider
 {
     public readonly string BASE_URL = DefaultUrl.Tenshi;
+    private readonly HttpClient _cookieSavingClient;
+    private readonly CookieContainer _cookieContainer = new();
 
     public TenshiMoeStreamProvider(HttpClient client) : base(client)
     {
+        var clientHandler = new HttpClientHandler
+        {
+            CookieContainer = _cookieContainer
+        };
+        _cookieSavingClient = new HttpClient(clientHandler);
     }
 
     public override async Task<int> GetNumberOfStreams(string url)
     {
-        await _client.BypassDDoS(BASE_URL);
-        var html = await _client.GetStreamAsync(url);
+        await _cookieSavingClient.BypassDDoS(BASE_URL);
+        var html = await _cookieSavingClient.GetStreamAsync(url);
 
         var doc = new HtmlDocument();
         doc.Load(html);
@@ -28,8 +36,8 @@ internal partial class TenshiMoeStreamProvider : BaseStreamProvider
 
     public override async IAsyncEnumerable<VideoStreamsForEpisode> GetStreams(string url, Range range)
     {
-        await _client.BypassDDoS(BASE_URL);
-        var html = await _client.GetStreamAsync(url);
+        await _cookieSavingClient.BypassDDoS(BASE_URL);
+        var html = await _cookieSavingClient.GetStreamAsync(url);
 
         var doc = new HtmlDocument();
         doc.Load(html);
@@ -39,7 +47,7 @@ internal partial class TenshiMoeStreamProvider : BaseStreamProvider
 
         foreach (var ep in Enumerable.Range(start, end - start + 1))
         {
-            if (await ExtractUrls(_client, $"{url}/{ep}") is VideoStreamsForEpisode streamForEp)
+            if (await ExtractUrls($"{url}/{ep}") is VideoStreamsForEpisode streamForEp)
             {
                 streamForEp.Episode = ep;
                 yield return streamForEp;
@@ -47,9 +55,9 @@ internal partial class TenshiMoeStreamProvider : BaseStreamProvider
         }
     }
 
-    private async Task<VideoStreamsForEpisode?> ExtractUrls(HttpClient client, string url)
+    private async Task<VideoStreamsForEpisode?> ExtractUrls(string url)
     {
-        var htmlStream = await client.GetStreamAsync(url);
+        var htmlStream = await _cookieSavingClient.GetStreamAsync(url);
 
         var doc = new HtmlDocument();
         doc.Load(htmlStream);
@@ -61,7 +69,19 @@ internal partial class TenshiMoeStreamProvider : BaseStreamProvider
             return null;
         }
 
-        var html = await client.GetStringAsync(embedStream);
+        var html = await _cookieSavingClient.GetStringAsync(embedStream);
+        var cookieCollection = _cookieContainer.GetCookies(new Uri(embedStream));
+        var ddg1 = string.Empty;
+        var ddg2 = string.Empty;
+        foreach (var item in cookieCollection.Cast<Cookie>())
+        {
+            switch (item.Name)
+            {
+                case "__ddg1_": ddg1 = item.Value; break;
+                case "__ddg2_": ddg2 = item.Value; break;
+            }
+        }
+        var cookie = $"__ddg1={ddg1}; __ddg2={ddg2}; __ddg2_={ddg2}";
 
         var streamsForEp = new VideoStreamsForEpisode();
         foreach (var match in StreamRegex().Matches(html).Cast<Match>())
@@ -71,13 +91,17 @@ internal partial class TenshiMoeStreamProvider : BaseStreamProvider
             streamsForEp.Qualities.Add(quality, new VideoStream
             {
                 Quality = quality,
-                Url = match.Groups[1].Value
+                Url = match.Groups[1].Value,
+                Headers = new Dictionary<string, string>
+                {
+                    [Headers.Cookie] = cookie
+                }
             });
         }
 
         return streamsForEp;
     }
 
-    [GeneratedRegex("src: '(.*)',[\0-\u007f]*?size: (\\d+)", RegexOptions.Compiled)]
+    [GeneratedRegex(@"<source src=""(.+?)"" .+? size=""([0-9]+)"">", RegexOptions.Compiled)]
     private static partial Regex StreamRegex();
 }

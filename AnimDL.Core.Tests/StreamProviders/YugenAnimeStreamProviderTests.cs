@@ -54,4 +54,11 @@ public class YugenAnimeStreamProviderTests
         var c = new AllAnimeAiredEpisodesProvider();
         var result = (await c.GetRecentlyAiredEpisodes()).ToList();
     }
+
+    [Fact]
+    public async Task TenshiEpisodes()
+    {
+        var service = new TenshiAiredEpisodesProvider();
+        await service.GetRecentlyAiredEpisodes(1);
+    }
 }

@@ -49,7 +49,7 @@ internal class AnimePaheProvider : BaseProvider
 
 internal class TenshiMoeProvider : BaseProvider
 {
-    public TenshiMoeProvider(TenshiMoeStreamProvider provider, TenshiCatalog catalog) : base(provider, catalog) { }
+    public TenshiMoeProvider(TenshiMoeStreamProvider provider, TenshiCatalog catalog, TenshiAiredEpisodesProvider episodesProvider) : base(provider, catalog, episodesProvider) { }
     public override ProviderType ProviderType => ProviderType.Tenshi;
 }
 
@@ -127,8 +127,8 @@ public static class ServiceCollectionExtensions
         services.AddProvider<YugenAnimeProvider, YugenAnimeCatalog, YugenAnimeStreamProvider, YugenAnimeAiredEpisodesProvider>();
         services.AddProvider<AllAnimeProvider, AllAnimeCatalog, AllAnimeStreamProvider, AllAnimeAiredEpisodesProvider>();
         services.AddProvider<AnimePaheProvider, AnimePaheCatalog, AnimePaheStreamProvider, AnimePaheAiredEpisodesProvider>();
+        services.AddProvider<TenshiMoeProvider, TenshiCatalog, TenshiMoeStreamProvider, TenshiAiredEpisodesProvider>();
         services.AddProvider<AnimixPlayProvider, AnimixPlayCatalog, AnimixPlayStreamProvider>();
-        services.AddProvider<TenshiMoeProvider, TenshiCatalog, TenshiMoeStreamProvider>();
         services.AddProvider<AnimeOutProvider, AnimeOutCatalog, AnimeOutStreamProvider>();
         services.AddProvider<ZoroProvider, ZoroCatalog, ZoroStreamProvider>();
 

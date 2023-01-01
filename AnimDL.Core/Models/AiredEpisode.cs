@@ -20,3 +20,8 @@ public interface IHaveCreatedTime
 {
     DateTime CreatedAt { get; set; }
 }
+
+public interface IHaveHumanizedCreatedTime
+{
+    string CreatedAtHumanized { get; set; }
+}

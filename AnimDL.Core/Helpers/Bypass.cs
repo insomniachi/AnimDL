@@ -29,7 +29,7 @@ public static partial class Bypass
     {
         var text = await client.GetStringAsync("https://check.ddos-guard.net/check.js");
         var match = BypassRegex().Match(text);
-        await client.GetAsync(uri + match.Groups[1].Value);
+        var result = await client.GetStringAsync(uri + match.Groups[1].Value);
     }
 
     public static async Task<(string Token, string Number)?> BypassRecaptcha(this HttpClient client, string url, Dictionary<string, string>? headers = null)

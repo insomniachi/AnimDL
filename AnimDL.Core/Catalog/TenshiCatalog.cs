@@ -1,34 +1,64 @@
-﻿using AnimDL.Core.Api;
+﻿using System.Net;
+using System.Text.Json.Nodes;
+using System.Text.RegularExpressions;
+using AnimDL.Core.Api;
 using AnimDL.Core.Helpers;
 using AnimDL.Core.Models;
-using HtmlAgilityPack;
-using HtmlAgilityPack.CssSelectors.NetCore;
+using AnimDL.Core.Models.SearchResults;
 
 namespace AnimDL.Core.Catalog;
 
-public class TenshiCatalog : ICatalog
+public partial class TenshiCatalog : ICatalog
 {
     private readonly HttpClient _client;
+    private readonly CookieContainer _cookieContainer = new();
 
-    public TenshiCatalog(HttpClient client)
+    public TenshiCatalog()
     {
-        _client = client;
+        var clientHandler = new HttpClientHandler
+        {
+            CookieContainer = _cookieContainer
+        };
+        _client = new HttpClient(clientHandler);
     }
 
     public async IAsyncEnumerable<SearchResult> Search(string query)
     {
         await _client.BypassDDoS(DefaultUrl.Tenshi);
-        var html = await _client.GetStreamAsync(DefaultUrl.Tenshi + "anime", parameters: new() { ["q"] = query });
+        var html = await _client.GetStringAsync(DefaultUrl.Tenshi);
+        var csrfToken = CsrfTokenRegex().Match(html).Groups[1].Value;
+        var cookie = string.Join(";",_cookieContainer.GetCookies(new Uri(DefaultUrl.Tenshi)).Cast<Cookie>().Select(item => $"{item.Name}={item.Value}"));
 
-        var doc = new HtmlDocument();
-        doc.Load(html);
-        foreach (var item in doc.QuerySelectorAll(".list > li > a"))
+        var json = await _client.PostFormUrlEncoded("https://tenshi.moe/anime/search", new Dictionary<string, string>() { ["q"] = query }, new() 
         {
-            yield return new SearchResult
+            [Headers.Cookie] = cookie,
+            ["x-requested-with"] = "XMLHttpRequest",
+            ["x-csrf-token"] = csrfToken
+        });
+
+        foreach (var item in JsonNode.Parse(json)?.AsArray() ?? new JsonArray())
+        {
+            var url = $"{item?["url"]}";
+            var title = $"{item?["title"]}";
+            var image = $"{item?["cover"]}";
+            var genre = $"{item?["genre"]}";
+            var year = $"{item?["year"]}";
+            var type = $"{item?["type"]}";
+            var eps = $"{item?["eps"]}";
+
+            yield return new TenshiSearchResult
             {
-                Title = item.Attributes["title"].Value,
-                Url = item.Attributes["href"].Value,
+                Title = title,
+                Url = url,
+                Image = image,
+                Genre = genre,
+                Type = type,
+                Episodes = eps,
+                Year = year,
             };
         }
     }
+
+    [GeneratedRegex(@"<meta name=""csrf-token"" content=""(.+)"">")]
+    private static partial Regex CsrfTokenRegex();
 }
