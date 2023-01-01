@@ -1,10 +1,10 @@
 ﻿using System.Net;
-using System.Text.Json.Nodes;
 using System.Text.RegularExpressions;
 using AnimDL.Core.Api;
 using AnimDL.Core.Helpers;
 using AnimDL.Core.Models;
 using AnimDL.Core.Models.SearchResults;
+using Newtonsoft.Json.Linq;
 
 namespace AnimDL.Core.Catalog;
 
@@ -36,15 +36,15 @@ public partial class TenshiCatalog : ICatalog
             ["x-csrf-token"] = csrfToken
         });
 
-        foreach (var item in JsonNode.Parse(json)?.AsArray() ?? new JsonArray())
+        foreach (var item in JArray.Parse(json))
         {
-            var url = $"{item?["url"]}";
-            var title = $"{item?["title"]}";
-            var image = $"{item?["cover"]}";
-            var genre = $"{item?["genre"]}";
-            var year = $"{item?["year"]}";
-            var type = $"{item?["type"]}";
-            var eps = $"{item?["eps"]}";
+            var url = $"{item["url"]}";
+            var title = $"{item["title"]}";
+            var image = $"{item["cover"]}";
+            var genre = $"{item["genre"]}";
+            var year = $"{item["year"]}";
+            var type = $"{item["type"]}";
+            var eps = $"{item["eps"]}";
 
             yield return new TenshiSearchResult
             {

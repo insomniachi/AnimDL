@@ -32,14 +32,14 @@ jobs:
                 dotnet restore ${{ env.PROJECT_PATH }}
                 dotnet restore ${{ env.CORE_PROJECT_PATH}}
 
-        -   name: 'Build project'
-            run: | 
-                dotnet build ${{ env.PROJECT_PATH }} --no-restore -c Release
-                dotnet build ${{ env.CORE_PROJECT_PATH }} --no-restore -c Release
-
         -   name: 'Get version'
             id: version
             uses: battila7/get-version-action@v2    
+
+        -   name: 'Build project'
+            run: | 
+                dotnet build ${{ env.PROJECT_PATH }} --no-restore -c Release -p:Version=${{ steps.version.outputs.version-without-v}}
+                dotnet build ${{ env.CORE_PROJECT_PATH }} --no-restore -c Release -p:Version=${{ steps.version.outputs.version-without-v}}
 
         -   name: 'Pack'
             run: | 

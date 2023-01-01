@@ -59,6 +59,13 @@ public class YugenAnimeStreamProviderTests
     public async Task TenshiEpisodes()
     {
         var service = new TenshiAiredEpisodesProvider();
-        await service.GetRecentlyAiredEpisodes(1);
+        var result = (await service.GetRecentlyAiredEpisodes(1)).ToList();
+    }
+
+    [Fact]
+    public async Task TenchiCatalog()
+    {
+        var catalog = new TenshiCatalog();
+        var result = await catalog.Search("sword art online").ToListAsync();
     }
 }
