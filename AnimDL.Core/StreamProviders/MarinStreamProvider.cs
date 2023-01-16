@@ -71,8 +71,9 @@ internal class MarinStreamProvider : BaseStreamProvider
                     Url = streamUrl
                 });
 
-                yield return videoStreamForEp;
             }
+
+            yield return videoStreamForEp;
         }
     }
 
