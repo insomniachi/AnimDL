@@ -87,7 +87,7 @@ internal class AllAnimeProvider : BaseProvider
 internal class MarinMoeProvider : BaseProvider
 {
     public MarinMoeProvider(MarinStreamProvider provider, MarinCatalog catalog, MarinAiredEpisodesProvider airedEpisodesProvider) : base(provider, catalog, airedEpisodesProvider) { }
-    public override ProviderType ProviderType => ProviderType.Marin
+    public override ProviderType ProviderType => ProviderType.Marin;
 }
 
 public static class ServiceCollectionExtensions
