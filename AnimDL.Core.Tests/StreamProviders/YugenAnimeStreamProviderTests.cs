@@ -68,4 +68,25 @@ public class YugenAnimeStreamProviderTests
         var catalog = new TenshiCatalog();
         var result = await catalog.Search("sword art online").ToListAsync();
     }
+
+    [Fact]
+    public async Task MarinCatalog()
+    {
+        var catalog = new MarinCatalog();
+        var result = await catalog.Search("sword art online").ToListAsync();
+    }
+
+    [Fact]
+    public async Task MarinStreamProvider()
+    {
+        var provider = new MarinStreamProvider(_httpClient);
+        var result = await provider.GetStreams("https://marin.moe/anime/tuc7mysz", Range.All).ToListAsync();
+    }
+
+    [Fact]
+    public async Task MarinAiredEpisodes()
+    {
+        var provider = new MarinAiredEpisodesProvider();
+        var result = await provider.GetRecentlyAiredEpisodes(1);
+    }
 }

@@ -24,4 +24,5 @@ public class VideoStreamsForEpisode
     }
     public string EpisodeString { get; set; } = string.Empty;
     public Dictionary<string, VideoStream> Qualities { get; set; } = new();
+    public Dictionary<string, string> AdditionalInformation { get; set; } = new();
 }

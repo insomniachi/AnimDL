@@ -10,4 +10,5 @@ public enum ProviderType
     Zoro,
     Yugen,
     AllAnime,
+    Marin
 }

@@ -47,6 +47,7 @@ internal class AnimePaheProvider : BaseProvider
     public override ProviderType ProviderType => ProviderType.AnimePahe;
 }
 
+[Obsolete("Rebranded to Marin")]
 internal class TenshiMoeProvider : BaseProvider
 {
     public TenshiMoeProvider(TenshiMoeStreamProvider provider, TenshiCatalog catalog, TenshiAiredEpisodesProvider episodesProvider) : base(provider, catalog, episodesProvider) { }
@@ -81,6 +82,12 @@ internal class AllAnimeProvider : BaseProvider
 {
     public AllAnimeProvider(AllAnimeStreamProvider provider, AllAnimeCatalog catalog, AllAnimeAiredEpisodesProvider episodesProvider) : base(provider, catalog, episodesProvider) { }
     public override ProviderType ProviderType => ProviderType.AllAnime;
+}
+
+internal class MarinMoeProvider : BaseProvider
+{
+    public MarinMoeProvider(MarinStreamProvider provider, MarinCatalog catalog, MarinAiredEpisodesProvider airedEpisodesProvider) : base(provider, catalog, airedEpisodesProvider) { }
+    public override ProviderType ProviderType => ProviderType.Marin
 }
 
 public static class ServiceCollectionExtensions
@@ -127,6 +134,7 @@ public static class ServiceCollectionExtensions
         services.AddProvider<YugenAnimeProvider, YugenAnimeCatalog, YugenAnimeStreamProvider, YugenAnimeAiredEpisodesProvider>();
         services.AddProvider<AllAnimeProvider, AllAnimeCatalog, AllAnimeStreamProvider, AllAnimeAiredEpisodesProvider>();
         services.AddProvider<AnimePaheProvider, AnimePaheCatalog, AnimePaheStreamProvider, AnimePaheAiredEpisodesProvider>();
+        services.AddProvider<MarinMoeProvider, MarinCatalog, MarinStreamProvider, MarinAiredEpisodesProvider>();
         services.AddProvider<TenshiMoeProvider, TenshiCatalog, TenshiMoeStreamProvider, TenshiAiredEpisodesProvider>();
         services.AddProvider<AnimixPlayProvider, AnimixPlayCatalog, AnimixPlayStreamProvider>();
         services.AddProvider<AnimeOutProvider, AnimeOutCatalog, AnimeOutStreamProvider>();

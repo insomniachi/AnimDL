@@ -9,6 +9,7 @@ public class DefaultUrl
     public static string Zoro { get; set; } = "https://zoro.to/";
     public static string Yugen { get; set; } = "https://yugen.to/";
     public static string AllAnime { get; set; } = "https://allanime.site/";
+    public static string Marin { get; set; } = "https://marin.moe/";
 }
 
 public class GlobalConfig

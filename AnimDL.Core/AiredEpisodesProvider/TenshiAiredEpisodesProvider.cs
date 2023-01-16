@@ -7,6 +7,7 @@ using HtmlAgilityPack.CssSelectors.NetCore;
 
 namespace AnimDL.Core.AiredEpisodesProvider;
 
+[Obsolete("Rebranded to Marin")]
 internal class TenshiAiredEpisodesProvider : IAiredEpisodeProvider
 {
     private readonly HttpClient _client;

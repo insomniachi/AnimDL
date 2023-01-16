@@ -8,6 +8,7 @@ using Splat;
 
 namespace AnimDL.Core.StreamProviders;
 
+[Obsolete("Rebranded to Marin")]
 internal partial class TenshiMoeStreamProvider : BaseStreamProvider
 {
     public readonly string BASE_URL = DefaultUrl.Tenshi;

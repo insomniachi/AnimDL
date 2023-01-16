@@ -8,7 +8,8 @@ using Newtonsoft.Json.Linq;
 
 namespace AnimDL.Core.Catalog;
 
-public partial class TenshiCatalog : ICatalog
+[Obsolete("Rebranded to Marin")]
+internal partial class TenshiCatalog : ICatalog
 {
     private readonly HttpClient _client;
     private readonly CookieContainer _cookieContainer = new();

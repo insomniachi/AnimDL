@@ -54,17 +54,22 @@ internal partial class YugenAnimeStreamProvider : BaseStreamProvider
         var slug = uri.Segments[^1].TrimEnd('/');
         var number = uri.Segments[^2].TrimEnd('/');
 
-        for (int i = start; i <= end; i++)
+        for (int ep = start; ep <= end; ep++)
         {
-            var epUrl = $"{DefaultUrl.Yugen}watch/{number}/{slug}/{i}/";
+            var epUrl = $"{DefaultUrl.Yugen.TrimEnd('/')}/watch/{number}/{slug}/{ep}/";
             doc = await Load(epUrl);
             var text = doc.Text;
             var iframeUrl = doc.QuerySelector("iframe").Attributes["src"].Value;
 
+            if(!iframeUrl.StartsWith("https:"))
+            {
+                iframeUrl = $"https:{iframeUrl}";
+            }
+
             uri = new UriBuilder(iframeUrl).Uri;
             var key = uri.Segments[^1].TrimEnd('/');
 
-            var json = await _client.PostFormUrlEncoded($"{DefaultUrl.Yugen}api/embed/", new()
+            var json = await _client.PostFormUrlEncoded($"{DefaultUrl.Yugen.TrimEnd('/')}/api/embed/", new()
             {
                 ["id"] = key,
                 ["ac"] = "0"
@@ -77,7 +82,7 @@ internal partial class YugenAnimeStreamProvider : BaseStreamProvider
 
             yield return new VideoStreamsForEpisode
             {
-                Episode = i,
+                Episode = ep,
                 Qualities = new Dictionary<string, VideoStream>
                 {
                     ["default"] = new VideoStream
