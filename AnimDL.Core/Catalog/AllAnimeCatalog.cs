@@ -65,7 +65,5 @@ internal class AllAnimeCatalog : ICatalog
                 Image = $"{item?["thumbnail"]}"
             };
         }
-
-        yield break;
     }
 }

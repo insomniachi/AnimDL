@@ -1,7 +1,9 @@
-﻿using System.Net.Http.Json;
+﻿using System.Globalization;
+using System.Net.Http.Json;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Text.RegularExpressions;
+using System.Web;
 using AnimDL.Core.Helpers;
 using AnimDL.Core.Models;
 using Splat;
@@ -43,6 +45,9 @@ internal partial class AllAnimeStreamProvider : BaseStreamProvider
     [GeneratedRegex(@"https://.+?/(?'base'.+?/),(?'resolutions'(?:\d+p,)+)")]
     private static partial Regex WixMpUrlRegex();
 
+    [GeneratedRegex("sourceUrl[:=]\"(?<url>.+?)\"[;,](?:.+?\\.)?priority[:=](?<priority>.+?)[;,](?:.+?\\.)?sourceName[:=](?<name>.+?)[,;]")]
+    private static partial Regex SourceRegex();
+
     public AllAnimeStreamProvider(HttpClient client) : base(client)
     {
         client.DefaultRequestHeaders.UserAgent.ParseAdd(ServiceCollectionExtensions.USER_AGENT);
@@ -69,8 +74,9 @@ internal partial class AllAnimeStreamProvider : BaseStreamProvider
     public override async IAsyncEnumerable<VideoStreamsForEpisode> GetStreams(string url, Range range)
     {
         var uriBuilder = new UriBuilder(DefaultUrl.AllAnime);
-        //uriBuilder.Path = "/getVersion";
-        //var versionResponse = await _client.GetFromJsonAsync<GetVersionResponse>(uriBuilder.Uri.AbsoluteUri);
+        uriBuilder.Path = "/getVersion";
+        var versionResponse = await _client.GetFromJsonAsync<GetVersionResponse>(uriBuilder.Uri.AbsoluteUri);
+        var apiEndPoint = new UriBuilder(versionResponse?.episodeIframeHead ?? "");
 
         var html = await _client.GetStringAsync(url);
 
@@ -104,23 +110,45 @@ internal partial class AllAnimeStreamProvider : BaseStreamProvider
 
             var hasEmbedMatch = SourceEmbedRegex().Match(content);
 
+            var directProvider = new List<string>();
+            var embedProvider = new List<string>();
+
             if(hasEmbedMatch.Success)
             {
-                uriBuilder = new UriBuilder(hasEmbedMatch.Groups[1].Value);
-                uriBuilder.Path += ".json";
-                var directUrl = uriBuilder.Uri.AbsoluteUri;
-                var stream = await Extract(directUrl);
-
-                if(stream is { })
-                {
-                    stream.Episode = e;
-                    stream.EpisodeString = ep;
-                    yield return stream;
-                }
+                var directUrl = hasEmbedMatch.Groups[1].Value.Replace("clock", "clock.json");
+                directProvider.Add(directUrl);
             }
             else
             {
-                this.Log().Error("not implemented");
+                foreach (var sourceMatch in SourceRegex().Matches(content).Cast<Match>())
+                {
+                    var parsedUrl = DecodeEncodedNonAsciiCharacters(HttpUtility.UrlDecode(sourceMatch.Groups[1].Value.Replace("clock", "clock.json")));
+                    var uri = new Uri(parsedUrl, UriKind.RelativeOrAbsolute);
+
+                    if(!uri.IsAbsoluteUri)
+                    {
+                        var directUrl = apiEndPoint + parsedUrl;
+                        directProvider.Add(directUrl);
+                    }
+                    else
+                    {
+                        embedProvider.Add(parsedUrl);
+                    }
+                }
+
+            }
+
+            if(directProvider.Count == 0)
+            {
+                continue;
+            }
+
+            var stream = await Extract(directProvider.First());
+            if (stream is { })
+            {
+                stream.Episode = e;
+                stream.EpisodeString = ep;
+                yield return stream;
             }
         }
     }
@@ -130,6 +158,8 @@ internal partial class AllAnimeStreamProvider : BaseStreamProvider
         var json = await _client.GetStringAsync(url);
         var jObject = JsonNode.Parse(json);
         var links = jObject!["links"]!.Deserialize<List<StreamLink>>()!;
+        var resolutionStr = links[0].resolutionStr;
+        resolutionStr = string.IsNullOrEmpty(resolutionStr) ? "default" : resolutionStr;
 
         var uri = new Uri(links[0].link);
         return uri.Host switch
@@ -140,10 +170,10 @@ internal partial class AllAnimeStreamProvider : BaseStreamProvider
             {
                 Qualities = new Dictionary<string, VideoStream>
                 {
-                    ["default"] = new VideoStream
+                    [resolutionStr] = new VideoStream
                     {
                         Url = uri.AbsoluteUri,
-                        Quality = "default"
+                        Quality = resolutionStr
                     }
                 }
             }
@@ -195,5 +225,16 @@ internal partial class AllAnimeStreamProvider : BaseStreamProvider
             "raw" => episodeDetails.raw,
             _ => throw new NotSupportedException()
         };
+    }
+
+    static string DecodeEncodedNonAsciiCharacters(string value)
+    {
+        return Regex.Replace(
+            value,
+            @"\\u(?<Value>[a-zA-Z0-9]{4})",
+            m =>
+            {
+                return ((char)int.Parse(m.Groups["Value"].Value, NumberStyles.HexNumber)).ToString();
+            });
     }
 }
