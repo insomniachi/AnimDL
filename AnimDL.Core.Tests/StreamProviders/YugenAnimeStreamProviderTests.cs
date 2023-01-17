@@ -89,4 +89,12 @@ public class YugenAnimeStreamProviderTests
         var provider = new MarinAiredEpisodesProvider();
         var result = await provider.GetRecentlyAiredEpisodes(1);
     }
+
+    [Fact]
+    public async Task KamyRoll()
+    {
+        var kamy = new KamyRollClient();
+        await kamy.Authenticate();
+        var result = await kamy.GetStreams("GY79P41KR", 2..2).ToListAsync();
+    }
 }
