@@ -47,6 +47,14 @@ public class Program
     static async Task<int> Main(string[] args)
 
     {
+        var providerFact = ProviderFactory.Instance;
+        providerFact.LoadPlugin<Plugin.AllAnime.Plugin>();
+        providerFact.LoadPlugin<Plugin.AnimePahe.Plugin>();
+        providerFact.LoadPlugin<Plugin.GogoAnime.Plugin>();
+        providerFact.LoadPlugin<Plugin.Marin.Plugin>();
+        providerFact.LoadPlugin<Plugin.Yugen.Plugin>();
+
+
         var loggerFactory = _host.Services.GetRequiredService<ILoggerFactory>();
         Locator.CurrentMutable.UseMicrosoftExtensionsLoggingWithWrappingFullLogger(loggerFactory);
         Initialize(_host.Services.GetRequiredService<IConfiguration>());
@@ -67,7 +75,7 @@ public class Program
         DefaultUrl.Tenshi = config["ProviderUrls:Tenshi"] ?? DefaultUrl.Tenshi;
         DefaultUrl.Zoro = config["ProviderUrls:Zoro"] ?? DefaultUrl.Zoro;
 
-        AppOptions.ProviderType.SetDefaultValue(config.GetValue<ProviderType>("DefaultProvider"));
+        AppOptions.ProviderType.SetDefaultValue(config["DefaultProvider"] ?? "allanime");
         if (config.GetValue<bool>("UseRichPresense"))
         {
             DiscordRpc.Initialize();

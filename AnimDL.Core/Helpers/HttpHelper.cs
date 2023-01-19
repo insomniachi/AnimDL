@@ -2,11 +2,18 @@
 
 namespace AnimDL.Core.Helpers;
 
-internal static class HttpHelper
+public static class HttpHelper
 {
     const string CORS_PROXY = "https://corsproxy.io/";
 
-    internal static async Task<string> PostFormUrlEncoded(this HttpClient client, string url, Dictionary<string, string> postData)
+    public static HttpClient Client { get; } = new HttpClient();
+
+    static HttpHelper()
+    {
+        Client.DefaultRequestHeaders.UserAgent.ParseAdd(ServiceCollectionExtensions.USER_AGENT);
+    }
+
+    public static async Task<string> PostFormUrlEncoded(this HttpClient client, string url, Dictionary<string, string> postData)
     {
         using var content = new FormUrlEncodedContent(postData);
         content.Headers.Clear();
@@ -15,7 +22,7 @@ internal static class HttpHelper
         return await response.Content.ReadAsStringAsync();
     }
 
-    internal static async Task<string> PostFormUrlEncoded(this HttpClient client, string url,
+    public static async Task<string> PostFormUrlEncoded(this HttpClient client, string url,
                                                           Dictionary<string, string> postData,
                                                           Dictionary<string, string> headers)
     {
@@ -41,7 +48,7 @@ internal static class HttpHelper
         }
     }
 
-    internal static async Task<string> GetStringAsync(this HttpClient client, string url, Dictionary<string, string>? parameters = null, Dictionary<string, string>? headers = null)
+    public static async Task<string> GetStringAsync(this HttpClient client, string url, Dictionary<string, string>? parameters = null, Dictionary<string, string>? headers = null)
     {
         var actualUrl = parameters is null
             ? url
@@ -66,7 +73,7 @@ internal static class HttpHelper
         }
     }
 
-    internal static async Task<Stream> GetStreamAsync(this HttpClient client, string url, Dictionary<string, string>? parameters = null, Dictionary<string, string>? headers = null)
+    public static async Task<Stream> GetStreamAsync(this HttpClient client, string url, Dictionary<string, string>? parameters = null, Dictionary<string, string>? headers = null)
     {
         var actualUrl = parameters is null
             ? url
@@ -91,7 +98,7 @@ internal static class HttpHelper
         }
     }
 
-    internal static async Task<string> CfGetStringAsync(this HttpClient client, string url, Dictionary<string, string>? parameters = null, Dictionary<string, string>? headers = null)
+    public static async Task<string> CfGetStringAsync(this HttpClient client, string url, Dictionary<string, string>? parameters = null, Dictionary<string, string>? headers = null)
     {
         if (headers is null)
         {
@@ -103,7 +110,7 @@ internal static class HttpHelper
         return await client.GetStringAsync(CORS_PROXY + "?" + url, parameters ?? new());
     }
 
-    internal static async Task<Stream> CfGetStreamAsync(this HttpClient client, string url, Dictionary<string, string>? parameters = null, Dictionary<string, string>? headers = null)
+    public static async Task<Stream> CfGetStreamAsync(this HttpClient client, string url, Dictionary<string, string>? parameters = null, Dictionary<string, string>? headers = null)
     {
         if (headers is null)
         {

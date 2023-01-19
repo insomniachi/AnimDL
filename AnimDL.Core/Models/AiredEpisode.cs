@@ -13,7 +13,7 @@ public abstract partial class AiredEpisode
     public string EpisodeString { get; set; } = string.Empty;
 
     [GeneratedRegex("(\\d+)", RegexOptions.RightToLeft)]
-    internal static partial Regex EpisodeRegex();
+    public static partial Regex EpisodeRegex();
 }
 
 public interface IHaveCreatedTime

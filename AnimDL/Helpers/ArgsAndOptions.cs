@@ -1,4 +1,5 @@
 ﻿using AnimDL.Api;
+using AnimDL.Core;
 using AnimDL.Core.Api;
 using System.CommandLine;
 using System.Text.RegularExpressions;
@@ -12,7 +13,7 @@ public class AppArguments
 
 public static partial class AppOptions
 {
-    public static readonly Option<ProviderType> ProviderType = new(new[] { "-p", "--provider" }, "provider name");
+    public static readonly Option<string> ProviderType = new(new[] { "-p", "--provider" }, "provider name");
     public static readonly Option<MediaPlayerType> MediaPlayer = new(new[] { "--player" }, () => MediaPlayerType.Vlc, "media player to stream.");
     public static readonly Option<Range> Range = new(aliases: new[] { "-r", "--range" }, description: "range of episodes", parseArgument: x =>
     {
@@ -47,7 +48,7 @@ public static partial class AppOptions
     {
         Range.SetDefaultValue(new Range(Index.FromStart(0), Index.FromEnd(0)));
         Range.Arity = ArgumentArity.ZeroOrOne;
-        ProviderType.AddCompletions(Enum.GetNames<ProviderType>());
+        ProviderType.AddCompletions(ProviderFactory.Instance.Providers.Select(x => x.Name).ToArray());
     }
 
     [GeneratedRegex("(?'startFromEnd'\\^)?(?'start'\\d+)(?'isRange'..)?(?'endFromEnd'\\^)?(?'end'\\d+)?")]

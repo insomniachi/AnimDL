@@ -1,4 +1,4 @@
-﻿using AnimDL.Core.StreamProviders;
+﻿using Plugin.GogoAnime;
 
 namespace AnimDL.Core.Tests.StreamProviders
 {
