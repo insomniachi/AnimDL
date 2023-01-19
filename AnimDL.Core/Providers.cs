@@ -1,4 +1,5 @@
-﻿using AnimDL.Core.AiredEpisodesProvider;
+﻿using System.Runtime.Loader;
+using AnimDL.Core.AiredEpisodesProvider;
 using AnimDL.Core.Api;
 using AnimDL.Core.Catalog;
 using AnimDL.Core.Extractors;
@@ -13,6 +14,7 @@ public abstract class BaseProvider : IProvider
     public IStreamProvider StreamProvider { get; }
     public ICatalog Catalog { get; }
     public IAiredEpisodeProvider? AiredEpisodesProvider { get; }
+    public string Name { get; } = string.Empty;
 
     public BaseProvider(IStreamProvider provider, ICatalog catalog, IAiredEpisodeProvider? airedEpisodesProvider = null)
     {
@@ -24,14 +26,70 @@ public abstract class BaseProvider : IProvider
 
 public class ProviderFactory : IProviderFactory
 {
-    private readonly IEnumerable<IProvider> _providers;
+    private readonly List<AssemblyLoadContext> _assemblyLoadContexts = new();
+    private readonly IPluginRegistrationContext pluginContext = new PluginRegistrationContext();
 
-    public ProviderFactory(IEnumerable<IProvider> providers)
+    public static ProviderFactory Instance { get; } = new ProviderFactory();
+
+    public IEnumerable<ProviderInfo> Providers => pluginContext.Providers;
+    public IProvider? GetProvider(string name) => pluginContext.GetProvider(name);
+
+    public void LoadPlugins(string folder)
     {
-        _providers = providers;
+        foreach (var dll in Directory.GetFiles(folder, "*.dll"))
+        {
+            var context = new AssemblyLoadContext(dll, true);
+
+            var assembly = context.LoadFromAssemblyPath(dll);
+            var plugins = assembly.GetExportedTypes().Where(x => x.IsAssignableTo(typeof(IPlugin))).ToList();
+
+            if (plugins.Count == 0)
+            {
+                context.Unload();
+                continue;
+            }
+
+            foreach (var type in plugins)
+            {
+                if (!type.IsAssignableTo(typeof(IPlugin)) || !(type.FullName is { } pluginType))
+                {
+                    continue;
+                }
+
+                if (assembly.CreateInstance(pluginType) is not IPlugin plugIn)
+                {
+                    continue;
+                }
+
+                plugIn.RegisterProviders(pluginContext);
+
+            }
+            _assemblyLoadContexts.Add(context);
+        }
     }
 
-    public IProvider GetProvider(ProviderType type) => _providers.First(x => x.ProviderType == type);
+    public void LoadPlugin<TPlugin>()
+        where TPlugin : IPlugin, new()
+    {
+        var plugin = new TPlugin();
+        plugin.RegisterProviders(pluginContext);
+    }
+
+    public void UnloadPlugin(string name)
+    {
+        if (pluginContext.UnloadPlugin(name) is not { } plugin)
+        {
+            return;
+        }
+
+        if (AssemblyLoadContext.GetLoadContext(plugin.Provider.Value.GetType().Assembly) is not { } loadContext)
+        {
+            return;
+        }
+
+        _assemblyLoadContexts.Remove(loadContext);
+        loadContext.Unload();
+    }
 }
 
 [Obsolete("RIP")]
@@ -39,12 +97,6 @@ internal class AnimixPlayProvider : BaseProvider
 {
     public AnimixPlayProvider(AnimixPlayStreamProvider provider, AnimixPlayCatalog catalog) : base(provider, catalog) { }
     public override ProviderType ProviderType => ProviderType.AnimixPlay;
-}
-
-internal class AnimePaheProvider : BaseProvider
-{
-    public AnimePaheProvider(AnimePaheStreamProvider provider, AnimePaheCatalog catalog, AnimePaheAiredEpisodesProvider episodesProvider) : base(provider, catalog, episodesProvider) { }
-    public override ProviderType ProviderType => ProviderType.AnimePahe;
 }
 
 [Obsolete("Rebranded to Marin")]
@@ -60,34 +112,10 @@ internal class AnimeOutProvider : BaseProvider
     public override ProviderType ProviderType => ProviderType.AnimeOut;
 }
 
-internal class GogoAnimeProvider : BaseProvider
-{
-    public GogoAnimeProvider(GogoAnimeStreamProvider provider, GogoAnimeCatalog catalog, GogoAnimeEpisodesProvider episodesProvider) : base(provider, catalog, episodesProvider) { }
-    public override ProviderType ProviderType => ProviderType.GogoAnime;
-}
-
 internal class ZoroProvider : BaseProvider
 {
     public ZoroProvider(ZoroStreamProvider provider, ZoroCatalog catalog) : base(provider, catalog) { }
     public override ProviderType ProviderType => ProviderType.Zoro;
-}
-
-internal class YugenAnimeProvider : BaseProvider
-{
-    public YugenAnimeProvider(YugenAnimeStreamProvider provider, YugenAnimeCatalog catalog, YugenAnimeAiredEpisodesProvider episodesProvider) : base(provider, catalog, episodesProvider) { }
-    public override ProviderType ProviderType => ProviderType.Yugen;
-}
-
-internal class AllAnimeProvider : BaseProvider
-{
-    public AllAnimeProvider(AllAnimeStreamProvider provider, AllAnimeCatalog catalog, AllAnimeAiredEpisodesProvider episodesProvider) : base(provider, catalog, episodesProvider) { }
-    public override ProviderType ProviderType => ProviderType.AllAnime;
-}
-
-internal class MarinMoeProvider : BaseProvider
-{
-    public MarinMoeProvider(MarinStreamProvider provider, MarinCatalog catalog, MarinAiredEpisodesProvider airedEpisodesProvider) : base(provider, catalog, airedEpisodesProvider) { }
-    public override ProviderType ProviderType => ProviderType.Marin;
 }
 
 public static class ServiceCollectionExtensions
@@ -130,11 +158,6 @@ public static class ServiceCollectionExtensions
         services.AddTransient<RapidVideoExtractor>();
 
         //providers
-        services.AddProvider<GogoAnimeProvider, GogoAnimeCatalog, GogoAnimeStreamProvider, GogoAnimeEpisodesProvider>();
-        services.AddProvider<YugenAnimeProvider, YugenAnimeCatalog, YugenAnimeStreamProvider, YugenAnimeAiredEpisodesProvider>();
-        services.AddProvider<AllAnimeProvider, AllAnimeCatalog, AllAnimeStreamProvider, AllAnimeAiredEpisodesProvider>();
-        services.AddProvider<AnimePaheProvider, AnimePaheCatalog, AnimePaheStreamProvider, AnimePaheAiredEpisodesProvider>();
-        services.AddProvider<MarinMoeProvider, MarinCatalog, MarinStreamProvider, MarinAiredEpisodesProvider>();
         services.AddProvider<TenshiMoeProvider, TenshiCatalog, TenshiMoeStreamProvider, TenshiAiredEpisodesProvider>();
         services.AddProvider<AnimixPlayProvider, AnimixPlayCatalog, AnimixPlayStreamProvider>();
         services.AddProvider<AnimeOutProvider, AnimeOutCatalog, AnimeOutStreamProvider>();
@@ -143,5 +166,4 @@ public static class ServiceCollectionExtensions
         return services;
     }
 }
-
 

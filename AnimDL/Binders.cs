@@ -1,4 +1,5 @@
 ﻿using AnimDL.Api;
+using AnimDL.Core;
 using AnimDL.Core.Api;
 using System.CommandLine;
 using System.CommandLine.Binding;
@@ -31,16 +32,16 @@ public class InstanceBinder<T> : BinderBase<T>
 
 public class ProviderBinder : BinderBase<IProvider>
 {
-    private readonly Option<ProviderType> _providerType;
+    private readonly Option<string> _providerType;
 
-    public ProviderBinder(Option<ProviderType> providerType)
+    public ProviderBinder(Option<string> providerType)
     {
         _providerType = providerType;
     }
 
     protected override IProvider GetBoundValue(BindingContext bindingContext)
     {
-        return Program.Resolve<IProviderFactory>().GetProvider(bindingContext.ParseResult.GetValueForOption(_providerType));
+        return ProviderFactory.Instance.GetProvider(bindingContext.ParseResult.GetValueForOption(_providerType)!) ?? throw new Exception();
     }
 }
 

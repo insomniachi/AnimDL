@@ -2,5 +2,9 @@
 
 public interface IProviderFactory
 {
-    IProvider GetProvider(ProviderType type);
+    IEnumerable<ProviderInfo> Providers { get; }
+    IProvider? GetProvider(string name);
+    void LoadPlugins(string folder);
+    void LoadPlugin<TPlugin>() where TPlugin : IPlugin, new();
+    void UnloadPlugin(string name);
 }

@@ -1,7 +1,10 @@
-﻿using AnimDL.Core.AiredEpisodesProvider;
+﻿using Plugin.Yugen;
+using Plugin.AllAnime;
+using Plugin.AnimePahe;
+using Plugin.Marin;
+using Plugin.GogoAnime;
+using AnimDL.Core.AiredEpisodesProvider;
 using AnimDL.Core.Catalog;
-using AnimDL.Core.Helpers;
-using AnimDL.Core.StreamProviders;
 
 namespace AnimDL.Core.Tests.StreamProviders;
 
@@ -90,11 +93,11 @@ public class YugenAnimeStreamProviderTests
         var result = await provider.GetRecentlyAiredEpisodes(1);
     }
 
-    [Fact]
-    public async Task KamyRoll()
-    {
-        var kamy = new KamyRollClient();
-        await kamy.Authenticate();
-        var result = await kamy.GetStreams("GY79P41KR", 2..2).ToListAsync();
-    }
+    //[Fact]
+    //public async Task KamyRoll()
+    //{
+    //    var kamy = new KamyRollClient();
+    //    await kamy.Authenticate();
+    //    var result = await kamy.GetStreams("GY79P41KR", 2..2).ToListAsync();
+    //}
 }
