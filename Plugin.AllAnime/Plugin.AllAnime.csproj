@@ -8,9 +8,7 @@
     <Platforms>AnyCPU;x64</Platforms>
   </PropertyGroup>
 
-	
   <ItemGroup>
-	  <PackageReference Include="AnimDL.Core" Version="0.5.7.3" />
+    <PackageReference Include="AnimDL.Core" Version="0.6.0" />
   </ItemGroup>
-
 </Project>
