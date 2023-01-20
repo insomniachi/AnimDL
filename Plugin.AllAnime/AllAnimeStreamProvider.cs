@@ -155,7 +155,7 @@ public partial class AllAnimeStreamProvider : BaseStreamProvider
         }
     }
 
-    private async Task<VideoStreamsForEpisode?> Extract(string url)
+    private async Task<VideoStreamsForEpisode> Extract(string url)
     {
         var json = await _client.GetStringAsync(url);
         var jObject = JsonNode.Parse(json);
@@ -197,7 +197,7 @@ public partial class AllAnimeStreamProvider : BaseStreamProvider
         return result;
     }
 
-    private VideoStreamsForEpisode? WixMpUnpack(Uri uri)
+    private VideoStreamsForEpisode WixMpUnpack(Uri uri)
     {
         var match = WixMpUrlRegex().Match(uri.AbsoluteUri);
         

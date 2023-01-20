@@ -35,12 +35,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\AnimDL.Core\AnimDL.Core.csproj" />
-		<ProjectReference Include="..\Plugin.AllAnime\Plugin.AllAnime.csproj" />
-		<ProjectReference Include="..\Plugin.AnimePahe\Plugin.AnimePahe.csproj" />
-		<ProjectReference Include="..\Plugin.GogoAnime\Plugin.GogoAnime.csproj" />
-		<ProjectReference Include="..\Plugin.Marin\Plugin.Marin.csproj" />
-		<ProjectReference Include="..\Plugin.Yugen\Plugin.Yugen.csproj" />
+	  <ProjectReference Include="..\AnimDL.Core\AnimDL.Core.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>

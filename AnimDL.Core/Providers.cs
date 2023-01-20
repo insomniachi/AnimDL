@@ -36,9 +36,10 @@ public class ProviderFactory : IProviderFactory
 
     public void LoadPlugins(string folder)
     {
-        foreach (var dll in Directory.GetFiles(folder, "*.dll"))
+        var files = Directory.GetFiles(folder, "*.dll");
+        foreach (var dll in files)
         {
-            var context = new AssemblyLoadContext(dll, true);
+            var context = new AssemblyLoadContext(Path.GetFullPath(dll), true);
 
             var assembly = context.LoadFromAssemblyPath(dll);
             var plugins = assembly.GetExportedTypes().Where(x => x.IsAssignableTo(typeof(IPlugin))).ToList();
