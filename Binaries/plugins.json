@@ -1,28 +1,22 @@
 [
     {
-        "Name": "allanime",
-        "Version" : 1.0,
+        "Version" : "1.0.0.0",
         "Url": "https://raw.githubusercontent.com/insomniachi/AnimDL/plugins/Binaries/Plugin.AllAnime.dll"
     },
     {
-        "Name": "animepahe",
-        "Version" : 1.0,
+        "Version" : "1.0.0.0",
         "Url": "https://raw.githubusercontent.com/insomniachi/AnimDL/plugins/Binaries/Plugin.AnimePahe.dll"
     },
     {
-        "Name": "gogo",
-        "Version" : 1.0,
+        "Version" : "1.0.0.0",
         "Url": "https://raw.githubusercontent.com/insomniachi/AnimDL/plugins/Binaries/Plugin.GogoAnime.dll"
     },
     {
-        "Name": "marin",
-        "Version" : 1.0,
+        "Version" : "1.0.0.0",
         "Url": "https://raw.githubusercontent.com/insomniachi/AnimDL/plugins/Binaries/Plugin.Marin.dll"
     },
     {
-        "Name": "yugen",
-        "Version" : 1.0,
+        "Version" : "1.0.0.0",
         "Url": "https://raw.githubusercontent.com/insomniachi/AnimDL/plugins/Binaries/Plugin.Yugen.dll"
-    },
-    
+    }
 ]
