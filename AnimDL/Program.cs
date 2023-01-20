@@ -12,6 +12,7 @@ using Splat;
 using Splat.Microsoft.Extensions.Logging;
 using System.CommandLine;
 using System.ComponentModel;
+using System.Reflection;
 using Xabe.FFmpeg;
 
 namespace AnimDL;
@@ -45,15 +46,8 @@ public class Program
     .Build();
 
     static async Task<int> Main(string[] args)
-
     {
-        var providerFact = ProviderFactory.Instance;
-        providerFact.LoadPlugin<Plugin.AllAnime.Plugin>();
-        providerFact.LoadPlugin<Plugin.AnimePahe.Plugin>();
-        providerFact.LoadPlugin<Plugin.GogoAnime.Plugin>();
-        providerFact.LoadPlugin<Plugin.Marin.Plugin>();
-        providerFact.LoadPlugin<Plugin.Yugen.Plugin>();
-
+        ProviderFactory.Instance.LoadPlugins(Environment.CurrentDirectory);
 
         var loggerFactory = _host.Services.GetRequiredService<ILoggerFactory>();
         Locator.CurrentMutable.UseMicrosoftExtensionsLoggingWithWrappingFullLogger(loggerFactory);
