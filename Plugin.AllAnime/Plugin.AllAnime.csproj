@@ -1,11 +1,14 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
+	<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+	<AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
     <TargetFramework>net7.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <PlatformTarget>x64</PlatformTarget>
-    <BaseOutputPath>..\AnimDL\bin</BaseOutputPath>
+    <OutputPath>..\Binaries\</OutputPath>
     <Platforms>AnyCPU;x64</Platforms>
+	<Version>1.0</Version>
   </PropertyGroup>
 
   <ItemGroup>
