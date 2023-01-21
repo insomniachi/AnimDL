@@ -1,4 +1,6 @@
-﻿namespace AnimDL.Core.Api;
+﻿using AnimDL.Core.Models;
+
+namespace AnimDL.Core.Api;
 
 public interface IProviderFactory
 {
@@ -7,4 +9,5 @@ public interface IProviderFactory
     void LoadPlugins(string folder);
     void LoadPlugin<TPlugin>() where TPlugin : IPlugin, new();
     void UnloadPlugin(string name);
+    void UnloadPlugins();
 }

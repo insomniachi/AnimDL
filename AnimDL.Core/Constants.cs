@@ -22,3 +22,8 @@ public class Headers
     public const string Referer = "referer";
     public const string Cookie = "cookie";
 }
+
+public static class Config
+{
+    public const string BaseUrl = "BaseUrl";
+}
