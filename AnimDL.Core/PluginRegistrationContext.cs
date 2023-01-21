@@ -4,7 +4,7 @@ using AnimDL.Core.Models;
 
 namespace AnimDL.Core;
 
-public class PluginRegistrationContext : IPluginRegistrationContext
+public class PluginContext : IPluginRegistrationContext, IPluginResolver
 {
     private readonly List<ProviderInfo> _plugins = new();
 

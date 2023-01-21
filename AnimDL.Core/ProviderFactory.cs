@@ -7,11 +7,15 @@ namespace AnimDL.Core;
 public class ProviderFactory : IProviderFactory
 {
     private readonly List<AssemblyLoadContext> _assemblyLoadContexts = new();
-    private readonly IPluginRegistrationContext _pluginContext = new PluginRegistrationContext();
+    private readonly PluginContext _pluginContext = new();
+    private readonly Dictionary<string, IPlugin> _plugins = new();
 
     public static ProviderFactory Instance { get; } = new ProviderFactory();
     public IEnumerable<ProviderInfo> Providers => _pluginContext.Providers;
     public IProvider? GetProvider(string name) => _pluginContext.GetProvider(name);
+
+    public IParameters GetConfiguration(string name) => _plugins[name].GetDefaultConfig();
+    public void SetConfiguration(string name, IParameters configuration) => _plugins[name].Initialize(configuration);
 
     public void LoadPlugins(string folder)
     {
@@ -42,7 +46,7 @@ public class ProviderFactory : IProviderFactory
                 }
 
                 plugIn.RegisterProviders(_pluginContext);
-
+                _plugins.Add(_pluginContext.Providers.Last().Name, plugIn);
             }
             _assemblyLoadContexts.Add(context);
         }
