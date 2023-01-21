@@ -1,22 +1,26 @@
 [
-    {
-        "Version" : "1.1.0.0",
-        "Url": "https://raw.githubusercontent.com/insomniachi/AnimDL/plugins/Binaries/Plugin.AllAnime.dll"
-    },
-    {
-        "Version" : "1.1.0.0",
-        "Url": "https://raw.githubusercontent.com/insomniachi/AnimDL/plugins/Binaries/Plugin.AnimePahe.dll"
-    },
-    {
-        "Version" : "1.1.0.0",
-        "Url": "https://raw.githubusercontent.com/insomniachi/AnimDL/plugins/Binaries/Plugin.GogoAnime.dll"
-    },
-    {
-        "Version" : "1.1.0.0",
-        "Url": "https://raw.githubusercontent.com/insomniachi/AnimDL/plugins/Binaries/Plugin.Marin.dll"
-    },
-    {
-        "Version" : "1.1.0.0",
-        "Url": "https://raw.githubusercontent.com/insomniachi/AnimDL/plugins/Binaries/Plugin.Yugen.dll"
-    }
+  {
+    "Version": "1.0.0.0",
+    "Url": "https://raw.githubusercontent.com/insomniachi/AnimDL/master/Binaries/Plugin.AllAnime.dll"
+  },
+  {
+    "Version": "1.0.0.0",
+    "Url": "https://raw.githubusercontent.com/insomniachi/AnimDL/master/Binaries/Plugin.AnimePahe.dll"
+  },
+  {
+    "Version": "1.0.0.0",
+    "Url": "https://raw.githubusercontent.com/insomniachi/AnimDL/master/Binaries/Plugin.GogoAnime.dll"
+  },
+  {
+    "Version": "1.0.0.0",
+    "Url": "https://raw.githubusercontent.com/insomniachi/AnimDL/master/Binaries/Plugin.Marin.dll"
+  },
+  {
+    "Version": "1.0.0.0",
+    "Url": "https://raw.githubusercontent.com/insomniachi/AnimDL/master/Binaries/Plugin.Yugen.dll"
+  },
+  {
+    "Version": "1.0.0.0",
+    "Url": "https://raw.githubusercontent.com/insomniachi/AnimDL/master/Binaries/Plugin.KamyRoll.dll"
+  }
 ]

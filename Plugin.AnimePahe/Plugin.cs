@@ -1,7 +1,6 @@
 ﻿using AnimDL.Core.Api;
 using AnimDL.Core.Helpers;
 using AnimDL.Core.Models;
-using CommonConfig = AnimDL.Core.Config;
 
 namespace Plugin.AnimePahe;
 
@@ -13,13 +12,13 @@ public class Plugin : IPlugin
     {
         return new Parameters
         {
-            [CommonConfig.BaseUrl] = Config.BaseUrl
+            [nameof(Config.BaseUrl)] = Config.BaseUrl
         };
     }
 
     public void Initialize(IParameters parameters)
     {
-        if(parameters.TryGetValue(CommonConfig.BaseUrl, out string url))
+        if(parameters.TryGetValue(nameof(Config.BaseUrl), out string url))
         {
             Config.BaseUrl = url;
         }

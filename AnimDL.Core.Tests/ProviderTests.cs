@@ -11,10 +11,13 @@ namespace AnimDL.Core.Tests
     {
         private readonly ITestOutputHelper _output;
         private readonly JsonSerializerOptions _searializerOption = new() { WriteIndented = true };
+        private readonly string kamyToken = @"O+xmBPFx1UxoAiQYjDc9YYq01SdCZo1ABBoHDrNuIScEIKmYfIZoj57l1xeoLWGW3R2ZlxPlyqUf5R3hWzx+xSQnmPyk3GoUIFF19P0oCqp2B9ivNhtYiqir06rBK71mRzIjVUCmN3C7MvQUhH82QWUfZiCpFzCvxJ8cIX4Jr8w=";
 
         public ProviderTests(ITestOutputHelper output)
         {
             _output = output;
+            Plugin.KamyRoll.Config.AccessToken = kamyToken;
+            Plugin.KamyRoll.KamyRollClient.SetAccessToken();
         }
 
         [Theory]
@@ -23,6 +26,7 @@ namespace AnimDL.Core.Tests
         [InlineData("marin", "hyouka")]
         [InlineData("yugen", "hyouka")]
         [InlineData("gogo", "hyouka")]
+        [InlineData("kamy", "hyouka")]
         public async Task Catalog_Search(string providerType, string query)
         {
             // arrange
@@ -73,8 +77,11 @@ namespace AnimDL.Core.Tests
                     Assert.False(string.IsNullOrEmpty(ihe.Episodes));
                 }
 
-                var result = await HttpHelper.Client.GetAsync(searchResult.Url);
-                result.EnsureSuccessStatusCode();
+                if (providerType != "kamy") // for kamy the url field will contain media id, so it's not a valid url
+                {
+                    var result = await HttpHelper.Client.GetAsync(searchResult.Url);
+                    result.EnsureSuccessStatusCode(); 
+                }
             }
         }
 
@@ -84,6 +91,7 @@ namespace AnimDL.Core.Tests
         [InlineData("marin", "https://marin.moe/anime/4vvgviic", 22)]
         [InlineData("yugen", "https://yugen.to/anime/2016/hyouka/", 22)]
         [InlineData("gogo", "https://www1.gogoanime.bid/category/hyouka", 22)]
+        [InlineData("kamy", "G6P585256", 22)]
         public async Task StreamProvider_GetNumberOfStreams(string providerType, string url, int expected)
         {
             // arrange
@@ -102,6 +110,7 @@ namespace AnimDL.Core.Tests
         [InlineData("marin", "https://marin.moe/anime/4vvgviic")]
         [InlineData("yugen", "https://yugen.to/anime/2016/hyouka/")]
         [InlineData("gogo", "https://www1.gogoanime.bid/category/hyouka")]
+        [InlineData("kamy", "G6P585256")]
         public async Task StreamProvider_GetStreams(string providerType, string url)
         {
             // arrange

@@ -13,6 +13,7 @@ internal class Helper
             "marin" => new Plugin.Marin.Provider(),
             "yugen" => new Plugin.Yugen.Provider(),
             "gogo" => new Plugin.GogoAnime.Provider(),
+            "kamy" => new Plugin.KamyRoll.KamyRollClient(),
             _ => throw new NotSupportedException()
         };
     }

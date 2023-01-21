@@ -10,37 +10,45 @@ namespace Plugin.KamyRoll;
 
 public class KamyRollClient : ICatalog, IStreamProvider, IProvider
 {
-    private readonly HttpClient _httpClient = new();
-    private readonly string _api = "https://api.kamyroll.tech";
+    private static readonly HttpClient _httpClient = new();
+    private static readonly string _api = "https://api.kamyroll.tech";
 
     public ICatalog Catalog => this;
     public IStreamProvider StreamProvider => this;
     public IAiredEpisodeProvider AiredEpisodesProvider => null!;
-    public ProviderType ProviderType => ProviderType.AllAnime;
-    public string Name => "kamyroll";
 
-    public async Task<KamyRollToken> Authenticate()
+    public static async Task AuthenticateIfNot()
     {
+        if(!string.IsNullOrEmpty(Config.AccessToken))
+        {
+            return;
+        }
+
         var url = QueryHelpers.AddQueryString(_api + "/auth/v1/token", new Dictionary<string, string>
         {
             ["device_id"] = "whatvalueshouldbeforweb",
             ["device_type"] = "com.service.data",
             ["access_token"] = "HMbQeThWmZq4t7w"
         });
-        var stream = await _httpClient.GetStreamAsync(url); 
+        var stream = await HttpHelper.Client.GetStreamAsync(url); 
         var token = JsonSerializer.Deserialize(stream, KamyRollTokenSerializationContext.Default.KamyRollToken);
-        SetAccessToken(token!.AccessToken);
-        return token!;
+        Config.AccessToken = token.AccessToken;
+        SetAccessToken();
+    }
+
+    public static void SetAccessToken()
+    {
+        _httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", Config.AccessToken);
     }
 
     public async IAsyncEnumerable<SearchResult> Search(string query)
     {
-        Console.WriteLine("Searching");
-        await Authenticate();
+        await AuthenticateIfNot();
+
         var result = await MakeRequest(_api + "/content/v1/search", new Dictionary<string, string>
         {
             ["query"] = query,
-            ["limit"] = "5"
+            ["limit"] = Config.SearchLimit
         });
 
         var jObject = JsonNode.Parse(result);
@@ -62,13 +70,26 @@ public class KamyRollClient : ICatalog, IStreamProvider, IProvider
 
     public async Task<int> GetNumberOfStreams(string url)
     {
+        await AuthenticateIfNot();
         var json = await MakeRequest(_api + "/content/v1/media", new Dictionary<string, string> { ["id"] = url });
-        _ = int.TryParse(JsonNode.Parse(json)?["episode_count"]?.ToString(), out int epCount);
-        return epCount;
+        var jObject = JsonNode.Parse(json);
+        _ = int.TryParse(jObject?["episode_count"]?.ToString(), out int epCount);
+        var isDubbed = (bool)jObject?["is_dubbed"]?.AsValue();
+
+        return isDubbed ? epCount/2 : epCount;
+    }
+
+    private static bool IsCorrectStreamType(JsonNode epObject)
+    {
+        bool isSub = (bool)epObject["is_subbed"].AsValue();
+        return Config.StreamType == "sub"
+            ? isSub
+            : !isSub;
     }
 
     public async IAsyncEnumerable<VideoStreamsForEpisode> GetStreams(string url, Range range)
     {
+        await AuthenticateIfNot();
         var json = await MakeRequest(_api + "/content/v1/media", new Dictionary<string, string> { ["id"] = url });
         _ = int.TryParse(JsonNode.Parse(json)?["episode_count"]?.ToString(), out int epCount);
         var (start, end) = range.Extract(epCount);
@@ -78,8 +99,13 @@ public class KamyRollClient : ICatalog, IStreamProvider, IProvider
             ["id"] = url
         });
 
-        foreach (var item in JsonNode.Parse(json)?["items"]?.AsArray().First()?["episodes"]?.AsArray() ?? new JsonArray())
+        foreach (var item in JsonNode.Parse(json)?["items"]?.AsArray()?.SelectMany(x => x?["episodes"]?.AsArray()) ?? new JsonArray())
         {
+            if(!IsCorrectStreamType(item))
+            {
+                continue;
+            }
+
             if (!int.TryParse($"{item?["sequence_number"]}", out int ep))
             {
                 continue;
@@ -122,18 +148,19 @@ public class KamyRollClient : ICatalog, IStreamProvider, IProvider
                 },
                 AdditionalInformation = new Dictionary<string, string>
                 {
-                    ["title-en"] = $"{item?["title"]}"
+                    ["title-en"] = $"{item?["title"]}",
+                    ["description"] = $"{item?["description"]}"
                 }
             };
         }
     }
 
-    private async Task<string> MakeRequest(string endpoint, Dictionary<string,string> @params = null)
+    private static async Task<string> MakeRequest(string endpoint, Dictionary<string,string> @params = null)
     {
         var reqParams = new Dictionary<string, string>
         {
-            ["channel_id"] = "crunchyroll",
-            ["locale"] = "en-US"
+            ["channel_id"] = Config.Channel,
+            ["locale"] = Config.Locale
         };
 
         if(@params is not null)
@@ -146,11 +173,6 @@ public class KamyRollClient : ICatalog, IStreamProvider, IProvider
 
         var response = await _httpClient.GetAsync(QueryHelpers.AddQueryString(endpoint, reqParams));
         return await response.Content.ReadAsStringAsync();
-    }
-
-    public void SetAccessToken(string accessToken)
-    {
-        _httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", accessToken);
     }
 }
 
