@@ -1,5 +1,4 @@
-﻿using AnimDL.Core;
-using AnimDL.Core.Api;
+﻿using AnimDL.Core.Api;
 using AnimDL.Core.Models;
 using HtmlAgilityPack;
 using HtmlAgilityPack.CssSelectors.NetCore;
@@ -20,12 +19,12 @@ public partial class GogoAnimeEpisodesProvider : IAiredEpisodeProvider
         var nodes = doc.QuerySelectorAll(".items li");
         var list = new List<AiredEpisode>();
 
-        var uriBuilder = new UriBuilder(DefaultUrl.GogoAnime);
+        var baseUrl = Config.BaseUrl.TrimEnd('/');
         foreach (var item in nodes)
         {
             var title = item.SelectSingleNode("div/a").Attributes["title"].Value;
-            uriBuilder.Path = item.SelectSingleNode("div/a").Attributes["href"].Value;
-            var url = uriBuilder.Uri.AbsoluteUri;
+            var path = item.SelectSingleNode("div/a").Attributes["href"].Value;
+            var url = $"{baseUrl}/{path}";
             var img = item.SelectSingleNode("div/a/img").Attributes["src"].Value;
             list.Add(new GogoAnimeAiredEpisode
             {

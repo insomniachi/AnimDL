@@ -5,7 +5,6 @@ using AnimDL.Core;
 using AnimDL.Core.Api;
 using AnimDL.Core.Helpers;
 using AnimDL.Core.Models;
-using AnimDL.Core.Models.SearchResults;
 using Splat;
 
 namespace Plugin.Marin;

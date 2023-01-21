@@ -117,11 +117,11 @@ public partial class GogoAnimeStreamProvider : BaseStreamProvider
         var doc = new HtmlDocument();
         doc.Load(html);
 
-        var uriBuilder = new UriBuilder(DefaultUrl.GogoAnime);
+        var baseUrl = Config.BaseUrl.TrimEnd('/');
         foreach (var item in doc.QuerySelectorAll("a[class=\"\"] , a[class=\"\"]").Reverse())
         {
-            uriBuilder.Path = item.Attributes["href"].Value.Trim();
-            var embedUrl = uriBuilder.Uri.AbsoluteUri;
+            var path = item.Attributes["href"].Value.Trim();
+            var embedUrl = $"{baseUrl}/{path}";
             var epMatch = EpisodeRegex().Match(item.InnerHtml);
             int ep = -1;
 
@@ -148,7 +148,7 @@ public partial class GogoAnimeStreamProvider : BaseStreamProvider
 
     private static string ConvertHost(string url)
     {
-        var converted = UrlRegex().Replace(url, DefaultUrl.GogoAnime);
+        var converted = UrlRegex().Replace(url, Config.BaseUrl);
         return converted;
     }
 

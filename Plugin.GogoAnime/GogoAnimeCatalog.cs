@@ -2,7 +2,6 @@
 using AnimDL.Core.Api;
 using AnimDL.Core.Helpers;
 using AnimDL.Core.Models;
-using AnimDL.Core.Models.SearchResults;
 using HtmlAgilityPack;
 using HtmlAgilityPack.CssSelectors.NetCore;
 
@@ -10,7 +9,6 @@ namespace Plugin.GogoAnime;
 
 public class GogoAnimeCatalog : ICatalog
 {
-    readonly string SEARCH_URL = $"{DefaultUrl.GogoAnime}search.html";
     private readonly HttpClient _client;
 
     public GogoAnimeCatalog(HttpClient client)
@@ -20,7 +18,8 @@ public class GogoAnimeCatalog : ICatalog
 
     public async IAsyncEnumerable<SearchResult> Search(string query)
     {
-        var html = await _client.GetStreamAsync(SEARCH_URL, parameters: new() { ["keyword"] = query });
+        var baseUrl = Config.BaseUrl.TrimEnd('/');
+        var html = await _client.GetStreamAsync(baseUrl + "/search.html", parameters: new() { ["keyword"] = query });
 
         var doc = new HtmlDocument();
         doc.Load(html);
@@ -35,7 +34,7 @@ public class GogoAnimeCatalog : ICatalog
             yield return new GogoAnimeSearchResult
             {
                 Title = title,
-                Url = DefaultUrl.GogoAnime.TrimEnd('/') + url,
+                Url = baseUrl + url,
                 Image = image,
                 Year = year
             };

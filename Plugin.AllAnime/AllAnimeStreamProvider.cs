@@ -50,10 +50,7 @@ public partial class AllAnimeStreamProvider : BaseStreamProvider
     [GeneratedRegex("sourceUrl[:=]\"(?<url>.+?)\"[;,](?:.+?\\.)?priority[:=](?<priority>.+?)[;,](?:.+?\\.)?sourceName[:=](?<name>.+?)[,;]")]
     private static partial Regex SourceRegex();
 
-    public AllAnimeStreamProvider(HttpClient client) : base(client)
-    {
-
-    }
+    public AllAnimeStreamProvider(HttpClient client) : base(client) { }
 
     public override async Task<int> GetNumberOfStreams(string url)
     {
@@ -75,9 +72,7 @@ public partial class AllAnimeStreamProvider : BaseStreamProvider
 
     public override async IAsyncEnumerable<VideoStreamsForEpisode> GetStreams(string url, Range range)
     {
-        var uriBuilder = new UriBuilder(DefaultUrl.AllAnime);
-        uriBuilder.Path = "/getVersion";
-        var versionResponse = await _client.GetFromJsonAsync<GetVersionResponse>(uriBuilder.Uri.AbsoluteUri);
+        var versionResponse = await _client.GetFromJsonAsync<GetVersionResponse>(Config.BaseUrl.TrimEnd('/') + "/getVersion");
         var apiEndPoint = new UriBuilder(versionResponse?.episodeIframeHead ?? "");
 
         var html = await _client.GetStringAsync(url);
@@ -107,7 +102,7 @@ public partial class AllAnimeStreamProvider : BaseStreamProvider
                 }
             }
 
-            var epUrl = $"{url}/episodes/{GlobalConfig.AudioType}/{ep}";
+            var epUrl = $"{url}/episodes/{Config.StreamType}/{ep}";
             var content = await _client.GetStringAsync(epUrl);
 
             var hasEmbedMatch = SourceEmbedRegex().Match(content);
@@ -117,19 +112,21 @@ public partial class AllAnimeStreamProvider : BaseStreamProvider
 
             if(hasEmbedMatch.Success)
             {
-                var directUrl = hasEmbedMatch.Groups[1].Value.Replace("clock", "clock.json");
+                var rawUrl = hasEmbedMatch.Groups[1].Value;
+                var directUrl = rawUrl.Replace("clock", "clock.json");
                 directProvider.Add(directUrl);
             }
             else
             {
                 foreach (var sourceMatch in SourceRegex().Matches(content).Cast<Match>())
                 {
-                    var parsedUrl = DecodeEncodedNonAsciiCharacters(HttpUtility.UrlDecode(sourceMatch.Groups[1].Value.Replace("clock", "clock.json")));
+                    var rawUrl = sourceMatch.Groups[1].Value;
+                    var parsedUrl = DecodeEncodedNonAsciiCharacters(HttpUtility.UrlDecode(rawUrl.Replace("clock", "clock.json")));
                     var uri = new Uri(parsedUrl, UriKind.RelativeOrAbsolute);
 
                     if(!uri.IsAbsoluteUri)
                     {
-                        var directUrl = apiEndPoint + parsedUrl;
+                        var directUrl = apiEndPoint.Host + parsedUrl;
                         directProvider.Add(directUrl);
                     }
                     else
@@ -157,6 +154,11 @@ public partial class AllAnimeStreamProvider : BaseStreamProvider
 
     private async Task<VideoStreamsForEpisode> Extract(string url)
     {
+        if(!url.StartsWith("https"))
+        {
+            url = $"https://{url}";
+        }
+
         var json = await _client.GetStringAsync(url);
         var jObject = JsonNode.Parse(json);
         var links = jObject!["links"]!.Deserialize<List<StreamLink>>()!;
@@ -197,7 +199,7 @@ public partial class AllAnimeStreamProvider : BaseStreamProvider
         return result;
     }
 
-    private VideoStreamsForEpisode WixMpUnpack(Uri uri)
+    private static VideoStreamsForEpisode WixMpUnpack(Uri uri)
     {
         var match = WixMpUrlRegex().Match(uri.AbsoluteUri);
         
@@ -220,7 +222,7 @@ public partial class AllAnimeStreamProvider : BaseStreamProvider
 
     private static List<string> GetEpisodes(EpisodeDetails episodeDetails)
     {
-        return GlobalConfig.AudioType switch
+        return Config.StreamType switch
         {
             "sub" => episodeDetails.sub,
             "dub" => episodeDetails.dub,
@@ -231,12 +233,9 @@ public partial class AllAnimeStreamProvider : BaseStreamProvider
 
     static string DecodeEncodedNonAsciiCharacters(string value)
     {
-        return Regex.Replace(
-            value,
-            @"\\u(?<Value>[a-zA-Z0-9]{4})",
-            m =>
-            {
-                return ((char)int.Parse(m.Groups["Value"].Value, NumberStyles.HexNumber)).ToString();
-            });
+        return UtfEncodedStringRegex().Replace(value, m => ((char)int.Parse(m.Groups["Value"].Value, NumberStyles.HexNumber)).ToString());
     }
+
+    [GeneratedRegex("\\\\u(?<Value>[a-zA-Z0-9]{4})")]
+    private static partial Regex UtfEncodedStringRegex();
 }

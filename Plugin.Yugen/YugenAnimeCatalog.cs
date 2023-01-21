@@ -12,16 +12,10 @@ namespace Plugin.Yugen;
 public partial class YugenAnimeCatalog : ICatalog, ICanParseMalId, IEnableLogger
 {
     private readonly HttpClient _client;
-    private readonly string _searchApi;
-    private readonly string _baseUrl;
-    private readonly UriBuilder _uriBuilder = new(DefaultUrl.Yugen);
-
+    
     public YugenAnimeCatalog(HttpClient client)
     {
         _client = client;
-        _uriBuilder.Path = "/search";
-        _searchApi = _uriBuilder.Uri.AbsoluteUri;
-        _baseUrl = DefaultUrl.Yugen;
     }
 
     public async Task<long> GetMalId(string url)
@@ -41,7 +35,8 @@ public partial class YugenAnimeCatalog : ICatalog, ICanParseMalId, IEnableLogger
 
     public async IAsyncEnumerable<SearchResult> Search(string query)
     {
-        var stream = await _client.GetStreamAsync(_searchApi, parameters: new() { ["q"] = query });
+        var baseUrl = Config.BaseUrl.TrimEnd('/');
+        var stream = await _client.GetStreamAsync(baseUrl + "/search", parameters: new() { ["q"] = query });
         var doc = new HtmlDocument();
         doc.Load(stream);
 
@@ -56,7 +51,7 @@ public partial class YugenAnimeCatalog : ICatalog, ICanParseMalId, IEnableLogger
         foreach (var node in nodes)
         {
             var title = node.Attributes["title"].Value;
-            var url = _baseUrl.TrimEnd('/') + node.Attributes["href"].Value;
+            var url = baseUrl + node.Attributes["href"].Value;
             var image = node.QuerySelector("img").Attributes["data-src"].Value;
             var season = node.QuerySelector(".anime-details span").InnerText.Split(" ");
             var rating = node.QuerySelector(".option")?.ChildNodes[1]?.InnerText?.Trim() ?? string.Empty;

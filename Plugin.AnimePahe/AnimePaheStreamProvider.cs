@@ -31,7 +31,6 @@ public partial class AnimePaheStreamProvider : BaseStreamProvider
     [GeneratedRegex(@"\('h o=\\'(.*)\\';.+,(\d+),(\d+),'(.+)'.split\('\|'\),.+,.+\)")]
     private static partial Regex KwiwRegex();
 
-    public readonly string API = DefaultUrl.AnimePahe + "api";
     public const string CHARACTER_MAP = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ+/";
     private readonly HttpClient _clientInternal = new HttpClient(new HttpClientHandler { AllowAutoRedirect = false });
 
@@ -115,7 +114,7 @@ public partial class AnimePaheStreamProvider : BaseStreamProvider
 
     private async Task<AnimePaheEpisodePage> GetSessionPage(string releaseId, int page)
     {
-        var content = await _client.GetStreamAsync(API, parameters: new()
+        var content = await _client.GetStreamAsync(Config.BaseUrl.TrimEnd('/') + "/api", parameters: new()
         {
             ["m"] = "release",
             ["id"] = releaseId,
@@ -128,7 +127,7 @@ public partial class AnimePaheStreamProvider : BaseStreamProvider
 
     private async Task<Dictionary<string, AnimePaheEpisodeStream>> GetStreamUrl(string releaseId, string streamSession)
     {
-        var stream = await _client.GetStreamAsync(API, parameters: new()
+        var stream = await _client.GetStreamAsync(Config.BaseUrl.TrimEnd('/') + "/api", parameters: new()
         {
             ["m"] = "links",
             ["id"] = releaseId,

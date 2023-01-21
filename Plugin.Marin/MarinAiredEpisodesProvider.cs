@@ -1,7 +1,6 @@
 ﻿using System.Net;
 using System.Text.Json.Nodes;
 using System.Web;
-using AnimDL.Core;
 using AnimDL.Core.Api;
 using AnimDL.Core.Helpers;
 using AnimDL.Core.Models;
@@ -30,8 +29,8 @@ public class MarinAiredEpisodesProvider : IAiredEpisodeProvider, IEnableLogger
 
     public async Task<IEnumerable<AiredEpisode>> GetRecentlyAiredEpisodes(int page = 1)
     {
-        await _httpClient.GetAsync(DefaultUrl.Marin);
-        var xsrfToken = HttpUtility.UrlDecode(_cookieContainer.GetCookies(new Uri(DefaultUrl.Marin)).FirstOrDefault(x => x.Name == "XSRF-TOKEN")?.Value);
+        await _httpClient.GetAsync(Config.BaseUrl);
+        var xsrfToken = HttpUtility.UrlDecode(_cookieContainer.GetCookies(new Uri(Config.BaseUrl)).FirstOrDefault(x => x.Name == "XSRF-TOKEN")?.Value);
 
         if (string.IsNullOrEmpty(xsrfToken))
         {
@@ -39,7 +38,8 @@ public class MarinAiredEpisodesProvider : IAiredEpisodeProvider, IEnableLogger
             return Enumerable.Empty<AiredEpisode>();
         }
 
-        var json = await _httpClient.PostFormUrlEncoded(DefaultUrl.Marin.TrimEnd('/') + "/episode", GetParameters(), GetHeaders(xsrfToken));
+        var baseUrl = Config.BaseUrl.TrimEnd('/');
+        var json = await _httpClient.PostFormUrlEncoded(baseUrl + "/episode", GetParameters(), GetHeaders(xsrfToken));
 
         if (string.IsNullOrEmpty(json))
         {
@@ -57,7 +57,7 @@ public class MarinAiredEpisodesProvider : IAiredEpisodeProvider, IEnableLogger
                 Episode = int.Parse($"{item?["slug"]}"),
                 Image = $"{item?["cover"]}",
                 Title = $"{item?["anime"]?["title"]}",
-                Url = $"{DefaultUrl.Marin.TrimEnd('/')}/anime/{item?["anime"]?["slug"]}",
+                Url = $"{baseUrl}/anime/{item?["anime"]?["slug"]}",
                 CreatedAtHumanized = $"{item?["release_ago"]}"
             });
         }

@@ -11,19 +11,10 @@ namespace Plugin.AllAnime;
 public class AllAnimeAiredEpisodesProvider : IAiredEpisodeProvider
 {
     private readonly HtmlWeb _web = new();
-    private readonly string _api;
 
     class AllAnimeAiredEpisode : AiredEpisode, IHaveCreatedTime
     {
         public DateTime CreatedAt { get; set; }
-    }
-
-
-    public AllAnimeAiredEpisodesProvider()
-    {
-        var uriBuilder = new UriBuilder(DefaultUrl.AllAnime) { Path = "/allanimeapi" };
-        uriBuilder.ToString();
-        _api = uriBuilder.Uri.AbsoluteUri;
     }
 
     public async Task<IEnumerable<AiredEpisode>> GetRecentlyAiredEpisodes(int page = 1)
@@ -47,11 +38,10 @@ public class AllAnimeAiredEpisodesProvider : IAiredEpisodeProvider
             ["extensions"] = JsonSerializer.Serialize(AllAnimeCatalog._extensions)
         };
 
-        var url = QueryHelpers.AddQueryString(_api, queryParams);
+        var url = QueryHelpers.AddQueryString(Config.BaseUrl.TrimEnd('/') + "/allanimeapi", queryParams);
         var response = await _web.LoadFromWebAsync(url);
         var jObject = JsonNode.Parse(response.Text);
 
-        var uriBuilder = new UriBuilder(DefaultUrl.AllAnime);
         var result = new List<AiredEpisode>();
         foreach (var item in jObject?["data"]?["shows"]?["edges"]?.AsArray() ?? new JsonArray())
         {
@@ -65,8 +55,7 @@ public class AllAnimeAiredEpisodesProvider : IAiredEpisodeProvider
             var ep = $"{item?["lastEpisodeInfo"]?["sub"]?["episodeString"]}";
             _ = int.TryParse(ep, out int epInt);
             var datetime = new DateTime(year, month, day, hour, min, 0).ToLocalTime();
-            uriBuilder.Path = $"/anime/{item?["_id"]}";
-            var animeUrl = uriBuilder.Uri.AbsoluteUri;
+            var animeUrl = Config.BaseUrl.TrimEnd('/') + $"/anime/{item?["_id"]}";
 
             result.Add(new AllAnimeAiredEpisode
             {
