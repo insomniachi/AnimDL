@@ -12,7 +12,9 @@ public class Plugin : IPlugin
     {
         return new Parameters
         {
-            [nameof(Config.Provider)] = Config.Provider
+            [nameof(Config.Provider)] = Config.Provider,
+            [nameof(Config.CrunchyrollStreamType)] = Config.CrunchyrollStreamType,
+            [nameof(Config.CrunchyrollMediaType)] = Config.CrunchyrollMediaType,
         };
     }
 
@@ -21,6 +23,14 @@ public class Plugin : IPlugin
         if(parameters.TryGetValue(nameof(Config.Provider), out string provider))
         {
             Config.Provider = provider;
+        }
+        if (parameters.TryGetValue(nameof(Config.CrunchyrollStreamType), out string type))
+        {
+            Config.CrunchyrollStreamType = type;
+        }
+        if (parameters.TryGetValue(nameof(Config.CrunchyrollMediaType), out string mediaType))
+        {
+            Config.CrunchyrollMediaType = mediaType;
         }
     }
 
@@ -42,4 +52,6 @@ public class Provider : IProvider
 public static class Config
 {
     public static string Provider { get; set; } = "zoro";
+    public static string CrunchyrollStreamType { get; set; } = "sub";
+    public static string CrunchyrollMediaType { get; set; } = "series";
 }

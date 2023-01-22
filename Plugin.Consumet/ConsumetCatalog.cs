@@ -37,7 +37,8 @@ public class ConsumetCatalog : ICatalog
         {
             "animepahe" => node.Deserialize<ConsumetAnimePaheSearchResult>(_options).ToSearchResult(),
             "zoro" => node.Deserialize<ConsumetZoroSearchResult>(_options).ToSearchResult(),
-            _ => throw new NotSupportedException()
+            "enime" => node.Deserialize<ConsumetEnimeSearchResult>(_options).ToSearchResult(),
+            _ => node.Deserialize<ConsumetGenericResult>(_options).ToSearchResult(),
         };
     }
 }

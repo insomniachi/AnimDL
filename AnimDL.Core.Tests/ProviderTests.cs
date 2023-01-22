@@ -39,6 +39,8 @@ public class ProviderTests
     [Theory]
     [InlineData("animepahe", "hyouka")]
     [InlineData("zoro", "hyouka")]
+    [InlineData("enime", "hyouka")]
+    [InlineData("crunchyroll", "hyouka")]
     public async Task Consumet_Catalog_Search(string providerType, string query)
     {
         Plugin.Consumet.Config.Provider = providerType;
@@ -69,6 +71,8 @@ public class ProviderTests
     [Theory]
     [InlineData("animepahe", "a2bc091e-7bc1-8438-f078-91eef648eaef", 22)]
     [InlineData("zoro", "hyouka-349", 22)]
+    [InlineData("enime", "cl82p4w3o00247slu6qnobo40", 22)]
+    [InlineData("crunchyroll", "G6P585256", 22)]
     public async Task Consumet_StreamProvider_GetNumberOfStreams(string providerType, string id, int expected)
     {
         // arrange
@@ -107,6 +111,7 @@ public class ProviderTests
     [Theory]
     [InlineData("animepahe", "a2bc091e-7bc1-8438-f078-91eef648eaef")]
     [InlineData("zoro", "hyouka-349")]
+    [InlineData("crunchyroll", "G6P585256")]
     public async Task Consumet_StreamProvider_GetStreams(string providerType, string id)
     {
         // arrange
@@ -138,6 +143,7 @@ public class ProviderTests
 
     [Theory]
     [InlineData("zoro")]
+    [InlineData("animepahe")]
     public async Task Consumet_AiredEpisodesProvider_GetEpisodes(string providerType)
     {
         // arrange
