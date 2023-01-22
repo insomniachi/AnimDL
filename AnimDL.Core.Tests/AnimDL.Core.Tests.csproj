@@ -25,6 +25,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Plugin.AllAnime\Plugin.AllAnime.csproj" />
     <ProjectReference Include="..\Plugin.AnimePahe\Plugin.AnimePahe.csproj" />
+    <ProjectReference Include="..\Plugin.Consumet\Plugin.Consumet.csproj" />
     <ProjectReference Include="..\Plugin.GogoAnime\Plugin.GogoAnime.csproj" />
     <ProjectReference Include="..\Plugin.KamyRoll\Plugin.KamyRoll.csproj" />
     <ProjectReference Include="..\Plugin.Marin\Plugin.Marin.csproj" />
