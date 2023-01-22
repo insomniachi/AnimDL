@@ -7,7 +7,7 @@
 	<OutputPath>..\Binaries\</OutputPath>
 	<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
 	<AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
-	<Version>1.0</Version>
+	<Version>1.1</Version>
   </PropertyGroup>
 
   <ItemGroup>
