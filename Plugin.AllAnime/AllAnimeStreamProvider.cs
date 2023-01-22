@@ -4,7 +4,6 @@ using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Text.RegularExpressions;
 using System.Web;
-using AnimDL.Core;
 using AnimDL.Core.Helpers;
 using AnimDL.Core.Models;
 using AnimDL.Core.StreamProviders;
@@ -32,6 +31,7 @@ public partial class AllAnimeStreamProvider : BaseStreamProvider
         public string link { get; set; } = string.Empty;
         public bool hls { get; set; }
         public string resolutionStr { get; set; } = string.Empty;
+        public int resolution { get; set; } = 0;
         public string src { get; set; } = string.Empty;
     }
 
@@ -107,27 +107,28 @@ public partial class AllAnimeStreamProvider : BaseStreamProvider
 
             var hasEmbedMatch = SourceEmbedRegex().Match(content);
 
-            var directProvider = new List<string>();
+            var directProvider = new List<(string, string)>();
             var embedProvider = new List<string>();
 
             if(hasEmbedMatch.Success)
             {
                 var rawUrl = hasEmbedMatch.Groups[1].Value;
                 var directUrl = rawUrl.Replace("clock", "clock.json");
-                directProvider.Add(directUrl);
+                directProvider.Add(new (directUrl, ""));
             }
             else
             {
                 foreach (var sourceMatch in SourceRegex().Matches(content).Cast<Match>())
                 {
                     var rawUrl = sourceMatch.Groups[1].Value;
+                    var priority = sourceMatch.Groups["priority"].Value;
                     var parsedUrl = DecodeEncodedNonAsciiCharacters(HttpUtility.UrlDecode(rawUrl.Replace("clock", "clock.json")));
                     var uri = new Uri(parsedUrl, UriKind.RelativeOrAbsolute);
 
                     if(!uri.IsAbsoluteUri)
                     {
                         var directUrl = apiEndPoint.Host + parsedUrl;
-                        directProvider.Add(directUrl);
+                        directProvider.Add(new (directUrl, priority));
                     }
                     else
                     {
@@ -142,7 +143,7 @@ public partial class AllAnimeStreamProvider : BaseStreamProvider
                 continue;
             }
 
-            var stream = await Extract(directProvider.First());
+            var stream = await Extract(directProvider.OrderBy(x => x.Item2).FirstOrDefault().Item1);
             if (stream is { })
             {
                 stream.Episode = e;
@@ -154,6 +155,11 @@ public partial class AllAnimeStreamProvider : BaseStreamProvider
 
     private async Task<VideoStreamsForEpisode> Extract(string url)
     {
+        if(string.IsNullOrEmpty(url))
+        {
+            return null;
+        }
+
         if(!url.StartsWith("https"))
         {
             url = $"https://{url}";
@@ -162,27 +168,46 @@ public partial class AllAnimeStreamProvider : BaseStreamProvider
         var json = await _client.GetStringAsync(url);
         var jObject = JsonNode.Parse(json);
         var links = jObject!["links"]!.Deserialize<List<StreamLink>>()!;
-        var resolutionStr = links[0].resolutionStr;
-        resolutionStr = string.IsNullOrEmpty(resolutionStr) ? "default" : resolutionStr;
-
+        var resolutionStr = GetResolution(links[0]);
         var uri = new Uri(links[0].link);
         return uri.Host switch
         {
             "v.vrv.co" => await VrvUnpack(uri),
             "repackager.wixmp.com" => WixMpUnpack(uri),
-            _ => new VideoStreamsForEpisode
-            {
-                Qualities = new Dictionary<string, VideoStream>
-                {
-                    [resolutionStr] = new VideoStream
-                    {
-                        Url = uri.AbsoluteUri,
-                        Quality = resolutionStr
-                    }
-                }
-            }
+            _ => GetDefault(links)
         };
     }
+
+    private static string GetResolution(StreamLink link)
+    {
+        if(link.resolution > 0)
+        {
+            return link.resolution.ToString();
+        }
+        if(!string.IsNullOrEmpty(link.resolutionStr))
+        {
+            return link.resolutionStr;
+        }
+        return "default";
+    }
+
+    private VideoStreamsForEpisode GetDefault(IEnumerable<StreamLink> links)
+    {
+        var result = new VideoStreamsForEpisode();
+        foreach (var item in links)
+        {
+            var resolutionStr = GetResolution(item);
+            var uri = new Uri(item.link);
+            var stream = new VideoStream
+            {
+                Url = uri.AbsoluteUri,
+                Quality = resolutionStr
+            };
+            result.Qualities.Add(resolutionStr, stream);
+        }
+        return result;
+    }
+    
 
     private async Task<VideoStreamsForEpisode> VrvUnpack(Uri uri)
     {

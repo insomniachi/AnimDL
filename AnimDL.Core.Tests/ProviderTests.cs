@@ -104,8 +104,9 @@ namespace AnimDL.Core.Tests
             Assert.Equal(expected, actual);
         }
 
-                [Theory]
-        [InlineData("allanime", "https://allanime.site/anime/dxxqKsaMhdrdQxczP")]
+        [Theory]
+        [InlineData("allanime", "https://allanime.site/anime/gHQe2eBBh57QdC9hZ")]
+        //[InlineData("allanime", "https://allanime.site/anime/dxxqKsaMhdrdQxczP")]
         [InlineData("animepahe", "https://animepahe.com/anime/f2ed1711-0345-cadb-6b48-a626e44351c6")]
         [InlineData("marin", "https://marin.moe/anime/4vvgviic")]
         [InlineData("yugen", "https://yugen.to/anime/2016/hyouka/")]
