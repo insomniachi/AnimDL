@@ -168,7 +168,6 @@ public partial class AllAnimeStreamProvider : BaseStreamProvider
         var json = await _client.GetStringAsync(url);
         var jObject = JsonNode.Parse(json);
         var links = jObject!["links"]!.Deserialize<List<StreamLink>>()!;
-        var resolutionStr = GetResolution(links[0]);
         var uri = new Uri(links[0].link);
         return uri.Host switch
         {
@@ -191,7 +190,7 @@ public partial class AllAnimeStreamProvider : BaseStreamProvider
         return "default";
     }
 
-    private VideoStreamsForEpisode GetDefault(IEnumerable<StreamLink> links)
+    private static VideoStreamsForEpisode GetDefault(IEnumerable<StreamLink> links)
     {
         var result = new VideoStreamsForEpisode();
         foreach (var item in links)
