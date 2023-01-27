@@ -64,7 +64,7 @@ public class ProviderFactory : IProviderFactory
                 }
 
                 plugIn.RegisterProviders(_pluginContext);
-                _plugins.Add(plugIn.GetName(), plugIn);
+                _plugins.Add(plugIn.GetType().Assembly.GetName().Name!, plugIn);
             }
             _assemblyLoadContexts.Add(context);
         }
