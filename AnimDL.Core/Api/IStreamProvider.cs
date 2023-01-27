@@ -8,3 +8,8 @@ public interface IStreamProvider
 
     public Task<int> GetNumberOfStreams(string url);
 }
+
+public interface IMultiAudioStreamProvider
+{
+    public IAsyncEnumerable<VideoStreamsForEpisode> GetStreams(string url, Range range, string streamType);
+}
