@@ -21,7 +21,8 @@ public class PluginContext : IPluginRegistrationContext, IPluginResolver
             Name = name,
             Id = id,
             Provider = new Lazy<IProvider>(() => new TProvider()),
-            Version = Assembly.GetCallingAssembly().GetName().Version!
+            Version = Assembly.GetCallingAssembly().GetName().Version!,
+            PluginName = Assembly.GetCallingAssembly().GetName().Name!
         });
     }
 

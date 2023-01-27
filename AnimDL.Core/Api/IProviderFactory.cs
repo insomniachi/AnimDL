@@ -10,6 +10,6 @@ public interface IProviderFactory
     void LoadPlugin<TPlugin>() where TPlugin : IPlugin, new();
     void UnloadPlugin(string name);
     void UnloadPlugins();
-    IParameters GetConfiguration(string name);
-    void SetConfiguration(string name, IParameters configuration);
+    ProviderOptions GetOptions(string providerName);
+    bool SetOptions(string name, ProviderOptions options);
 }

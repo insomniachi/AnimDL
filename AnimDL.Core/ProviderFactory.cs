@@ -14,8 +14,26 @@ public class ProviderFactory : IProviderFactory
     public IEnumerable<ProviderInfo> Providers => _pluginContext.Providers;
     public IProvider? GetProvider(string name) => _pluginContext.GetProvider(name);
 
-    public IParameters GetConfiguration(string name) => _plugins[name].GetDefaultConfig();
-    public void SetConfiguration(string name, IParameters configuration) => _plugins[name].Initialize(configuration);
+    public ProviderOptions GetOptions(string providerName)
+    {
+        if(GetPluginName(providerName) is not { } name)
+        {
+            return new();
+        }
+
+        return _plugins[name].GetOptions();
+    }
+
+    public bool SetOptions(string providerName, ProviderOptions configuration)
+    {
+        if (GetPluginName(providerName) is not { } name)
+        {
+            return false;
+        }
+
+        _plugins[name].SetOptions(configuration);
+        return true;
+    }
 
     public void LoadPlugins(string folder)
     {
@@ -46,7 +64,7 @@ public class ProviderFactory : IProviderFactory
                 }
 
                 plugIn.RegisterProviders(_pluginContext);
-                _plugins.Add(_pluginContext.Providers.Last().Name, plugIn);
+                _plugins.Add(plugIn.GetName(), plugIn);
             }
             _assemblyLoadContexts.Add(context);
         }
@@ -82,5 +100,7 @@ public class ProviderFactory : IProviderFactory
         _assemblyLoadContexts.Remove(loadContext);
         loadContext.Unload();
     }
+
+    private string? GetPluginName(string providerName) => _pluginContext.Providers.FirstOrDefault(x => x.Name == providerName)?.PluginName;
 }
 

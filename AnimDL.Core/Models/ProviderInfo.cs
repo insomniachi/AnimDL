@@ -13,4 +13,5 @@ public class ProviderInfo
     required public string DisplayName { get; init; }
     required public Lazy<IProvider> Provider { get; init; }
     required public Version Version { get; init; }
+    required public string PluginName { get; set; }
 }
