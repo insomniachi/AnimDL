@@ -8,20 +8,14 @@ public class Plugin : IPlugin
 {
     static Guid Id { get; } = Guid.Parse("CAF084DB-CE59-457E-93BD-5B0EF169C424");
 
-    public IParameters GetDefaultConfig()
+    public ProviderOptions GetOptions()
     {
-        return new Parameters
-        {
-            [nameof(Config.BaseUrl)] = Config.BaseUrl
-        };
+        return new ProviderOptions().AddOption(nameof(Config.BaseUrl), "Url", Config.BaseUrl);
     }
 
-    public void Initialize(IParameters parameters)
+    public void SetOptions(ProviderOptions parameters)
     {
-        if(parameters.TryGetValue(nameof(Config.BaseUrl), out string url))
-        {
-            Config.BaseUrl = url;
-        }
+        Config.BaseUrl = parameters.GetString(nameof(Config.BaseUrl), Config.BaseUrl);
     }
 
     public void RegisterProviders(IPluginRegistrationContext registrationContext)

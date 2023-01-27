@@ -4,6 +4,7 @@ using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Text.RegularExpressions;
 using System.Web;
+using AnimDL.Core.Api;
 using AnimDL.Core.Helpers;
 using AnimDL.Core.Models;
 using AnimDL.Core.StreamProviders;
@@ -11,7 +12,7 @@ using Splat;
 
 namespace Plugin.AllAnime;
 
-public partial class AllAnimeStreamProvider : BaseStreamProvider
+public partial class AllAnimeStreamProvider : BaseStreamProvider, IMultiAudioStreamProvider
 {
     class GetVersionResponse
     {
@@ -70,7 +71,7 @@ public partial class AllAnimeStreamProvider : BaseStreamProvider
         return total;
     }
 
-    public override async IAsyncEnumerable<VideoStreamsForEpisode> GetStreams(string url, Range range)
+    public async IAsyncEnumerable<VideoStreamsForEpisode> GetStreams(string url, Range range, string streamType)
     {
         var versionResponse = await _client.GetFromJsonAsync<GetVersionResponse>(Config.BaseUrl.TrimEnd('/') + "/getVersion");
         var apiEndPoint = new UriBuilder(versionResponse?.episodeIframeHead ?? "");
@@ -79,7 +80,7 @@ public partial class AllAnimeStreamProvider : BaseStreamProvider
 
         var match = EpisodesRegex().Match(html);
 
-        if(!match.Success)
+        if (!match.Success)
         {
             this.Log().Error("availableEpisodesDetail not found");
         }
@@ -90,19 +91,31 @@ public partial class AllAnimeStreamProvider : BaseStreamProvider
         var (start, end) = range.Extract(total);
         foreach (var ep in sorted)
         {
-            if(int.TryParse(ep, out int e))
+            if (int.TryParse(ep, out int e))
             {
-                if(e < start)
+                if (e < start)
                 {
                     continue;
                 }
-                else if(e > end)
+                else if (e > end)
                 {
                     break;
                 }
             }
 
-            var epUrl = $"{url}/episodes/{Config.StreamType}/{ep}";
+            var streamTypes = new List<string>() { "sub" };
+
+            if(episodesDetail.dub?.Contains(ep) == true)
+            {
+                streamTypes.Add("dub");
+            }
+            if(episodesDetail.raw?.Contains(ep) == true)
+            {
+                streamTypes.Add("raw");
+            }
+
+
+            var epUrl = $"{url}/episodes/{streamType}/{ep}";
             var content = await _client.GetStringAsync(epUrl);
 
             var hasEmbedMatch = SourceEmbedRegex().Match(content);
@@ -110,11 +123,11 @@ public partial class AllAnimeStreamProvider : BaseStreamProvider
             var directProvider = new List<(string, string)>();
             var embedProvider = new List<string>();
 
-            if(hasEmbedMatch.Success)
+            if (hasEmbedMatch.Success)
             {
                 var rawUrl = hasEmbedMatch.Groups[1].Value;
                 var directUrl = rawUrl.Replace("clock", "clock.json");
-                directProvider.Add(new (directUrl, ""));
+                directProvider.Add(new(directUrl, ""));
             }
             else
             {
@@ -125,10 +138,10 @@ public partial class AllAnimeStreamProvider : BaseStreamProvider
                     var parsedUrl = DecodeEncodedNonAsciiCharacters(HttpUtility.UrlDecode(rawUrl.Replace("clock", "clock.json")));
                     var uri = new Uri(parsedUrl, UriKind.RelativeOrAbsolute);
 
-                    if(!uri.IsAbsoluteUri)
+                    if (!uri.IsAbsoluteUri)
                     {
                         var directUrl = apiEndPoint.Host + parsedUrl;
-                        directProvider.Add(new (directUrl, priority));
+                        directProvider.Add(new(directUrl, priority));
                     }
                     else
                     {
@@ -138,7 +151,7 @@ public partial class AllAnimeStreamProvider : BaseStreamProvider
 
             }
 
-            if(directProvider.Count == 0)
+            if (directProvider.Count == 0)
             {
                 continue;
             }
@@ -148,10 +161,13 @@ public partial class AllAnimeStreamProvider : BaseStreamProvider
             {
                 stream.Episode = e;
                 stream.EpisodeString = ep;
+                stream.StreamTypes = streamTypes;
                 yield return stream;
             }
         }
     }
+
+    public override IAsyncEnumerable<VideoStreamsForEpisode> GetStreams(string url, Range range) =>  GetStreams(url, range, Config.StreamType);
 
     private async Task<VideoStreamsForEpisode> Extract(string url)
     {

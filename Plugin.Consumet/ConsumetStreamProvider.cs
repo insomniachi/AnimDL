@@ -5,7 +5,7 @@ using AnimDL.Core.Models;
 
 namespace Plugin.Consumet;
 
-public class ConsumetStreamProvider : IStreamProvider
+public class ConsumetStreamProvider : IStreamProvider, IMultiAudioStreamProvider
 {
     private readonly HttpClient _httpClient;
 
@@ -37,19 +37,40 @@ public class ConsumetStreamProvider : IStreamProvider
             : obj["English Dub1"]?.AsArray().Count ?? 0;
     }
 
-    private static JsonArray GetEpisodesArray(JsonNode jObject)
+    //private static JsonArray GetEpisodesArray(JsonNode jObject)
+    //{
+    //    if (jObject["episodes"] is JsonArray ja)
+    //    {
+    //        return ja;
+    //    }
+
+    //    return Config.CrunchyrollStreamType == "sub"
+    //        ? jObject["episodes"]["subbed1"]?.AsArray() ?? new JsonArray()
+    //        : jObject["episodes"]["English Dub1"]?.AsArray() ?? new JsonArray();
+    //}
+
+    private static JsonArray GetEpisodesArray(JsonNode jObject, string streamType)
     {
         if (jObject["episodes"] is JsonArray ja)
         {
             return ja;
         }
 
-        return Config.CrunchyrollStreamType == "sub"
-            ? jObject["episodes"]["subbed1"]?.AsArray() ?? new JsonArray()
-            : jObject["episodes"]["English Dub1"]?.AsArray() ?? new JsonArray();
+        return jObject["episodes"][streamType]?.AsArray() ?? new JsonArray();
     }
 
-    public async IAsyncEnumerable<VideoStreamsForEpisode> GetStreams(string url, Range range)
+    private static IEnumerable<string> GetStreamTypes(JsonNode jObject)
+    {
+        if (jObject["episodes"] is JsonArray ja)
+        {
+            return Enumerable.Empty<string>();
+        }
+
+        return jObject["episodes"]?.AsObject()?.Select(x => x.Key);
+    }
+
+
+    public async IAsyncEnumerable<VideoStreamsForEpisode> GetStreams(string url, Range range, string streamType)
     {
         var json = await _httpClient.GetStringAsync(GetInfoApiUrl(url));
         var jObject = JsonNode.Parse(json);
@@ -58,24 +79,25 @@ public class ConsumetStreamProvider : IStreamProvider
 
         var (start, end) = range.Extract(totalEpisoes ?? 0);
 
-        foreach (var item in GetEpisodesArray(jObject))
+        foreach (var item in GetEpisodesArray(jObject, streamType))
         {
             var epId = $"{item?["id"]}";
             int number = (int?)item["number"]?.AsValue() ?? ((int)item["episode_number"]?.AsValue());
 
-            if(number < start)
+            if (number < start)
             {
                 continue;
             }
 
-            if(number > end)
+            if (number > end)
             {
                 break;
             }
 
             var videoStreamForEpisodes = new VideoStreamsForEpisode()
             {
-                Episode = number
+                Episode = number,
+                StreamTypes = GetStreamTypes(jObject),
             };
 
             var streams = await _httpClient.GetStringAsync(GetStreamApiUrl(epId));
@@ -101,8 +123,9 @@ public class ConsumetStreamProvider : IStreamProvider
 
             yield return videoStreamForEpisodes;
         }
-
     }
+
+    public IAsyncEnumerable<VideoStreamsForEpisode> GetStreams(string url, Range range) => GetStreams(url, range, Config.CrunchyrollStreamType);
 
     private static string GetInfoApiUrl(string id)
     {

@@ -9,25 +9,17 @@ public class Plugin : IPlugin
 {
     static Guid Id { get; } = Guid.Parse("54F3E0C3-64A2-4C81-9FBD-F6E8ABF2AA08");
 
-    public IParameters GetDefaultConfig()
+    public ProviderOptions GetOptions()
     {
-        return new Parameters
-        {
-            [nameof(Config.BaseUrl)] = Config.BaseUrl,
-            [nameof(Config.StreamType)] = Config.StreamType
-        };
+        return new ProviderOptions()
+            .AddOption(nameof(Config.BaseUrl), "Url", Config.BaseUrl)
+            .AddSelectableOption(nameof(Config.StreamType), "Stream Type", Config.StreamType, new[] { "sub", "dub", "raw" });
     }
 
-    public void Initialize(IParameters parameters)
+    public void SetOptions(ProviderOptions parameters)
     {
-        if(parameters.TryGetValue(nameof(Config.BaseUrl), out string url))
-        {
-            Config.BaseUrl = url;
-        }
-        if (parameters.TryGetValue(nameof(Config.StreamType), out string type))
-        {
-            Config.StreamType = type;
-        }
+        Config.BaseUrl = parameters.GetString(nameof(Config.BaseUrl), Config.BaseUrl);
+        Config.StreamType = parameters.GetString(nameof(Config.StreamType), Config.StreamType);
     }
 
     public void RegisterProviders(IPluginRegistrationContext registrationContext)

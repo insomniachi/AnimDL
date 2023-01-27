@@ -8,20 +8,17 @@ public class Plugin : IPlugin
 {
     static Guid Id { get; } = Guid.Parse("C8A2E8A4-A137-4D24-8788-69923BCF9D5C");
 
-    public IParameters GetDefaultConfig()
+    public ProviderOptions GetOptions()
     {
-        return new Parameters
-        {
-            [nameof(Config.BaseUrl)] = Config.BaseUrl
-        };
+        return new ProviderOptions()
+            .AddOption(nameof(Config.BaseUrl), "Url", Config.BaseUrl)
+            .AddSelectableOption(nameof(Config.StreamType), "Stream Type", Config.StreamType, new[] {"sub", "dub"});
     }
 
-    public void Initialize(IParameters parameters)
+    public void SetOptions(ProviderOptions parameters)
     {
-        if(parameters.TryGetValue(nameof(Config.BaseUrl), out string url))
-        {
-            Config.BaseUrl = url;
-        }
+        Config.BaseUrl = parameters.GetString(nameof(Config.BaseUrl), Config.BaseUrl);
+        Config.StreamType = parameters.GetString(nameof(Config.StreamType), Config.StreamType);
     }
 
     public void RegisterProviders(IPluginRegistrationContext registrationContext)
@@ -33,6 +30,7 @@ public class Plugin : IPlugin
 public static class Config
 {
     public static string BaseUrl { get; set; } = "https://yugen.to/";
+    public static string StreamType { get; set; } = "sub";
 }
 
 public class Provider : IProvider
