@@ -33,7 +33,7 @@ public class ConsumetStreamProvider : IStreamProvider, IMultiAudioStreamProvider
         }
 
         var @obj = jObject["episodes"];
-        return Config.CrunchyrollStreamType == "sub"
+        return Config.CrunchyrollStreamType == "subbed1"
             ? obj["subbed1"]?.AsArray().Count ?? 0
             : obj["English Dub1"]?.AsArray().Count ?? 0;
     }

@@ -106,9 +106,10 @@ public class ProviderTests
     }
 
     [Theory]
-    [InlineData("animepahe", "a2bc091e-7bc1-8438-f078-91eef648eaef")]
+    [InlineData("animepahe", "a2bc091e-7bc1-8438-f078-91eef648eaef")] // hyouka
     [InlineData("zoro", "hyouka-349")]
-    [InlineData("crunchyroll", "G6P585256")]
+    [InlineData("crunchyroll", "G6P585256")] // hyouka
+    [InlineData("crunchyroll", "G9VHN91DJ")] // angel next door
     public async Task Consumet_StreamProvider_GetStreams(string providerType, string id)
     {
         // arrange

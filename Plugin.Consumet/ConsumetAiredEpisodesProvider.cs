@@ -7,7 +7,7 @@ namespace Plugin.Consumet;
 
 public class ConsumetAiredEpisodesProvider : IAiredEpisodeProvider
 {
-    private readonly List<string> _unavailableProviders = new() { "kamy", "crunchyroll" };
+    private readonly List<string> _unavailableProviders = new() { "kamy" };
     private readonly HttpClient _httpClient;
     private readonly JsonSerializerOptions _options = new() { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
 
