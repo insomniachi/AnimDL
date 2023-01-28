@@ -1,4 +1,5 @@
-﻿using System.Text.Json.Nodes;
+﻿using System.Text.Json;
+using System.Text.Json.Nodes;
 using AnimDL.Core.Api;
 using AnimDL.Core.Helpers;
 using AnimDL.Core.Models;
@@ -109,6 +110,8 @@ public class ConsumetStreamProvider : IStreamProvider, IMultiAudioStreamProvider
                 headers.Add(header.Key, header.Value.ToString());
             }
 
+            var subtitles = streamsObj?["subtitles"]?.AsArray().ToDictionary(x => x["lang"].ToString(), x => x["url"].ToString());
+
             foreach (var stream in streamsObj?["sources"]?.AsArray() ?? new JsonArray())
             {
                 var quality = stream["quality"].ToString();
@@ -119,6 +122,11 @@ public class ConsumetStreamProvider : IStreamProvider, IMultiAudioStreamProvider
                     Quality = quality,
                     Headers = headers
                 });
+
+                if(subtitles is { Count : >0})
+                {
+                    videoStreamForEpisodes.AdditionalInformation["subtitles"] = JsonSerializer.Serialize(subtitles);
+                }
             }
 
             yield return videoStreamForEpisodes;
