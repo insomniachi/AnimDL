@@ -8,7 +8,7 @@ namespace Plugin.Consumet;
 public class ConsumetCatalog : ICatalog
 {
     private readonly HttpClient _httpClient;
-    protected readonly JsonSerializerOptions _options = new JsonSerializerOptions
+    protected readonly JsonSerializerOptions _options = new()
     {
         PropertyNamingPolicy = JsonNamingPolicy.CamelCase
     };
@@ -20,8 +20,14 @@ public class ConsumetCatalog : ICatalog
 
     public async IAsyncEnumerable<SearchResult> Search(string query)
     {
-        var response = await _httpClient.GetStringAsync($"https://api.consumet.org/anime/{Config.Provider}/{query}");
-        var jObject = JsonNode.Parse(response);
+        var response = await _httpClient.GetAsync($"https://api.consumet.org/anime/{Config.Provider}/{query}");
+
+        if(!response.IsSuccessStatusCode)
+        {
+            yield break;
+        }
+
+        var jObject = JsonNode.Parse(await response.Content.ReadAsStringAsync());
 
         var results = jObject?["results"]?.AsArray() ?? new JsonArray();
 

@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.Net.Quic;
+using System.Text;
 using System.Text.Json.Nodes;
 using System.Text.RegularExpressions;
 using AnimDL.Core.Api;
@@ -11,17 +12,20 @@ namespace Plugin.Yugen;
 
 public partial class YugenAnimeStreamProvider : BaseStreamProvider, IMultiAudioStreamProvider
 {
-    public YugenAnimeStreamProvider(HttpClient client) : base(client)
-    {
-    }
+    public YugenAnimeStreamProvider(HttpClient client) : base(client) { }
 
-    public override async Task<int> GetNumberOfStreams(string url)
+    public override Task<int> GetNumberOfStreams(string url) => GetNumberOfStreams(url, Config.StreamType);
+
+    public async Task<int> GetNumberOfStreams(string url, string streamType)
     {
         var doc = await Load(url + "watch");
+        var episodeText = streamType == "sub"
+            ? "Episodes"
+            : "Episodes (Dub)";
 
         var epSection = doc.QuerySelectorAll(".data")
                            .Select(x => x.InnerText)
-                           .Where(x => x?.Contains("Episodes") == true)
+                           .Where(x => x?.Contains(episodeText) == true)
                            .First();
 
         var match = EpisodeRegex().Match(epSection);

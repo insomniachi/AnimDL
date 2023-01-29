@@ -53,7 +53,9 @@ public partial class AllAnimeStreamProvider : BaseStreamProvider, IMultiAudioStr
 
     public AllAnimeStreamProvider(HttpClient client) : base(client) { }
 
-    public override async Task<int> GetNumberOfStreams(string url)
+    public override Task<int> GetNumberOfStreams(string url) => GetNumberOfStreams(url, Config.StreamType);
+
+    public async Task<int> GetNumberOfStreams(string url, string streamType)
     {
         var html = await _client.GetStringAsync(url);
 
@@ -65,7 +67,7 @@ public partial class AllAnimeStreamProvider : BaseStreamProvider, IMultiAudioStr
         }
 
         var episodesDetail = JsonSerializer.Deserialize<EpisodeDetails>(match.Groups[1].Value.Replace("\\\"", "\""));
-        var sorted = GetEpisodes(episodesDetail!).OrderBy(x => x.Length).ThenBy(x => x).ToList();
+        var sorted = GetEpisodes(episodesDetail!, streamType).OrderBy(x => x.Length).ThenBy(x => x).ToList();
         var total = int.Parse(sorted.LastOrDefault(x => int.TryParse(x, out int e))!);
 
         return total;
@@ -86,7 +88,7 @@ public partial class AllAnimeStreamProvider : BaseStreamProvider, IMultiAudioStr
         }
 
         var episodesDetail = JsonSerializer.Deserialize<EpisodeDetails>(match.Groups[1].Value.Replace("\\\"", "\""));
-        var sorted = GetEpisodes(episodesDetail!).OrderBy(x => x.Length).ThenBy(x => x).ToList();
+        var sorted = GetEpisodes(episodesDetail!, Config.StreamType).OrderBy(x => x.Length).ThenBy(x => x).ToList();
         var total = int.Parse(sorted.LastOrDefault(x => int.TryParse(x, out int e))!);
         var (start, end) = range.Extract(total);
         foreach (var ep in sorted)
@@ -260,9 +262,9 @@ public partial class AllAnimeStreamProvider : BaseStreamProvider, IMultiAudioStr
         return result;
     }
 
-    private static List<string> GetEpisodes(EpisodeDetails episodeDetails)
+    private static List<string> GetEpisodes(EpisodeDetails episodeDetails, string streamType)
     {
-        return Config.StreamType switch
+        return streamType switch
         {
             "sub" => episodeDetails.sub,
             "dub" => episodeDetails.dub,

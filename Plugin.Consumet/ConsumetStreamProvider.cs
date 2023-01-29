@@ -15,16 +15,18 @@ public class ConsumetStreamProvider : IStreamProvider, IMultiAudioStreamProvider
         _httpClient = httpClient;
     }
 
-    public async Task<int> GetNumberOfStreams(string url)
+    public Task<int> GetNumberOfStreams(string url) => GetNumberOfStreams(url, Config.CrunchyrollStreamType);
+
+    public async Task<int> GetNumberOfStreams(string url, string streamType)
     {
         var requestUrl = GetInfoApiUrl(url);
         var json = await _httpClient.GetStringAsync(requestUrl);
         var jObject = JsonNode.Parse(json);
         var totalEpisoes = (int?)jObject["totalEpisodes"]?.AsValue();
-        return totalEpisoes ?? CalculateEpisodes(jObject);
+        return totalEpisoes ?? CalculateEpisodes(jObject, streamType);
     }
 
-    private static int CalculateEpisodes(JsonNode jObject)
+    private static int CalculateEpisodes(JsonNode jObject, string streamType)
     {
         if (jObject["episodes"] is JsonArray ja)
         {
@@ -32,23 +34,8 @@ public class ConsumetStreamProvider : IStreamProvider, IMultiAudioStreamProvider
             return ja.Count * (episodesPerPage ?? 1);
         }
 
-        var @obj = jObject["episodes"];
-        return Config.CrunchyrollStreamType == "subbed1"
-            ? obj["subbed1"]?.AsArray().Count ?? 0
-            : obj["English Dub1"]?.AsArray().Count ?? 0;
+        return jObject["episodes"]?[streamType]?.AsArray().Count ?? 0;
     }
-
-    //private static JsonArray GetEpisodesArray(JsonNode jObject)
-    //{
-    //    if (jObject["episodes"] is JsonArray ja)
-    //    {
-    //        return ja;
-    //    }
-
-    //    return Config.CrunchyrollStreamType == "sub"
-    //        ? jObject["episodes"]["subbed1"]?.AsArray() ?? new JsonArray()
-    //        : jObject["episodes"]["English Dub1"]?.AsArray() ?? new JsonArray();
-    //}
 
     private static JsonArray GetEpisodesArray(JsonNode jObject, string streamType)
     {
@@ -76,7 +63,7 @@ public class ConsumetStreamProvider : IStreamProvider, IMultiAudioStreamProvider
         var json = await _httpClient.GetStringAsync(GetInfoApiUrl(url));
         var jObject = JsonNode.Parse(json);
         var totalEpisoes = (int?)jObject["totalEpisodes"]?.AsValue();
-        totalEpisoes ??= CalculateEpisodes(jObject);
+        totalEpisoes ??= CalculateEpisodes(jObject, streamType);
 
         var (start, end) = range.Extract(totalEpisoes ?? 0);
 

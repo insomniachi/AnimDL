@@ -110,6 +110,7 @@ public class ProviderTests
     [InlineData("zoro", "hyouka-349")]
     [InlineData("crunchyroll", "G6P585256")] // hyouka
     [InlineData("crunchyroll", "G9VHN91DJ")] // angel next door
+    [InlineData("crunchyroll", "G6NQ5DWZ6")] // mha
     public async Task Consumet_StreamProvider_GetStreams(string providerType, string id)
     {
         // arrange
