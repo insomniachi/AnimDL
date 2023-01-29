@@ -111,6 +111,7 @@ public class ProviderTests
     [InlineData("crunchyroll", "G6P585256")] // hyouka
     [InlineData("crunchyroll", "G9VHN91DJ")] // angel next door
     [InlineData("crunchyroll", "G6NQ5DWZ6")] // mha
+    [InlineData("crunchyroll", "GR751KNZY")] // attack on titan
     public async Task Consumet_StreamProvider_GetStreams(string providerType, string id)
     {
         // arrange

@@ -70,7 +70,12 @@ public class ConsumetStreamProvider : IStreamProvider, IMultiAudioStreamProvider
         foreach (var item in GetEpisodesArray(jObject, streamType))
         {
             var epId = $"{item?["id"]}";
-            int number = (int?)item["number"]?.AsValue() ?? ((int)item["episode_number"]?.AsValue());
+            var numberString = item["number"]?.ToString() ?? item["episode_number"]?.ToString();
+
+            if(!int.TryParse(numberString, out int number))
+            {
+                continue;
+            }
 
             if (number < start)
             {
