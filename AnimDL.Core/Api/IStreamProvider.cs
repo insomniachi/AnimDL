@@ -12,4 +12,5 @@ public interface IStreamProvider
 public interface IMultiAudioStreamProvider
 {
     public IAsyncEnumerable<VideoStreamsForEpisode> GetStreams(string url, Range range, string streamType);
+    public Task<int> GetNumberOfStreams(string url, string streamType);
 }

@@ -72,9 +72,9 @@ public class ProviderFactory : IProviderFactory
 
     public void UnloadPlugins()
     {
-        foreach (var item in _pluginContext.Providers)
+        foreach (var item in _pluginContext.Providers.Select(x => x.Name))
         {
-            UnloadPlugin(item.Name);
+            UnloadPlugin(item);
         }
     }
 
