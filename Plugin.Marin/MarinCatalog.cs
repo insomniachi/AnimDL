@@ -25,7 +25,7 @@ public class MarinCatalog : ICatalog, IEnableLogger
 
     public async IAsyncEnumerable<SearchResult> Search(string query)
     {
-        await _httpClient.GetAsync(DefaultUrl.Marin);
+        await _httpClient.GetStringAsync(DefaultUrl.Marin, new Dictionary<string, string> { ["range"] = "bytes=0-0" });
         var xsrfToken = HttpUtility.UrlDecode(_cookieContainer.GetCookies(new Uri(DefaultUrl.Marin)).FirstOrDefault(x => x.Name == "XSRF-TOKEN")?.Value);
 
         if (string.IsNullOrEmpty(xsrfToken))
@@ -43,6 +43,7 @@ public class MarinCatalog : ICatalog, IEnableLogger
         }
 
         var jObject = JsonNode.Parse(json);
+        Config.Version = jObject["version"]?.ToString();
 
         foreach (var item in jObject?["props"]?["anime_list"]?["data"]?.AsArray() ?? new JsonArray())
         {

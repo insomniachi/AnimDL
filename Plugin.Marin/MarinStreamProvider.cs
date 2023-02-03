@@ -13,7 +13,7 @@ public class MarinStreamProvider : BaseStreamProvider
 {
     private static readonly Dictionary<string, string> _inertiaHeaders = new Dictionary<string, string>
     {
-        ["x-inertia-version"] = "5ec023866657ee7f8f9db8b2040b3ffc",
+        ["x-inertia-version"] = Config.Version,
         ["x-inertia"] = "true"
     };
 

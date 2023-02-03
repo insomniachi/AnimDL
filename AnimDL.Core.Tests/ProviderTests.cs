@@ -48,11 +48,11 @@ public class ProviderTests
 
     [Theory]
     [InlineData("allanime", "https://allanime.site/anime/dxxqKsaMhdrdQxczP", 22)]
+    [InlineData("allanime", "https://allanime.site/anime/worqyo39hvnMwZXbe", 4)] //
     [InlineData("animepahe", "https://animepahe.com/anime/f2ed1711-0345-cadb-6b48-a626e44351c6", 22)]
     [InlineData("marin", "https://marin.moe/anime/4vvgviic", 22)]
     [InlineData("yugen", "https://yugen.to/anime/2016/hyouka/", 22)]
     [InlineData("gogo", "https://www1.gogoanime.bid/category/hyouka", 22)]
-    //[InlineData("kamy", "G6P585256", 22)]
     public async Task StreamProvider_GetNumberOfStreams(string providerType, string url, int expected)
     {
         // arrange
@@ -60,6 +60,22 @@ public class ProviderTests
 
         // act
         var actual = await provider.StreamProvider.GetNumberOfStreams(url);
+
+        // assert
+        Assert.Equal(expected, actual);
+    }
+
+
+    [Theory]
+    [InlineData("allanime", "https://allanime.site/anime/worqyo39hvnMwZXbe", "sub", 4)]
+    public async Task MultiAudioStreamProvider_StreamProvider_GetNumberOfStreams(string providerType, string url, string type, int expected)
+    {
+        // arrange
+        var provider = Helper.GetProvider(providerType);
+        var streamProvider = provider.StreamProvider as IMultiAudioStreamProvider;
+        
+        // act
+        var actual = await streamProvider.GetNumberOfStreams(url, type);
 
         // assert
         Assert.Equal(expected, actual);
@@ -85,7 +101,7 @@ public class ProviderTests
 
     [Theory]
     [InlineData("allanime", "https://allanime.site/anime/gHQe2eBBh57QdC9hZ")]
-    //[InlineData("allanime", "https://allanime.site/anime/dxxqKsaMhdrdQxczP")]
+    [InlineData("allanime", "https://allanime.site/anime/worqyo39hvnMwZXbe")]
     [InlineData("animepahe", "https://animepahe.com/anime/f2ed1711-0345-cadb-6b48-a626e44351c6")]
     [InlineData("marin", "https://marin.moe/anime/4vvgviic")]
     [InlineData("yugen", "https://yugen.to/anime/2016/hyouka/")]

@@ -27,6 +27,7 @@ public class Plugin : IPlugin
 public static class Config
 {
     public static string BaseUrl { get; set; } = "https://marin.moe/";
+    public static string Version { get; set; }
 }
 
 public class Provider : IProvider
