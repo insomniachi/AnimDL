@@ -23,7 +23,6 @@ public class ProviderTests
     [InlineData("marin", "hyouka")]
     [InlineData("yugen", "hyouka")]
     [InlineData("gogo", "hyouka")]
-    //[InlineData("kamy", "hyouka")]
     public async Task Catalog_Search(string providerType, string query)
     {
         // arrange
@@ -34,10 +33,10 @@ public class ProviderTests
     }
 
     [Theory]
-    [InlineData("animepahe", "hyouka")]
     [InlineData("zoro", "hyouka")]
     [InlineData("enime", "hyouka")]
     [InlineData("crunchyroll", "hyouka")]
+    [InlineData("gogoanime", "hyouka")]
     public async Task Consumet_Catalog_Search(string providerType, string query)
     {
         Plugin.Consumet.Config.Provider = providerType;
@@ -86,6 +85,7 @@ public class ProviderTests
     [InlineData("zoro", "hyouka-349", 22)]
     [InlineData("enime", "cl82p4w3o00247slu6qnobo40", 22)]
     [InlineData("crunchyroll", "G6P585256", 22)]
+    [InlineData("gogoanime", "hyouka", 22)]
     public async Task Consumet_StreamProvider_GetNumberOfStreams(string providerType, string id, int expected)
     {
         // arrange
@@ -127,7 +127,8 @@ public class ProviderTests
     [InlineData("crunchyroll", "G6P585256")] // hyouka
     [InlineData("crunchyroll", "G9VHN91DJ")] // angel next door
     [InlineData("crunchyroll", "G6NQ5DWZ6")] // mha
-    [InlineData("crunchyroll", "GR751KNZY")] // attack on titan
+    [InlineData("crunchyroll", "GR751KNZY")] // attack on tita
+    [InlineData("gogoanime", "hyouka")]
     public async Task Consumet_StreamProvider_GetStreams(string providerType, string id)
     {
         // arrange
@@ -160,6 +161,7 @@ public class ProviderTests
     [Theory]
     [InlineData("zoro")]
     [InlineData("animepahe")]
+    [InlineData("gogoanime")]
     public async Task Consumet_AiredEpisodesProvider_GetEpisodes(string providerType)
     {
         // arrange

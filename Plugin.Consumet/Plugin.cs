@@ -11,7 +11,7 @@ public class Plugin : IPlugin
     public ProviderOptions GetOptions()
     {
         return new ProviderOptions()
-            .AddSelectableOption(nameof(Config.Provider), "Provider", Config.Provider, new[] { "zoro", "crunchyroll" })
+            .AddSelectableOption(nameof(Config.Provider), "Provider", Config.Provider, new[] { "zoro", "crunchyroll", "gogoanime" })
             .AddSelectableOption(nameof(Config.CrunchyrollStreamType), "Stream Type", Config.CrunchyrollStreamType, new[] { "subbed1", "English Dub1" })
             .AddSelectableOption(nameof(Config.CrunchyrollMediaType), "Media Type", Config.CrunchyrollMediaType, new[] {"series", "movie"});
     }

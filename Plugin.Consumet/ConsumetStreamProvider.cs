@@ -131,7 +131,7 @@ public class ConsumetStreamProvider : IStreamProvider, IMultiAudioStreamProvider
     {
         return Config.Provider switch
         {
-            "animepahe" => PathInfoParam(id),
+            "animepahe" or "gogoanime" => PathInfoParam(id),
             "crunchyroll" => $"https://api.consumet.org/anime/{Config.Provider}/info?id={id}&mediaType={Config.CrunchyrollMediaType}",
             _ => QueryInfoParam(id),
         };
@@ -141,7 +141,7 @@ public class ConsumetStreamProvider : IStreamProvider, IMultiAudioStreamProvider
     {
         return Config.Provider switch
         {
-            "animepahe" => PathStreamParam(id),
+            "animepahe" or "gogoanime" => PathStreamParam(id),
             _ => QueryStreamParam(id)
         };
     }
