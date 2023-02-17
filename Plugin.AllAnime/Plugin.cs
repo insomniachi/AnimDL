@@ -13,7 +13,8 @@ public class Plugin : IPlugin
     {
         return new ProviderOptions()
             .AddOption(nameof(Config.BaseUrl), "Url", Config.BaseUrl)
-            .AddSelectableOption(nameof(Config.StreamType), "Stream Type", Config.StreamType, new[] { "sub", "dub", "raw" });
+            .AddSelectableOption(nameof(Config.StreamType), "Stream Type", Config.StreamType, new[] { "sub", "dub", "raw" })
+            .AddSelectableOption(nameof(Config.CountryOfOrigin), "Country of Origin", Config.CountryOfOrigin, new[] {"ALL", "JP", "CN", "KR"});
     }
 
     public void SetOptions(ProviderOptions parameters)
@@ -32,6 +33,7 @@ public static class Config
 {
     public static string BaseUrl { get; set; } = "https://allanime.to/";
     public static string StreamType { get; set; } = "sub";
+    public static string CountryOfOrigin { get; set; } = "JP";
 }
 
 public class Provider : IProvider
