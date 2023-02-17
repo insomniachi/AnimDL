@@ -1,4 +1,5 @@
-﻿using System.Globalization;
+﻿using System.Diagnostics;
+using System.Globalization;
 using System.Net.Http.Json;
 using System.Text.Json;
 using System.Text.Json.Nodes;
@@ -17,12 +18,20 @@ namespace Plugin.AllAnime;
 public partial class AllAnimeStreamProvider : BaseStreamProvider, IMultiAudioStreamProvider
 {
     private readonly HtmlWeb _web = new();
-    internal static readonly object _extensions = new
+    internal static readonly object _extensionsStream = new
     {
         persistedQuery = new
         {
             version = 1,
             sha256Hash = "1f0a5d6c9ce6cd3127ee4efd304349345b0737fbf5ec33a60bbc3d18e3bb7c61"
+        }
+    };
+    internal static readonly object _extensionsShow = new
+    {
+        persistedQuery = new
+        {
+            version = 1,
+            sha256Hash = "f73a8347df0e3e794f8955a18de6e85ac25dfc6b74af8ad613edf87bb446a854"
         }
     };
     class GetVersionResponse
@@ -48,6 +57,7 @@ public partial class AllAnimeStreamProvider : BaseStreamProvider, IMultiAudioStr
         public PortData portData { get; set; }
     }
 
+    [DebuggerDisplay("{priority} - {sourceUrl} - {type}")]
     class SourceUrlObj
     {
         public string sourceUrl { get; set; }
@@ -68,20 +78,11 @@ public partial class AllAnimeStreamProvider : BaseStreamProvider, IMultiAudioStr
         public List<PortDataStream> streams { get; set; }
     }
 
-    [GeneratedRegex(@"\\""availableEpisodesDetail\\"":({.+?})")]
-    private static partial Regex EpisodesRegex();
-
-    [GeneratedRegex(@"<iframe id=""episode-frame"" .+? src=""(.+?)""")]
-    private static partial Regex SourceEmbedRegex();
-
     [GeneratedRegex(@"^#EXT-X-STREAM-INF:.*?RESOLUTION=\d+x(?'resolution'\d+).*?\n(?'url'.+?)$", RegexOptions.Multiline)]
     private static partial Regex VrvResponseRegex();
 
     [GeneratedRegex(@"https://.+?/(?'base'.+?/),(?'resolutions'(?:\d+p,)+)")]
     private static partial Regex WixMpUrlRegex();
-
-    [GeneratedRegex("sourceUrl[:=]\"(?<url>.+?)\"[;,](?:.+?\\.)?priority[:=](?<priority>.+?)[;,](?:.+?\\.)?sourceName[:=](?<name>.+?)[,;]")]
-    private static partial Regex SourceRegex();
 
     public AllAnimeStreamProvider(HttpClient client) : base(client) { }
 
@@ -89,17 +90,19 @@ public partial class AllAnimeStreamProvider : BaseStreamProvider, IMultiAudioStr
 
     public async Task<int> GetNumberOfStreams(string url, string streamType)
     {
-        var html = await _client.GetStringAsync(url);
-
-        var match = EpisodesRegex().Match(html);
-
-        if (!match.Success)
+        var searchVariables = new
         {
-            this.Log().Error("availableEpisodesDetail not found");
-        }
+            _id = url.Split('/').LastOrDefault()?.Trim()
+        };
+        var showApi = QueryHelpers.AddQueryString("https://api.allanime.co/allanimeapi", new Dictionary<string, string>
+        {
+            ["variables"] = JsonSerializer.Serialize(searchVariables),
+            ["extensions"] = JsonSerializer.Serialize(_extensionsShow)
+        });
 
-        var episodesDetail = JsonSerializer.Deserialize<EpisodeDetails>(match.Groups[1].Value.Replace("\\\"", "\""));
-        var sorted = GetEpisodes(episodesDetail!, streamType).OrderBy(x => x.Length).ThenBy(x => x).ToList();
+        var doc = await _web.LoadFromWebAsync(showApi);
+        var episodeDetails = JsonNode.Parse(doc.Text)?["data"]?["show"]?["availableEpisodesDetail"];
+        var sorted = GetEpisodes(episodeDetails?.Deserialize<EpisodeDetails>() ?? new(), streamType).OrderBy(x => x.Length).ThenBy(x => x).ToList();
         var total = int.Parse(sorted.LastOrDefault(x => int.TryParse(x, out int e))!);
 
         return total;
@@ -109,17 +112,27 @@ public partial class AllAnimeStreamProvider : BaseStreamProvider, IMultiAudioStr
     {
         var versionResponse = await _client.GetFromJsonAsync<GetVersionResponse>(Config.BaseUrl.TrimEnd('/') + "/getVersion");
         var apiEndPoint = new UriBuilder(versionResponse?.episodeIframeHead ?? "");
+        var id = url.Split('/').LastOrDefault()?.Trim();
+        var searchVariables = new
+        {
+            _id = id
+        };
+        var showApi = QueryHelpers.AddQueryString("https://api.allanime.co/allanimeapi", new Dictionary<string,string>
+        {
+            ["variables"] = JsonSerializer.Serialize(searchVariables),
+            ["extensions"] = JsonSerializer.Serialize(_extensionsShow)
+        });
 
-        var html = await _client.GetStringAsync(url);
+        var doc = await _web.LoadFromWebAsync(showApi);
+        var episodeDetails = JsonNode.Parse(doc.Text)?["data"]?["show"]?["availableEpisodesDetail"];
 
-        var match = EpisodesRegex().Match(html);
-
-        if (!match.Success)
+        if (episodeDetails is null)
         {
             this.Log().Error("availableEpisodesDetail not found");
+            yield break;
         }
 
-        var episodesDetail = JsonSerializer.Deserialize<EpisodeDetails>(match.Groups[1].Value.Replace("\\\"", "\""));
+        var episodesDetail = episodeDetails.Deserialize<EpisodeDetails>();
         var sorted = GetEpisodes(episodesDetail!, Config.StreamType).OrderBy(x => x.Length).ThenBy(x => x).ToList();
         var total = int.Parse(sorted.LastOrDefault(x => int.TryParse(x, out int e))!);
         var (start, end) = range.Extract(total);
@@ -158,7 +171,7 @@ public partial class AllAnimeStreamProvider : BaseStreamProvider, IMultiAudioStr
             var queryParams = new Dictionary<string, string>
             {
                 ["variables"] = JsonSerializer.Serialize(variables),
-                ["extensions"] = JsonSerializer.Serialize(_extensions)
+                ["extensions"] = JsonSerializer.Serialize(_extensionsStream)
             };
 
             var api = QueryHelpers.AddQueryString("https://api.allanime.co/allanimeapi", queryParams);
@@ -167,7 +180,7 @@ public partial class AllAnimeStreamProvider : BaseStreamProvider, IMultiAudioStr
             var sourceArray = jsonNode?["data"]?["episode"]?["sourceUrls"].AsArray();
             var sourceObjs = sourceArray.Deserialize<List<SourceUrlObj>>() ?? new List<SourceUrlObj>();
 
-            var source = sourceObjs.OrderByDescending(x => x.priority).First();
+            var source = sourceObjs.Where(x => x.type == "iframe").OrderByDescending(x => x.priority).First();
             var parsedUrl = DecodeEncodedNonAsciiCharacters(HttpUtility.UrlDecode(source.sourceUrl.Replace("clock", "clock.json")));
             var uri = new Uri(parsedUrl, UriKind.RelativeOrAbsolute);
 
