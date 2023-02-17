@@ -153,7 +153,7 @@ public partial class AllAnimeStreamProvider : BaseStreamProvider, IMultiAudioStr
             var sourceArray = jsonNode?["data"]?["episode"]?["sourceUrls"].AsArray();
             var sourceObjs = sourceArray.Deserialize<List<SourceUrlObj>>() ?? new List<SourceUrlObj>();
 
-            var source = sourceObjs.OrderBy(x => x.priority).First();
+            var source = sourceObjs.OrderByDescending(x => x.priority).First();
             var parsedUrl = DecodeEncodedNonAsciiCharacters(HttpUtility.UrlDecode(source.sourceUrl.Replace("clock", "clock.json")));
             var uri = new Uri(parsedUrl, UriKind.RelativeOrAbsolute);
 

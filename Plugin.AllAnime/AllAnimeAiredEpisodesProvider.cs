@@ -29,7 +29,7 @@ public class AllAnimeAiredEpisodesProvider : IAiredEpisodeProvider
             limit = 26,
             page,
             translationType = "sub",
-            countryOrigin = "ALL"
+            countryOrigin = "JP"
         };
 
         var queryParams = new Dictionary<string, string>
