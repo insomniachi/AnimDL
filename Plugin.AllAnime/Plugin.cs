@@ -30,7 +30,7 @@ public class Plugin : IPlugin
 
 public static class Config
 {
-    public static string BaseUrl { get; set; } = "https://allanime.site/";
+    public static string BaseUrl { get; set; } = "https://allanime.to/";
     public static string StreamType { get; set; } = "sub";
 }
 

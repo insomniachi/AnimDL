@@ -8,12 +8,23 @@ using AnimDL.Core.Api;
 using AnimDL.Core.Helpers;
 using AnimDL.Core.Models;
 using AnimDL.Core.StreamProviders;
+using HtmlAgilityPack;
+using Microsoft.AspNetCore.WebUtilities;
 using Splat;
 
 namespace Plugin.AllAnime;
 
 public partial class AllAnimeStreamProvider : BaseStreamProvider, IMultiAudioStreamProvider
 {
+    private readonly HtmlWeb _web = new();
+    internal static readonly object _extensions = new
+    {
+        persistedQuery = new
+        {
+            version = 1,
+            sha256Hash = "1f0a5d6c9ce6cd3127ee4efd304349345b0737fbf5ec33a60bbc3d18e3bb7c61"
+        }
+    };
     class GetVersionResponse
     {
         public string data { get; set; } = string.Empty;
@@ -34,6 +45,13 @@ public partial class AllAnimeStreamProvider : BaseStreamProvider, IMultiAudioStr
         public string resolutionStr { get; set; } = string.Empty;
         public int resolution { get; set; } = 0;
         public string src { get; set; } = string.Empty;
+    }
+
+    class SourceUrlObj
+    {
+        public string sourceUrl { get; set; }
+        public double priority { get; set; }
+        public string type { get; set; }
     }
 
     [GeneratedRegex(@"\\""availableEpisodesDetail\\"":({.+?})")]
@@ -116,49 +134,36 @@ public partial class AllAnimeStreamProvider : BaseStreamProvider, IMultiAudioStr
                 streamTypes.Add("raw");
             }
 
-
-            var epUrl = $"{url}/episodes/{streamType}/{ep}";
-            var content = await _client.GetStringAsync(epUrl);
-
-            var hasEmbedMatch = SourceEmbedRegex().Match(content);
-
-            var directProvider = new List<(string, string)>();
-            var embedProvider = new List<string>();
-
-            if (hasEmbedMatch.Success)
+            var variables = new
             {
-                var rawUrl = hasEmbedMatch.Groups[1].Value;
-                var directUrl = rawUrl.Replace("clock", "clock.json");
-                directProvider.Add(new(directUrl, ""));
-            }
-            else
+                showId = url.Split('/').LastOrDefault()?.Trim(),
+                translationType = streamType,
+                episodeString = ep,
+            };
+
+            var queryParams = new Dictionary<string, string>
             {
-                foreach (var sourceMatch in SourceRegex().Matches(content).Cast<Match>())
-                {
-                    var rawUrl = sourceMatch.Groups[1].Value;
-                    var priority = sourceMatch.Groups["priority"].Value;
-                    var parsedUrl = DecodeEncodedNonAsciiCharacters(HttpUtility.UrlDecode(rawUrl.Replace("clock", "clock.json")));
-                    var uri = new Uri(parsedUrl, UriKind.RelativeOrAbsolute);
+                ["variables"] = JsonSerializer.Serialize(variables),
+                ["extensions"] = JsonSerializer.Serialize(_extensions)
+            };
 
-                    if (!uri.IsAbsoluteUri)
-                    {
-                        var directUrl = apiEndPoint.Host + parsedUrl;
-                        directProvider.Add(new(directUrl, priority));
-                    }
-                    else
-                    {
-                        embedProvider.Add(parsedUrl);
-                    }
-                }
+            var api = QueryHelpers.AddQueryString("https://api.allanime.co/allanimeapi", queryParams);
+            var response = await _web.LoadFromWebAsync(api);
+            var jsonNode = JsonNode.Parse(response.Text);
+            var sourceArray = jsonNode?["data"]?["episode"]?["sourceUrls"].AsArray();
+            var sourceObjs = sourceArray.Deserialize<List<SourceUrlObj>>() ?? new List<SourceUrlObj>();
 
+            var source = sourceObjs.OrderBy(x => x.priority).First();
+            var parsedUrl = DecodeEncodedNonAsciiCharacters(HttpUtility.UrlDecode(source.sourceUrl.Replace("clock", "clock.json")));
+            var uri = new Uri(parsedUrl, UriKind.RelativeOrAbsolute);
+
+            var streamUrl = parsedUrl;
+            if (!uri.IsAbsoluteUri)
+            {
+                streamUrl = apiEndPoint.Host + parsedUrl;
             }
 
-            if (directProvider.Count == 0)
-            {
-                continue;
-            }
-
-            var stream = await Extract(directProvider.OrderBy(x => x.Item2).FirstOrDefault().Item1);
+            var stream = await Extract(streamUrl);
             if (stream is { })
             {
                 stream.Episode = e;

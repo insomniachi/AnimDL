@@ -39,7 +39,7 @@ public class AllAnimeCatalog : ICatalog
         };
 
         var baseUrl = Config.BaseUrl.TrimEnd('/');
-        var url = QueryHelpers.AddQueryString(baseUrl + "/allanimeapi", queryParams);
+        var url = QueryHelpers.AddQueryString("https://api.allanime.co/allanimeapi", queryParams);
         var response = await _web.LoadFromWebAsync(url);
         var jObject = JsonNode.Parse(response.Text);
         foreach (var item in jObject?["data"]?["shows"]?["edges"]?.AsArray() ?? new JsonArray())

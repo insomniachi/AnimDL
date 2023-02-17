@@ -46,8 +46,7 @@ public class ProviderTests
     }
 
     [Theory]
-    [InlineData("allanime", "https://allanime.site/anime/dxxqKsaMhdrdQxczP", 22)]
-    [InlineData("allanime", "https://allanime.site/anime/worqyo39hvnMwZXbe", 4)] //
+    [InlineData("allanime", "https://allanime.to/anime/dxxqKsaMhdrdQxczP", 22)]
     [InlineData("animepahe", "https://animepahe.com/anime/f2ed1711-0345-cadb-6b48-a626e44351c6", 22)]
     [InlineData("marin", "https://marin.moe/anime/4vvgviic", 22)]
     [InlineData("yugen", "https://yugen.to/anime/2016/hyouka/", 22)]
@@ -66,7 +65,7 @@ public class ProviderTests
 
 
     [Theory]
-    [InlineData("allanime", "https://allanime.site/anime/worqyo39hvnMwZXbe", "sub", 4)]
+    [InlineData("allanime", "https://allanime.to/anime/worqyo39hvnMwZXbe", "sub", 4)]
     public async Task MultiAudioStreamProvider_StreamProvider_GetNumberOfStreams(string providerType, string url, string type, int expected)
     {
         // arrange
@@ -100,8 +99,7 @@ public class ProviderTests
     }
 
     [Theory]
-    [InlineData("allanime", "https://allanime.site/anime/gHQe2eBBh57QdC9hZ")]
-    [InlineData("allanime", "https://allanime.site/anime/worqyo39hvnMwZXbe")]
+    [InlineData("allanime", "https://allanime.to/anime/dxxqKsaMhdrdQxczP")]
     [InlineData("animepahe", "https://animepahe.com/anime/f2ed1711-0345-cadb-6b48-a626e44351c6")]
     [InlineData("marin", "https://marin.moe/anime/4vvgviic")]
     [InlineData("yugen", "https://yugen.to/anime/2016/hyouka/")]
