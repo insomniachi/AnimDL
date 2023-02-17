@@ -45,6 +45,7 @@ public partial class AllAnimeStreamProvider : BaseStreamProvider, IMultiAudioStr
         public string resolutionStr { get; set; } = string.Empty;
         public int resolution { get; set; } = 0;
         public string src { get; set; } = string.Empty;
+        public PortData portData { get; set; }
     }
 
     class SourceUrlObj
@@ -52,6 +53,19 @@ public partial class AllAnimeStreamProvider : BaseStreamProvider, IMultiAudioStr
         public string sourceUrl { get; set; }
         public double priority { get; set; }
         public string type { get; set; }
+    }
+
+    class PortDataStream
+    {
+        public string format { get; set; }
+        public string url { get; set; }
+        public string audio_lang { get; set; }
+        public string hardsub_lang { get; set; }
+    }
+
+    class PortData
+    {
+        public List<PortDataStream> streams { get; set; }
     }
 
     [GeneratedRegex(@"\\""availableEpisodesDetail\\"":({.+?})")]
@@ -191,7 +205,26 @@ public partial class AllAnimeStreamProvider : BaseStreamProvider, IMultiAudioStr
         var json = await _client.GetStringAsync(url);
         var jObject = JsonNode.Parse(json);
         var links = jObject!["links"]!.Deserialize<List<StreamLink>>()!;
+
+        if(string.IsNullOrEmpty(links[0].link))
+        {
+            var result = new VideoStreamsForEpisode();
+            var resolutionStr = GetResolution(links[0]);
+            if (links[0].portData.streams.FirstOrDefault(x => x is { hardsub_lang: "en-US", format: "adaptive_hls" or "hls" }) is { } obj)
+            {
+                var stream = new VideoStream
+                {
+                    Url = obj.url,
+                    Quality = resolutionStr
+                };
+                result.Qualities.Add(resolutionStr, stream);
+
+            }
+            return result;
+        }
+
         var uri = new Uri(links[0].link);
+
         return uri.Host switch
         {
             "v.vrv.co" => await VrvUnpack(uri),
