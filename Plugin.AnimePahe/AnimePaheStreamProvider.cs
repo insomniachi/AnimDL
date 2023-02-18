@@ -31,8 +31,11 @@ public partial class AnimePaheStreamProvider : BaseStreamProvider
     [GeneratedRegex(@"\('h o=\\'(.*)\\';.+,(\d+),(\d+),'(.+)'.split\('\|'\),.+,.+\)")]
     private static partial Regex KwiwRegex();
 
+    [GeneratedRegex(@"<a href=""(?<url>.+?)"" .+? class=""dropdown-item"">.+? (?<resolution>\d+)p.+?</a>")]
+    private static partial Regex StreamsRegex();
+
     public const string CHARACTER_MAP = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ+/";
-    private readonly HttpClient _clientInternal = new HttpClient(new HttpClientHandler { AllowAutoRedirect = false });
+    private readonly HttpClient _clientInternal = new(new HttpClientHandler { AllowAutoRedirect = false });
 
     public AnimePaheStreamProvider(HttpClient client) : base(client)
     {
@@ -40,8 +43,8 @@ public partial class AnimePaheStreamProvider : BaseStreamProvider
 
     public override async Task<int> GetNumberOfStreams(string url)
     {
-        var doc = await Load(url);
-        var releaseId = IdRegex().Match(doc.Text).Groups[1].Value;
+        var html = await _clientInternal.GetStringAsync(url);
+        var releaseId = IdRegex().Match(html).Groups[1].Value;
 
         return (await GetSessionPage(releaseId, 1)).total;
     }
@@ -89,7 +92,7 @@ public partial class AnimePaheStreamProvider : BaseStreamProvider
             {
                 try
                 {
-                    var url = await GetDirectLink(kv.Value.kwik_pahewin);
+                    var url = await GetDirectLink(kv.Value);
                     if(string.IsNullOrEmpty(url))
                     {
                         continue;
@@ -98,7 +101,6 @@ public partial class AnimePaheStreamProvider : BaseStreamProvider
                     streams.Qualities.Add(kv.Key, new VideoStream
                     {
                         Quality = kv.Key,
-                        Headers = new Dictionary<string, string> { [Headers.Referer] = kv.Value.kwik },
                         Url = url
                     });
                 }
@@ -125,30 +127,17 @@ public partial class AnimePaheStreamProvider : BaseStreamProvider
         return await JsonSerializer.DeserializeAsync<AnimePaheEpisodePage>(content) ?? new();
     }
 
-    private async Task<Dictionary<string, AnimePaheEpisodeStream>> GetStreamUrl(string releaseId, string streamSession)
+    private async Task<Dictionary<string, string>> GetStreamUrl(string releaseId, string streamSession)
     {
-        var stream = await _client.GetStreamAsync(Config.BaseUrl.TrimEnd('/') + "/api", parameters: new()
-        {
-            ["m"] = "links",
-            ["id"] = releaseId,
-            ["session"] = streamSession,
-            ["p"] = "kwik"
-        });
-
-        var jObject = JsonNode.Parse(stream);
-        var data = jObject!["data"]!.AsArray();
-
-        var result = new Dictionary<string, AnimePaheEpisodeStream>();
-        foreach (var item in data)
-        {
-            var key = item!.AsObject()!.ElementAt(0)!.Key;
-            var value = item!.AsObject()!.ElementAt(0)!.Value.Deserialize<AnimePaheEpisodeStream>();
-            var symbol = (value!.av1 == 0) ? "p" : "a";
-            var actualKey = key + symbol;
-            result.TryAdd(actualKey, value);
-        }
+        var streamData = await _client.GetStringAsync(Config.BaseUrl.TrimEnd('/') + $"/play/{releaseId}/{streamSession}");
+        var result = new Dictionary<string, string>();
         
-        return result!;
+        foreach (var match in StreamsRegex().Matches(streamData).Cast<Match>())
+        {
+            result.TryAdd(match.Groups["resolution"].Value, match.Groups["url"].Value);
+        }
+
+        return result;
     }
     
     private string GetStreamFromEmbedUrl(string kwik)

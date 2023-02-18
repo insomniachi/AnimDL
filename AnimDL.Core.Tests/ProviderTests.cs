@@ -47,7 +47,7 @@ public class ProviderTests
 
     [Theory]
     [InlineData("allanime", "https://allanime.to/anime/dxxqKsaMhdrdQxczP", 22)]
-    [InlineData("animepahe", "https://animepahe.com/anime/f2ed1711-0345-cadb-6b48-a626e44351c6", 22)]
+    [InlineData("animepahe", "https://animepahe.com/anime/be63efaf-508a-74cb-c1b0-dbe371bc1d47", 22)]
     [InlineData("marin", "https://marin.moe/anime/4vvgviic", 22)]
     [InlineData("yugen", "https://yugen.to/anime/2016/hyouka/", 22)]
     [InlineData("gogo", "https://www1.gogoanime.bid/category/hyouka", 22)]
@@ -102,11 +102,10 @@ public class ProviderTests
     [InlineData("allanime", "https://allanime.to/anime/dxxqKsaMhdrdQxczP")]
     [InlineData("allanime", "https://allanime.to/anime/3QCFtixZM7P628ANS")]
     [InlineData("allanime", "https://allanime.to/GPGmNh83WhsBPLCmE")]
-    [InlineData("animepahe", "https://animepahe.com/anime/f2ed1711-0345-cadb-6b48-a626e44351c6")]
+    [InlineData("animepahe", "https://animepahe.com/anime/be63efaf-508a-74cb-c1b0-dbe371bc1d47")]
     [InlineData("marin", "https://marin.moe/anime/4vvgviic")]
     [InlineData("yugen", "https://yugen.to/anime/2016/hyouka/")]
     [InlineData("gogo", "https://www1.gogoanime.bid/category/hyouka")]
-    //[InlineData("kamy", "G6P585256")]
     public async Task StreamProvider_GetStreams(string providerType, string url)
     {
         // arrange
@@ -175,7 +174,10 @@ public class ProviderTests
     private async Task ActAndAssertRecentEpisodes(IProvider provider)
     {
         var result = (await provider.AiredEpisodesProvider.GetRecentlyAiredEpisodes()).ToList();
-        _output.WriteLine(JsonSerializer.Serialize(result, _searializerOption));
+        foreach (var item in result)
+        {
+            _output.WriteLine(JsonSerializer.Serialize(item, item.GetType(), _searializerOption));
+        }
         Assert.NotEmpty(result);
     }
 
