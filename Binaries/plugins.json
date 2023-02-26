@@ -14,5 +14,9 @@
   {
     "Version": "1.3.0.0",
     "Url": "https://raw.githubusercontent.com/insomniachi/AnimDL/master/Binaries/Plugin.AnimePahe.dll"
+  },
+  {
+    "Version": "1.2.0.0",
+    "Url": "https://raw.githubusercontent.com/insomniachi/AnimDL/master/Binaries/Plugin.GogoAnime.dll"
   }
 ]
