@@ -20,6 +20,7 @@ public class ProviderTests
     [Theory]
     [InlineData("allanime", "hyouka")]
     [InlineData("animepahe", "hyouka")]
+    [InlineData("animepahe", "danmachi")]
     [InlineData("marin", "hyouka")]
     [InlineData("yugen", "hyouka")]
     [InlineData("gogo", "hyouka")]
@@ -103,6 +104,8 @@ public class ProviderTests
     [InlineData("allanime", "https://allanime.to/anime/3QCFtixZM7P628ANS")]
     [InlineData("allanime", "https://allanime.to/GPGmNh83WhsBPLCmE")]
     [InlineData("animepahe", "https://animepahe.com/anime/be63efaf-508a-74cb-c1b0-dbe371bc1d47")]
+    [InlineData("animepahe", "https://animepahe.com/anime/6dd1970c-169b-d73f-9926-8483baf63f9a")]
+    [InlineData("animepahe", "https://animepahe.com/anime/94ba7e1f-e373-7aad-41e0-4c1181ec1df3")]
     [InlineData("marin", "https://marin.moe/anime/4vvgviic")]
     [InlineData("yugen", "https://yugen.to/anime/2016/hyouka/")]
     [InlineData("gogo", "https://www1.gogoanime.bid/category/hyouka")]
@@ -112,7 +115,7 @@ public class ProviderTests
         var provider = Helper.GetProvider(providerType);
         var count = 0;
 
-        await foreach (var stream in provider.StreamProvider.GetStreams(url, 1..1))
+        await foreach (var stream in provider.StreamProvider.GetStreams(url, Range.All))
         {
             _output.WriteLine(JsonSerializer.Serialize(stream, _searializerOption));
             Assert.NotEmpty(stream.Qualities);
