@@ -38,7 +38,7 @@ public class AnimePaheAiredEpisodesProvider : IAiredEpisodeProvider
             Title = $"{x!["anime_title"]}",
             Image = $"{x["snapshot"]}",
             Url = $"{baseAnimeUrl}/{x["anime_session"]}",
-            Episode = (int)x!["episode"]!.AsValue(),
+            Episode = (int)(double)x!["episode"]!.AsValue(),
             CreatedAt = DateTime.ParseExact($"{x["created_at"]}", "yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture).ToLocalTime(),
         });
     }
