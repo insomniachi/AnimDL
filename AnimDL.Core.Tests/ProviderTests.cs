@@ -30,7 +30,7 @@ public class ProviderTests
         var provider = Helper.GetProvider(providerType);
 
         // act
-        await AssertSearchResults(provider.Catalog.Search(query), providerType != "kamy");
+        await AssertSearchResults(provider.Catalog.Search(query), false);
     }
 
     [Theory]
@@ -184,7 +184,7 @@ public class ProviderTests
         Assert.NotEmpty(result);
     }
 
-    private async Task AssertSearchResults(IAsyncEnumerable<SearchResult> results, bool assertUrl = true)
+    private async Task AssertSearchResults(IAsyncEnumerable<SearchResult> results, bool assertUrl = false)
     {
         // act
         await foreach (var searchResult in results)

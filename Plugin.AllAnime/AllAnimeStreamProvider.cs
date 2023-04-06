@@ -17,13 +17,39 @@ namespace Plugin.AllAnime;
 
 public partial class AllAnimeStreamProvider : BaseStreamProvider, IMultiAudioStreamProvider
 {
+    public const string SHOW_QUERY =
+        """
+        query ($showId: String!) {
+            show(
+                _id: $showId
+            ) {
+                availableEpisodesDetail
+            }
+        }
+        """;
+
+    public const string EPISODE_QUERY =
+        """
+        query ($showId: String!, $translationType: VaildTranslationTypeEnumType!, $episodeString: String!) {
+            episode(
+                showId: $showId
+                translationType: $translationType
+                episodeString: $episodeString
+            ) {
+                episodeString,
+                sourceUrls,
+                notes
+            }
+        }
+        """;
+
     private readonly HtmlWeb _web = new();
     internal static readonly object _extensionsStream = new
     {
         persistedQuery = new
         {
             version = 1,
-            sha256Hash = "1f0a5d6c9ce6cd3127ee4efd304349345b0737fbf5ec33a60bbc3d18e3bb7c61"
+            sha256Hash = "0ac09728ee9d556967c1a60bbcf55a9f58b4112006d09a258356aeafe1c33889"
         }
     };
     internal static readonly object _extensionsShow = new
@@ -92,12 +118,12 @@ public partial class AllAnimeStreamProvider : BaseStreamProvider, IMultiAudioStr
     {
         var searchVariables = new
         {
-            _id = url.Split('/').LastOrDefault()?.Trim()
+            showId = url.Split('/').LastOrDefault()?.Trim()
         };
         var showApi = QueryHelpers.AddQueryString("https://api.allanime.co/allanimeapi", new Dictionary<string, string>
         {
             ["variables"] = JsonSerializer.Serialize(searchVariables),
-            ["extensions"] = JsonSerializer.Serialize(_extensionsShow)
+            ["query"] = SHOW_QUERY
         });
 
         var doc = await _web.LoadFromWebAsync(showApi);
@@ -115,12 +141,12 @@ public partial class AllAnimeStreamProvider : BaseStreamProvider, IMultiAudioStr
         var id = url.Split('/').LastOrDefault()?.Trim();
         var searchVariables = new
         {
-            _id = id
+            showId = id
         };
         var showApi = QueryHelpers.AddQueryString("https://api.allanime.co/allanimeapi", new Dictionary<string,string>
         {
             ["variables"] = JsonSerializer.Serialize(searchVariables),
-            ["extensions"] = JsonSerializer.Serialize(_extensionsShow)
+            ["query"] = SHOW_QUERY
         });
 
         var doc = await _web.LoadFromWebAsync(showApi);
@@ -163,7 +189,7 @@ public partial class AllAnimeStreamProvider : BaseStreamProvider, IMultiAudioStr
 
             var variables = new
             {
-                showId = url.Split('/').LastOrDefault()?.Trim(),
+                showId = id,
                 translationType = streamType,
                 episodeString = ep,
             };
@@ -171,12 +197,25 @@ public partial class AllAnimeStreamProvider : BaseStreamProvider, IMultiAudioStr
             var queryParams = new Dictionary<string, string>
             {
                 ["variables"] = JsonSerializer.Serialize(variables),
-                ["extensions"] = JsonSerializer.Serialize(_extensionsStream)
+                ["query"] = EPISODE_QUERY
             };
 
             var api = QueryHelpers.AddQueryString("https://api.allanime.co/allanimeapi", queryParams);
             var response = await _web.LoadFromWebAsync(api);
             var jsonNode = JsonNode.Parse(response.Text);
+
+            if (jsonNode?["errors"] is { })
+            {
+                api = QueryHelpers.AddQueryString("https://api.allanime.co/allanimeapi", new Dictionary<string,string>()
+                {
+                    ["variables"] = JsonSerializer.Serialize(variables),
+                    ["extensions"] = JsonSerializer.Serialize(_extensionsStream)
+                });
+
+                response = await _web.LoadFromWebAsync(api);
+                jsonNode = JsonNode.Parse(response.Text);
+            }
+
             var sourceArray = jsonNode?["data"]?["episode"]?["sourceUrls"].AsArray();
             var sourceObjs = sourceArray.Deserialize<List<SourceUrlObj>>() ?? new List<SourceUrlObj>();
 
@@ -193,6 +232,11 @@ public partial class AllAnimeStreamProvider : BaseStreamProvider, IMultiAudioStr
             var stream = await Extract(streamUrl);
             if (stream is { })
             {
+                if (jsonNode?["data"]?["episode"]?["notes"]?.ToString() is { } note)
+                {
+                    stream.AdditionalInformation.Add("title", note);
+                }
+
                 stream.Episode = e;
                 stream.EpisodeString = ep;
                 stream.StreamTypes = streamTypes;

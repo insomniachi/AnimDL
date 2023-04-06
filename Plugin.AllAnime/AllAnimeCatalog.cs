@@ -9,6 +9,36 @@ namespace Plugin.AllAnime;
 
 public class AllAnimeCatalog : ICatalog
 {
+    public const string SEARCH_QUERY =
+        $$"""
+        query(
+                $search: SearchInput
+                $limit: Int
+                $page: Int
+                $translationType: VaildTranslationTypeEnumType
+                $countryOrigin: VaildCountryOriginEnumType
+            ) {
+            shows(
+                search: $search
+                limit: $limit
+                page: $page
+                translationType: $translationType
+                countryOrigin: $countryOrigin
+            ) {
+                pageInfo {
+                    total
+                }
+                edges {
+                    _id,
+                    name,
+                    availableEpisodesDetail,
+                    season,
+                    score,
+                    thumbnail,
+                }
+            }
+        """;
+
     private readonly HtmlWeb _web = new();
     internal static readonly object _extensions = new
     {
@@ -32,16 +62,18 @@ public class AllAnimeCatalog : ICatalog
             limit = 40
         };
 
+
         var queryParams = new Dictionary<string, string>
         {
             ["variables"] = JsonSerializer.Serialize(variables),
-            ["extensions"] = JsonSerializer.Serialize(_extensions)
+            ["query"] = SEARCH_QUERY
         };
 
         var baseUrl = Config.BaseUrl.TrimEnd('/');
         var url = QueryHelpers.AddQueryString("https://api.allanime.co/allanimeapi", queryParams);
         var response = await _web.LoadFromWebAsync(url);
         var jObject = JsonNode.Parse(response.Text);
+
         foreach (var item in jObject?["data"]?["shows"]?["edges"]?.AsArray() ?? new JsonArray())
         {
             yield return new AllAnimeSearchResult
@@ -54,5 +86,7 @@ public class AllAnimeCatalog : ICatalog
                 Image = $"{item?["thumbnail"]}"
             };
         }
+
     }
+
 }
